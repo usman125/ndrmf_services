@@ -5,9 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ndrmf.user.model.Role;
 
-import java.util.List;
-
 @Repository
-public interface RoleRepository extends JpaRepository<Role, Long> {
+public interface RoleRepository extends JpaRepository<Role, Integer> {
     Role findByName(String name);
 }

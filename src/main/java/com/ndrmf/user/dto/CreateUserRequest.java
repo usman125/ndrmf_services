@@ -7,6 +7,7 @@ public class CreateUserRequest {
     private String firstName;
     private String lastName;
     private int orgId;
+    private Integer roleId;
     
 	public String getUsername() {
 		return username;
@@ -43,5 +44,11 @@ public class CreateUserRequest {
 	}
 	public void setOrgId(int orgId) {
 		this.orgId = orgId;
+	}
+	public Integer getRoleId() {
+		return roleId;
+	}
+	public void setRoleId(Integer roleId) {
+		this.roleId = roleId;
 	}
 }

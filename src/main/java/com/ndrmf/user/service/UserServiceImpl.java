@@ -20,12 +20,7 @@ import com.ndrmf.utils.CommonConstants;
 import com.ndrmf.utils.CommonUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -44,6 +39,10 @@ public class UserServiceImpl implements UserService {
         u.setOrg(orgRepo.getOne(body.getOrgId()));
         u.setUsername(body.getUsername());
         u.setPassword(passwordEncoder.encode(body.getPassword()));
+        
+        if(body.getRoleId() != null && body.getRoleId().intValue() > 0) {
+        	u.addRole(roleRepository.getOne(body.getRoleId()));
+        }
         
         userRepo.save(u);
     }
