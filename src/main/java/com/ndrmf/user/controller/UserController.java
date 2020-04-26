@@ -45,47 +45,47 @@ public class UserController {
     	return new ResponseEntity<List<OrganisationAndRoles>>(orgs, HttpStatus.OK);
     }
 
-    @PutMapping("/user/updateActiveStatus")
+    @PutMapping("/updateActiveStatus")
     public ResponseEntity<ServiceResponse> updateActiveStatus(@Valid @RequestBody UserActivationRequest userActivationRequest){
         return userService.updateProfile(userActivationRequest);
     }
 
-    @PutMapping("/user/updateEligibleStatus")
+    @PutMapping("/updateEligibleStatus")
     public ResponseEntity<ServiceResponse> updateEligibleStatus(@Valid @RequestBody UserEligibilityRequest userEligibilityRequest){
         return userService.updateProfile(userEligibilityRequest);
     }
 
-    @PutMapping("/user/updateQualifiedStatus")
+    @PutMapping("/updateQualifiedStatus")
     public ResponseEntity<ServiceResponse> updateQualifiedStatus(@Valid @RequestBody UserQualificationRequest userQualificationRequest){
         return userService.updateProfile(userQualificationRequest);
     }
 
-    @GetMapping("/user/getAllUsers")
+    @GetMapping("/getAllUsers")
     public ResponseEntity<ServiceResponse> getAllUsers(){
         return userService.getUsers(CommonConstants.FETCH_ALL_USER_OPTION);
     }
 
-    @GetMapping("/user/getActiveUser")
+    @GetMapping("/getActiveUser")
     public ResponseEntity<ServiceResponse> getActiveUser(){
         return userService.getUsers(CommonConstants.FETCH_ACTIVE_USER_OPTION);
     }
 
-    @GetMapping("/user/getInActiveUser")
+    @GetMapping("/getInActiveUser")
     public ResponseEntity<ServiceResponse> getInActiveUser(){
         return userService.getUsers(CommonConstants.FETCH_INACTIVE_USER_OPTION);
     }
 
-    @GetMapping("/user/getUsersOfRole/{roleName}")
+    @GetMapping("/getUsersOfRole/{roleName}")
     public ResponseEntity<ServiceResponse> getUserHavingRole(@PathVariable String roleName){
         return userService.getUsersHavingRole(roleName);
     }
 
-    @PutMapping("/user/addRole")
+    @PutMapping("/addRole")
     public ResponseEntity<ServiceResponse> addUserRoles(@Valid @RequestBody AddRoleUserRequest addRoleUserRequest){
         return userService.addRolesForUser(addRoleUserRequest);
     }
 
-    @GetMapping("/user/getRoles")
+    @GetMapping("/getRoles")
     public ResponseEntity<ServiceResponse> getAllRoles(){
         return roleService.getAllRoles();
     }
