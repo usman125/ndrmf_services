@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
@@ -55,8 +54,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             String[] roleClaims = jwtToken.getClaim("roles").asArray(String.class);
             
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            for(String r: roleClaims) {
-            	grantedAuthorities.add(new SimpleGrantedAuthority(r));
+            if(roleClaims != null) {
+            	for(String r: roleClaims) {
+                	grantedAuthorities.add(new SimpleGrantedAuthority(r));
+                }	
             }
 
             if (username != null) {
