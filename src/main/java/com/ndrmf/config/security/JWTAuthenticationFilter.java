@@ -2,6 +2,7 @@ package com.ndrmf.config.security;
 
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ndrmf.common.ApiResponse;
 import com.ndrmf.request.LoginRequest;
 import com.ndrmf.user.service.UserDetailsServiceImpl;
 
@@ -72,5 +73,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		res.setStatus(HttpStatus.OK.value());
 		res.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		objectMapper.writeValue(res.getWriter(), resBody);
+	}
+
+	@Override
+	protected void unsuccessfulAuthentication(HttpServletRequest req, HttpServletResponse res,
+			AuthenticationException authEx) throws IOException, ServletException {
+		ApiResponse apiResponse = new ApiResponse(false, authEx.getMessage());
+		
+		res.setStatus(HttpStatus.UNAUTHORIZED.value());
+		res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		objectMapper.writeValue(res.getWriter(), apiResponse);
 	}
 }
