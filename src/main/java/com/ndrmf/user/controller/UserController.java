@@ -18,6 +18,7 @@ import io.swagger.annotations.Api;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
 
@@ -31,6 +32,7 @@ public class UserController {
     private RoleService roleService;
 
 
+	@RolesAllowed("ADMIN")
     @PostMapping("/create")
     public ResponseEntity<ApiResponse> createUser(@Valid @RequestBody CreateUserRequest body){
     	userService.createUser(body);

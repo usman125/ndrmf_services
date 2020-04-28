@@ -8,7 +8,21 @@ public class CreateUserRequest {
     private String lastName;
     private int orgId;
     private Integer roleId;
+    private Integer departmentId;
+    private Integer designationId;
     
+	public Integer getDepartmentId() {
+		return departmentId;
+	}
+	public void setDepartmentId(Integer departmentId) {
+		this.departmentId = departmentId;
+	}
+	public Integer getDesignationId() {
+		return designationId;
+	}
+	public void setDesignationId(Integer designationId) {
+		this.designationId = designationId;
+	}
 	public String getUsername() {
 		return username;
 	}

@@ -7,6 +7,8 @@ import javax.validation.constraints.Size;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ndrmf.config.audit.Auditable;
+import com.ndrmf.setting.model.Department;
+import com.ndrmf.setting.model.Designation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,9 @@ public class User extends Auditable<String> implements UserDetails{
 	
 	private Organisation org;
 	private List<Role> roles;
+	
+	private Department department;
+	private Designation designation;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -149,5 +154,25 @@ public class User extends Auditable<String> implements UserDetails{
 
 	public void setOrg(Organisation org) {
 		this.org = org;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name="department_id", nullable = true)
+	public Department getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(Department department) {
+		this.department = department;
+	}
+
+	@ManyToOne
+	@JoinColumn(name="designation_id", nullable = true)
+	public Designation getDesignation() {
+		return designation;
+	}
+
+	public void setDesignation(Designation designation) {
+		this.designation = designation;
 	}
 }

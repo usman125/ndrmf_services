@@ -56,7 +56,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
             if(roleClaims != null) {
             	for(String r: roleClaims) {
-                	grantedAuthorities.add(new SimpleGrantedAuthority(r));
+                	grantedAuthorities.add(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + r));
                 }	
             }
 

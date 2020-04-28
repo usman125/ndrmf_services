@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.ndrmf.request.*;
 import com.ndrmf.response.ServiceResponse;
+import com.ndrmf.setting.repository.DepartmentRepository;
+import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.model.Organisation;
@@ -28,6 +30,8 @@ public class UserServiceImpl implements UserService {
 	@Autowired private RoleRepository roleRepository;
 	@Autowired private BCryptPasswordEncoder passwordEncoder;
 	@Autowired private OrganisationRepository orgRepo;
+	@Autowired private DepartmentRepository deptRepo;
+	@Autowired private DesignationRepository desigRepo;
 	
     @Override
     public void createUser(CreateUserRequest body) {
@@ -40,8 +44,16 @@ public class UserServiceImpl implements UserService {
         u.setUsername(body.getUsername());
         u.setPassword(passwordEncoder.encode(body.getPassword()));
         
-        if(body.getRoleId() != null && body.getRoleId().intValue() > 0) {
+        if(body.getRoleId() != null && body.getRoleId() > 0) {
         	u.addRole(roleRepository.getOne(body.getRoleId()));
+        }
+        
+        if(body.getDepartmentId() != null && body.getDepartmentId() > 0) {
+        	u.setDepartment(deptRepo.getOne(body.getDepartmentId()));
+        }
+        
+        if(body.getDesignationId() != null && body.getDesignationId() > 0) {
+        	u.setDesignation(desigRepo.getOne(body.getDesignationId()));
         }
         
         userRepo.save(u);
