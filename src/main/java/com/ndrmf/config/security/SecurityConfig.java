@@ -1,6 +1,8 @@
 package com.ndrmf.config.security;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ndrmf.common.ApiResponse;
 import com.ndrmf.user.service.UserDetailsServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +52,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.cors().and().csrf().disable().authorizeRequests()
-				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll().anyRequest().authenticated()
+				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+				.anyRequest().authenticated()
 				.and().addFilter(authenticationFilter()).addFilter(new JWTAuthorizationFilter(authManager))
+				.exceptionHandling()
+				.authenticationEntryPoint((request, response, e)-> {
+					response.setStatus(HttpStatus.UNAUTHORIZED.value());
+					response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+					objectMapper.writeValue(response.getWriter(), new ApiResponse(false, e.getMessage()));
+				})
+				.and()
 				// this disables session creation on Spring Security
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}

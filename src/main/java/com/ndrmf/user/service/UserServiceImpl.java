@@ -12,17 +12,23 @@ import com.ndrmf.setting.repository.DepartmentRepository;
 import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
+import com.ndrmf.user.dto.SignupRequest;
+import com.ndrmf.user.dto.SignupRequestItem;
 import com.ndrmf.user.model.Organisation;
 import com.ndrmf.user.model.Role;
+import com.ndrmf.user.model.Signup;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.OrganisationRepository;
 import com.ndrmf.user.repository.RoleRepository;
+import com.ndrmf.user.repository.SignupRepository;
 import com.ndrmf.user.repository.UserRepository;
-import com.ndrmf.utils.CommonConstants;
-import com.ndrmf.utils.CommonUtils;
+import com.ndrmf.util.CommonConstants;
+import com.ndrmf.util.CommonUtils;
+import com.ndrmf.util.enums.SignupRequestStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,6 +38,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired private OrganisationRepository orgRepo;
 	@Autowired private DepartmentRepository deptRepo;
 	@Autowired private DesignationRepository desigRepo;
+	@Autowired private SignupRepository signupRepo;
 	
     @Override
     public void createUser(CreateUserRequest body) {
@@ -228,6 +235,30 @@ public class UserServiceImpl implements UserService {
 			dtos.add(dto);
 			
 		}); 
+		
+		return dtos;
+	}
+
+	@Override
+	public void createSignup(SignupRequest body) {
+		Signup signup = new Signup();
+		
+		signup.setFirstName(body.getFirstName());
+		signup.setLastName(body.getLastName());
+		signup.setEmail(body.getEmail());
+		signup.setPassword(this.passwordEncoder.encode(body.getPassword()));
+		
+		signup.setApprovalStatus(SignupRequestStatus.PENDING.toString());
+		
+		signupRepo.save(signup);
+	}
+	
+	@Override
+	public List<SignupRequestItem> getPendingSignupRequests() {
+		List<Signup> reqs = signupRepo.findRequestsForStatus(SignupRequestStatus.PENDING.toString());
+		
+		List<SignupRequestItem> dtos = reqs.stream().map(req -> new SignupRequestItem(req.getId().toString(), req.getFirstName(), req.getLastName(), req.getEmail()))
+				.collect(Collectors.toList());
 		
 		return dtos;
 	}

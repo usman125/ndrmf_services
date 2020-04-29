@@ -1,4 +1,4 @@
-package com.ndrmf.utils;
+package com.ndrmf.util;
 
 public enum ResponseCode {
 

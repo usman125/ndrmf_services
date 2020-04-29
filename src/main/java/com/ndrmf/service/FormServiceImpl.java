@@ -11,8 +11,8 @@ import com.ndrmf.repository.SectionRepository;
 import com.ndrmf.request.FormCreationRequest;
 import com.ndrmf.request.FormUpdationRequest;
 import com.ndrmf.response.ServiceResponse;
-import com.ndrmf.utils.CommonConstants;
-import com.ndrmf.utils.CommonUtils;
+import com.ndrmf.util.CommonConstants;
+import com.ndrmf.util.CommonUtils;
 
 import java.util.List;
 

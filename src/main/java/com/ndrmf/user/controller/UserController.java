@@ -10,9 +10,11 @@ import com.ndrmf.request.*;
 import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
+import com.ndrmf.user.dto.SignupRequest;
+import com.ndrmf.user.dto.SignupRequestItem;
 import com.ndrmf.user.service.RoleService;
 import com.ndrmf.user.service.UserService;
-import com.ndrmf.utils.CommonConstants;
+import com.ndrmf.util.CommonConstants;
 
 import io.swagger.annotations.Api;
 
@@ -38,6 +40,19 @@ public class UserController {
     	userService.createUser(body);
     	
         return new ResponseEntity<ApiResponse>(new ApiResponse(true, "User created successfully."), HttpStatus.CREATED);
+    }
+	
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest body){
+    	userService.createSignup(body);
+    	
+        return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Signup request created successfully."), HttpStatus.CREATED);
+    }
+    
+    @RolesAllowed("ADMIN")
+    @GetMapping("/signup/requests/pending")
+    public ResponseEntity<List<SignupRequestItem>> getPendingSignupRequests(){
+    	return new ResponseEntity<List<SignupRequestItem>>(userService.getPendingSignupRequests(), HttpStatus.OK);
     }
     
     @GetMapping("/orgs")

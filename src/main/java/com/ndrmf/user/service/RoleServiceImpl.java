@@ -7,9 +7,9 @@ import com.ndrmf.response.RoleResponse;
 import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.user.model.Role;
 import com.ndrmf.user.repository.RoleRepository;
-import com.ndrmf.utils.CommonConstants;
-import com.ndrmf.utils.CommonUtils;
-import com.ndrmf.utils.ResponseCode;
+import com.ndrmf.util.CommonConstants;
+import com.ndrmf.util.CommonUtils;
+import com.ndrmf.util.ResponseCode;
 
 import java.util.List;
 

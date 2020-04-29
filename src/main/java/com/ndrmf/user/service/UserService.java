@@ -9,9 +9,15 @@ import com.ndrmf.request.*;
 import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
+import com.ndrmf.user.dto.SignupRequest;
+import com.ndrmf.user.dto.SignupRequestItem;
 
 public interface UserService {
     void createUser(CreateUserRequest body);
+    
+    void createSignup(SignupRequest body);
+    
+    List<SignupRequestItem> getPendingSignupRequests();
     
     List<OrganisationAndRoles> getOrganisations();
 

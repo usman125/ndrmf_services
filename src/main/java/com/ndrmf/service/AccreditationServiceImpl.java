@@ -10,8 +10,8 @@ import com.ndrmf.request.*;
 import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
-import com.ndrmf.utils.CommonConstants;
-import com.ndrmf.utils.CommonUtils;
+import com.ndrmf.util.CommonConstants;
+import com.ndrmf.util.CommonUtils;
 
 import java.util.*;
 

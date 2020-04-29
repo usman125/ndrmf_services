@@ -1,4 +1,4 @@
-package com.ndrmf.utils;
+package com.ndrmf.util;
 
 import com.ndrmf.model.*;
 import com.ndrmf.request.*;
