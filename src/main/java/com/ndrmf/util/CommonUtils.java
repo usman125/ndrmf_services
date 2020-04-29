@@ -39,7 +39,7 @@ public class CommonUtils {
         userRegdServiceResponse.setEmail(user.getEmail());
         userRegdServiceResponse.setUsername(user.getUsername());
         userRegdServiceResponse.setFirstName(user.getFirstName());
-        userRegdServiceResponse.setFamilyName(user.getFamilyName());
+        userRegdServiceResponse.setFamilyName(user.getLastName());
 
         return userRegdServiceResponse;
     }
@@ -103,7 +103,7 @@ public class CommonUtils {
         userInfo.setEmail(user.getEmail());
         userInfo.setUsername(user.getUsername());
         userInfo.setFirstName(user.getFirstName());
-        userInfo.setFamilyName(user.getFamilyName());
+        userInfo.setFamilyName(user.getLastName());
 
         List<String> roles = new ArrayList<>();
         for (Role role : user.getAuthorities()) {

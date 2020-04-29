@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 		respUser.setUsername(user.getUsername());
 		respUser.setEmail(user.getEmail());
 		respUser.setFirstName(user.getFirstName());
-		respUser.setLastName(user.getFamilyName());
+		respUser.setLastName(user.getLastName());
 		respUser.setOrgId(user.getOrg().getId());
 		respUser.setOrgName(user.getOrg().getName());
 		

@@ -23,7 +23,7 @@ public class User extends Auditable<String> implements UserDetails{
     private String username;
     private String password;
     private String firstName;
-    private String familyName;
+    private String lastName;
     private String email;
 	private boolean enabled;
 	
@@ -74,12 +74,12 @@ public class User extends Auditable<String> implements UserDetails{
     
     @Size(max = 50)
     @Column(name = "last_name")
-    public String getFamilyName() {
-        return familyName;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setFamilyName(String familyName) {
-        this.familyName = familyName;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     

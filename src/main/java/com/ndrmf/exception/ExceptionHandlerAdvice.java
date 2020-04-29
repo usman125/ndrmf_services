@@ -27,11 +27,18 @@ public class ExceptionHandlerAdvice {
 		return new ResponseEntity<ApiResponse>(new ApiResponse(false, message), HttpStatus.FORBIDDEN);
 	}
 	
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<ApiResponse> validationException(ValidationException ex){
+		String message = ex.getMessage();
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(false, message), HttpStatus.UNPROCESSABLE_ENTITY);
+	}
+	
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse> unhandledExceptions(Exception ex){
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
 		
-		return new ResponseEntity<ApiResponse>(new ApiResponse(false, message), HttpStatus.CONFLICT);
+		return new ResponseEntity<ApiResponse>(new ApiResponse(false, message), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
 	private String getMostSpecificMessage(DataIntegrityViolationException ex) {

@@ -1,5 +1,7 @@
 package com.ndrmf.user.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import com.ndrmf.util.CommonConstants;
 import io.swagger.annotations.Api;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
@@ -29,11 +32,15 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping(value="/user")
 public class UserController {
+	
+	Logger logger = LoggerFactory.getLogger(UserController.class);
+	
 	@Autowired
     private UserService userService;
 	@Autowired
     private RoleService roleService;
 
+	@RolesAllowed("ADMIN")
 	@GetMapping("/")
     public ResponseEntity<List<UserItem>> getAllUsers(){
 		return new ResponseEntity<List<UserItem>>(userService.getAllUsers(), HttpStatus.OK);
@@ -58,6 +65,17 @@ public class UserController {
     @GetMapping("/signup/requests/pending")
     public ResponseEntity<List<SignupRequestItem>> getPendingSignupRequests(){
     	return new ResponseEntity<List<SignupRequestItem>>(userService.getPendingSignupRequests(), HttpStatus.OK);
+    }
+    
+    @RolesAllowed("ADMIN")
+    @GetMapping("/signup/requests/{id}/approve")
+    public ResponseEntity<ApiResponse> approveSignupRequest(@PathVariable(name = "id", required = true) UUID id){
+    	
+    	logger.debug("Approving Signup Request with ID: "+id.toString());
+    	
+    	userService.approveSignupRequest(id, "approving request");
+    	
+    	return new ResponseEntity<ApiResponse>(new ApiResponse(true, "signup request approved"), HttpStatus.OK);
     }
     
     @GetMapping("/orgs")

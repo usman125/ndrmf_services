@@ -2,6 +2,7 @@ package com.ndrmf.user.service;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 
@@ -25,6 +26,8 @@ public interface UserService {
     List<UserItem> getActiveUsers();
     
     List<UserItem> getAllUsers();
+    
+    void approveSignupRequest(UUID id, String remarks);
     
 
     ResponseEntity<ServiceResponse> addRolesForUser(AddRoleUserRequest addRoleUserRequest);

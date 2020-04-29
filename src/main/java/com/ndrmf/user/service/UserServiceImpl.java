@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.exception.ValidationException;
 import com.ndrmf.request.*;
 import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.setting.repository.DepartmentRepository;
@@ -31,7 +32,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -49,7 +53,7 @@ public class UserServiceImpl implements UserService {
         u.setEmail(body.getEmail());
         u.setEnabled(true);
         u.setFirstName(body.getFirstName());
-        u.setFamilyName(body.getLastName());
+        u.setLastName(body.getLastName());
         u.setOrg(orgRepo.getOne(body.getOrgId()));
         u.setUsername(body.getUsername());
         u.setPassword(passwordEncoder.encode(body.getPassword()));
@@ -278,7 +282,7 @@ public class UserServiceImpl implements UserService {
 			dto.setUsername(u.getUsername());
 			dto.setEmail(u.getEmail());
 			dto.setFirstName(u.getFirstName());
-			dto.setLastName(u.getFamilyName());
+			dto.setLastName(u.getLastName());
 			dto.setEnabled(false);
 			
 			if(u.getOrg() != null) {
@@ -319,7 +323,7 @@ public class UserServiceImpl implements UserService {
 			dto.setUsername(u.getUsername());
 			dto.setEmail(u.getEmail());
 			dto.setFirstName(u.getFirstName());
-			dto.setLastName(u.getFamilyName());
+			dto.setLastName(u.getLastName());
 			dto.setEnabled(u.isEnabled());
 			
 			if(u.getOrg() != null) {
@@ -347,5 +351,30 @@ public class UserServiceImpl implements UserService {
 		
 		return dtos;
 	}
-
+	
+	@Transactional
+	@Override
+	public void approveSignupRequest(UUID id, String remarks) {
+		Signup s = signupRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("No request found for ID: "+id.toString()));
+		
+		if(s.getApprovalStatus() != SignupRequestStatus.PENDING.toString()) {
+			throw new ValidationException("Cannot approve. Request is already: " + s.getApprovalStatus());
+		}
+		
+		s.setApprovalRemarks(remarks);
+		s.setApprovalStatus(SignupRequestStatus.APPROVED.toString());
+		
+		User u = new User();
+		
+		u.setUsername(s.getEmail());
+		u.setEmail(s.getEmail());
+		u.setEnabled(true);
+		u.setFirstName(s.getFirstName());
+		u.setLastName(s.getLastName());
+		u.setPassword(s.getPassword());
+		u.setOrg(orgRepo.findByName("FIP").get());
+		
+		userRepo.save(u);
+	}
 }
