@@ -11,6 +11,7 @@ public class UserItem {
 	private int orgId;
 	private String orgName;
 	private List<Map<String, Object>> roles;
+	private boolean enabled;
 	
 	public String getUsername() {
 		return username;
@@ -53,5 +54,11 @@ public class UserItem {
 	}
 	public void setRoles(List<Map<String, Object>> roles) {
 		this.roles = roles;
+	}
+	public boolean isEnabled() {
+		return enabled;
+	}
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

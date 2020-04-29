@@ -279,6 +279,49 @@ public class UserServiceImpl implements UserService {
 			dto.setEmail(u.getEmail());
 			dto.setFirstName(u.getFirstName());
 			dto.setLastName(u.getFamilyName());
+			dto.setEnabled(false);
+			
+			if(u.getOrg() != null) {
+				dto.setOrgId(u.getOrg().getId());
+				dto.setOrgName(u.getOrg().getName());
+			}
+			
+			List<Map<String, Object>> roles = new ArrayList<>();
+			
+			if(u.getRoles() != null) {
+				u.getRoles().forEach(r -> {
+					Map<String, Object> role = new HashMap<>();
+					role.put("id", r.getId());
+					role.put("name", r.getName());
+					
+					roles.add(role);
+				});
+				
+				dto.setRoles(roles);
+			}
+			
+			dtos.add(dto);
+			
+		});
+		
+		return dtos;
+	}
+
+	@Override
+	public List<UserItem> getAllUsers() {
+		List<User> users = userRepo.findAll();
+		
+		List<UserItem> dtos = new ArrayList<>();
+		
+		users.forEach(u -> {
+			UserItem dto = new UserItem();
+			
+			dto.setUsername(u.getUsername());
+			dto.setEmail(u.getEmail());
+			dto.setFirstName(u.getFirstName());
+			dto.setLastName(u.getFamilyName());
+			dto.setEnabled(u.isEnabled());
+			
 			if(u.getOrg() != null) {
 				dto.setOrgId(u.getOrg().getId());
 				dto.setOrgName(u.getOrg().getName());

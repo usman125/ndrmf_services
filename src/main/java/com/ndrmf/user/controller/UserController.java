@@ -34,6 +34,10 @@ public class UserController {
 	@Autowired
     private RoleService roleService;
 
+	@GetMapping("/")
+    public ResponseEntity<List<UserItem>> getAllUsers(){
+		return new ResponseEntity<List<UserItem>>(userService.getAllUsers(), HttpStatus.OK);
+    }
 
 	@RolesAllowed("ADMIN")
     @PostMapping("/create")
@@ -76,11 +80,6 @@ public class UserController {
     @PutMapping("/updateQualifiedStatus")
     public ResponseEntity<ServiceResponse> updateQualifiedStatus(@Valid @RequestBody UserQualificationRequest userQualificationRequest){
         return userService.updateProfile(userQualificationRequest);
-    }
-
-    @GetMapping("/getAllUsers")
-    public ResponseEntity<ServiceResponse> getAllUsers(){
-        return userService.getUsers(CommonConstants.FETCH_ALL_USER_OPTION);
     }
 
     @GetMapping("/getActiveUser")

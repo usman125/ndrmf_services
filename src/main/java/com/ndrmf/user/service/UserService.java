@@ -24,6 +24,8 @@ public interface UserService {
     
     List<UserItem> getActiveUsers();
     
+    List<UserItem> getAllUsers();
+    
 
     ResponseEntity<ServiceResponse> addRolesForUser(AddRoleUserRequest addRoleUserRequest);
 
