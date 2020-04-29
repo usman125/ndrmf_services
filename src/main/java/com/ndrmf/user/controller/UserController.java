@@ -12,6 +12,7 @@ import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.service.RoleService;
 import com.ndrmf.user.service.UserService;
 import com.ndrmf.util.CommonConstants;
@@ -83,8 +84,8 @@ public class UserController {
     }
 
     @GetMapping("/getActiveUser")
-    public ResponseEntity<ServiceResponse> getActiveUser(){
-        return userService.getUsers(CommonConstants.FETCH_ACTIVE_USER_OPTION);
+    public ResponseEntity<List<UserItem>> getActiveUser(){
+    	return new ResponseEntity<List<UserItem>>(userService.getActiveUsers(), HttpStatus.OK);
     }
 
     @GetMapping("/getInActiveUser")

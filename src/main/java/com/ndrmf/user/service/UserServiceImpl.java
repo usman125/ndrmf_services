@@ -14,6 +14,7 @@ import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.model.Organisation;
 import com.ndrmf.user.model.Role;
 import com.ndrmf.user.model.Signup;
@@ -27,7 +28,9 @@ import com.ndrmf.util.CommonUtils;
 import com.ndrmf.util.enums.SignupRequestStatus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -257,8 +260,47 @@ public class UserServiceImpl implements UserService {
 	public List<SignupRequestItem> getPendingSignupRequests() {
 		List<Signup> reqs = signupRepo.findRequestsForStatus(SignupRequestStatus.PENDING.toString());
 		
-		List<SignupRequestItem> dtos = reqs.stream().map(req -> new SignupRequestItem(req.getId().toString(), req.getFirstName(), req.getLastName(), req.getEmail()))
+		List<SignupRequestItem> dtos = reqs.stream().map(req -> new SignupRequestItem(req.getId().toString(), req.getFirstName(), req.getLastName(), req.getEmail(), req.getCreatedDate()))
 				.collect(Collectors.toList());
+		
+		return dtos;
+	}
+
+	@Override
+	public List<UserItem> getActiveUsers() {
+		List<User> users = userRepo.findAllByEnabledTrue();
+		
+		List<UserItem> dtos = new ArrayList<>();
+		
+		users.forEach(u -> {
+			UserItem dto = new UserItem();
+			
+			dto.setUsername(u.getUsername());
+			dto.setEmail(u.getEmail());
+			dto.setFirstName(u.getFirstName());
+			dto.setLastName(u.getFamilyName());
+			if(u.getOrg() != null) {
+				dto.setOrgId(u.getOrg().getId());
+				dto.setOrgName(u.getOrg().getName());
+			}
+			
+			List<Map<String, Object>> roles = new ArrayList<>();
+			
+			if(u.getRoles() != null) {
+				u.getRoles().forEach(r -> {
+					Map<String, Object> role = new HashMap<>();
+					role.put("id", r.getId());
+					role.put("name", r.getName());
+					
+					roles.add(role);
+				});
+				
+				dto.setRoles(roles);
+			}
+			
+			dtos.add(dto);
+			
+		});
 		
 		return dtos;
 	}

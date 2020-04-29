@@ -1,16 +1,20 @@
 package com.ndrmf.user.dto;
 
+import java.util.Date;
+
 public class SignupRequestItem {
 	private String id;
 	private String firstName;
 	private String lastName;
 	private String email;
+	private Date createdAt;
 	
-	public SignupRequestItem(String id, String firstName, String lastName, String email) {
+	public SignupRequestItem(String id, String firstName, String lastName, String email, Date createdAt) {
 		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.createdAt = createdAt;
 	}
 	
 	public String getId() {
@@ -36,5 +40,13 @@ public class SignupRequestItem {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
 	}
 }

@@ -11,6 +11,7 @@ import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UserItem;
 
 public interface UserService {
     void createUser(CreateUserRequest body);
@@ -20,6 +21,9 @@ public interface UserService {
     List<SignupRequestItem> getPendingSignupRequests();
     
     List<OrganisationAndRoles> getOrganisations();
+    
+    List<UserItem> getActiveUsers();
+    
 
     ResponseEntity<ServiceResponse> addRolesForUser(AddRoleUserRequest addRoleUserRequest);
 
