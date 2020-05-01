@@ -3,7 +3,7 @@ package com.ndrmf.response;
 import java.io.Serializable;
 import java.util.List;
 
-import com.ndrmf.model.Section;
+import com.ndrmf.setting.model.Section;
 
 public class SectionResponse extends ServiceResponse  implements Serializable {
     private List<SectionInfo> sectionInfos;

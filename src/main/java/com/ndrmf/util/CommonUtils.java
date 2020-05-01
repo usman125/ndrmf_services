@@ -3,6 +3,7 @@ package com.ndrmf.util;
 import com.ndrmf.model.*;
 import com.ndrmf.request.*;
 import com.ndrmf.response.*;
+import com.ndrmf.setting.model.Section;
 import com.ndrmf.user.model.Role;
 import com.ndrmf.user.model.User;
 
@@ -20,15 +21,6 @@ public class CommonUtils {
         user.setPassword(userRegdServiceRequest.getPassword());
 
         return user;
-    }
-    public static Section mapSectionAdditionRequest(SectionRequest sectionRequest){
-        Section section = new Section();
-        section.setSectionKey(sectionRequest.getSectionKey());
-        section.setSectionName(sectionRequest.getSectionName());
-        section.setFormGenerated(sectionRequest.isFormGenerated());
-        section.setUsername(sectionRequest.getUserName());
-        section.setFormIdentity(sectionRequest.getFormIdentity());
-        return section;
     }
 
     public static ServiceResponse mapUserRegdResponse(User user){
@@ -72,29 +64,6 @@ public class CommonUtils {
         userResponse.setUserInfoList(userInfos);
 
         return userResponse;
-    }
-    public static ServiceResponse mapGetSections(List<Section> sections){
-        SectionResponse sectionResponse = new SectionResponse();
-
-        sectionResponse.setResponseCode(ResponseCode.SUCCESS.getRespCode());
-        sectionResponse.setResponseDesc(ResponseCode.SUCCESS.getRespDesc());
-        //List<SectionInfo> sectionInfos = new ArrayList<>(mapGetSectionInfos(sections));
-        sectionResponse.setSectionInfos(mapGetSectionInfos(sections));
-        return sectionResponse;
-    }
-
-    private static List<SectionInfo> mapGetSectionInfos(List<Section> sections) {
-        List<SectionInfo> sectionInfos = new ArrayList<>();
-        for(Section section: sections){
-            SectionInfo sectionInfo = new SectionInfo();
-            sectionInfo.setFormGenerated(section.isFormGenerated());
-            sectionInfo.setSectionKey(section.getSectionKey());
-            sectionInfo.setSectionName(section.getSectionName());
-            sectionInfo.setUserName(section.getUsername());
-            sectionInfo.setFormIdentity(section.getFormIdentity());
-            sectionInfos.add(sectionInfo);
-        }
-        return sectionInfos;
     }
 
     private static UserInfo prepareUserInfo(User user){
@@ -269,48 +238,6 @@ public class CommonUtils {
                 || null == formUpdationRequest.getStatus();
     }
 
-    private static FormInfo prepareFormInfo(Form form){
-        FormInfo formInfo = new FormInfo();
-
-        formInfo.setSectionName(form.getName());
-        formInfo.setDisplayType(form.getDisplayType());
-        formInfo.setFormIdentity(form.getFormIdentity());
-        formInfo.setPassingScore(form.getPassingScore());
-        formInfo.setTotalScore(form.getTotalScore());
-        formInfo.setPage(form.getPage());
-        formInfo.setNumOfPages(form.getNumOfPages());
-        formInfo.setStatus(form.getStatus());
-        formInfo.setComponent(form.getComponent());
-        formInfo.setSectionKey(form.getSection().getSectionKey());
-
-        return  formInfo;
-    }
-
-    public static ServiceResponse mapFormUpdateResponse(Form form){
-        FormUpdateResponse formUpdateResponse = new FormUpdateResponse();
-
-        formUpdateResponse.setResponseCode(ResponseCode.SUCCESS.getRespCode());
-        formUpdateResponse.setResponseDesc(CommonConstants.FORM_UPDATE_SUCCESS_DESC);
-        formUpdateResponse.setFormInfo(prepareFormInfo(form));
-
-        return formUpdateResponse;
-    }
-
-    public static ServiceResponse mapFormResponse(List<Form> forms){
-        FormResponse formResponse = new FormResponse();
-        List<FormInfo> formInfos =  new ArrayList<>();
-
-        formResponse.setResponseCode(ResponseCode.SUCCESS.getRespCode());
-        formResponse.setResponseDesc(ResponseCode.SUCCESS.getRespDesc());
-
-        for (Form form : forms) {
-            formInfos.add(prepareFormInfo(form));
-        }
-        formResponse.setFormInfoList(formInfos);
-
-        return formResponse;
-    }
-
     public static boolean isInvalidAccCreationRequest(AccCreateRequest accCreateRequest){
 
         return null == accCreateRequest
@@ -381,7 +308,7 @@ public class CommonUtils {
         AccreditationInfo accreditationInfo = new AccreditationInfo();
 
         accreditationInfo.setUserName(accreditation.getAccUser().getUsername());
-        accreditationInfo.setSectionKey(accreditation.getAccreditationSection().getSectionKey());
+        accreditationInfo.setSectionKey(accreditation.getAccreditationSection().getId().toString());
         accreditationInfo.setFormSubmitData(accreditation.getFormSubmitData());
         accreditationInfo.setStatus(accreditation.getStatus());
         accreditationInfo.setFormIdentity(accreditation.getFormIdentity());
@@ -449,8 +376,8 @@ public class CommonUtils {
         SectionReviewInfo sectionReviewInfo = new SectionReviewInfo();
         List<ComponentReviewInfo> componentReviewInfos = new ArrayList<>();
 
-        sectionReviewInfo.setUsername(sectionReview.getAccreditation().getAccreditationSection().getUsername());
-        sectionReviewInfo.setSectionKey(sectionReview.getAccreditation().getAccreditationSection().getSectionKey());
+        //sectionReviewInfo.setUsername(sectionReview.getAccreditation().getAccreditationSection().getUsername());
+        sectionReviewInfo.setSectionKey(sectionReview.getAccreditation().getAccreditationSection().getId().toString());
         sectionReviewInfo.setStatus(sectionReview.getStatus());
         sectionReviewInfo.setComments(sectionReview.getComments());
         sectionReviewInfo.setRating(sectionReview.getRating());

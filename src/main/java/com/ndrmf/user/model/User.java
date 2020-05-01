@@ -12,6 +12,7 @@ import com.ndrmf.setting.model.Designation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -19,7 +20,7 @@ public class User extends Auditable<String> implements UserDetails{
 
     private static final long serialVersionUID = 1L;
 
-    private long id;
+    private UUID id;
     private String username;
     private String password;
     private String firstName;
@@ -34,12 +35,13 @@ public class User extends Auditable<String> implements UserDetails{
 	private Designation designation;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    public long getId() {
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(columnDefinition = "uuid", updatable = false)
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     

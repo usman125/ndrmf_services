@@ -5,6 +5,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 
 import com.ndrmf.config.audit.Auditable;
+import com.ndrmf.setting.model.Section;
 import com.ndrmf.user.model.User;
 
 import java.io.Serializable;
@@ -30,10 +31,7 @@ public class Accreditation extends Auditable<String> {
     private User accUser;
 
     @ManyToOne
-    @JoinColumn(name = "section_key" , columnDefinition = "varchar(45)",
-            nullable = false, updatable = false,
-            referencedColumnName = "section_key",
-            foreignKey = @ForeignKey(name = "fkey_accredit_section_id"))
+    @JoinColumn(name = "section_key")
     private Section accreditationSection;
 
     @Column(name = "form_submit_data")

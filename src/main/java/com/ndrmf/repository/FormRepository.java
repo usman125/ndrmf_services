@@ -3,7 +3,7 @@ package com.ndrmf.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.ndrmf.model.Form;
-import com.ndrmf.model.Section;
+import com.ndrmf.setting.model.Section;
 
 import java.util.List;
 
