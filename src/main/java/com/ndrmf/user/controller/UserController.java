@@ -15,9 +15,11 @@ import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
 import com.ndrmf.user.dto.UserItem;
+import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.service.RoleService;
 import com.ndrmf.user.service.UserService;
 import com.ndrmf.util.CommonConstants;
+import com.ndrmf.util.enums.ProcessBoundRole;
 
 import io.swagger.annotations.Api;
 
@@ -110,9 +112,16 @@ public class UserController {
         return userService.getUsers(CommonConstants.FETCH_INACTIVE_USER_OPTION);
     }
 
-    @GetMapping("/getUsersOfRole/{roleName}")
-    public ResponseEntity<ServiceResponse> getUserHavingRole(@PathVariable String roleName){
-        return userService.getUsersHavingRole(roleName);
+    @RolesAllowed("ADMIN")
+    @GetMapping("/withRoleprocessOwner")
+    public ResponseEntity<List<UserLookupItem>> getUserHavingRoleProcessOwner(){
+        return new ResponseEntity<List<UserLookupItem>>(userService.getActiveUsersForLookupByRole(ProcessBoundRole.PROCESS_OWNER.getPersistenceValue()), HttpStatus.OK);
+    }
+    
+    @RolesAllowed("ADMIN")
+    @GetMapping("/withRoleSME")
+    public ResponseEntity<List<UserLookupItem>> getUserHavingRoleSME(){
+        return new ResponseEntity<List<UserLookupItem>>(userService.getActiveUsersForLookupByRole(ProcessBoundRole.SME.getPersistenceValue()), HttpStatus.OK);
     }
 
     @PutMapping("/addRole")

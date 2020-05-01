@@ -22,6 +22,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllByEnabledFalse();
     
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
-    List<User> findUsersForRole(@Param("roleName") String roleName);
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE u.enabled = true AND r.name = :roleName")
+    List<User> findActiveUsersForRole(@Param("roleName") String roleName);
 }

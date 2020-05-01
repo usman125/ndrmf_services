@@ -74,6 +74,14 @@ public class User extends Auditable<String> implements UserDetails{
         this.firstName = firstName;
     }
     
+    @Transient
+    public String getFullName() {
+    	if(this.lastName == null)
+    		return this.firstName;
+    	else
+    		return this.firstName + " " + this.lastName;
+    }
+    
     @Size(max = 50)
     @Column(name = "last_name")
     public String getLastName() {

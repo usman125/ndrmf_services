@@ -16,6 +16,7 @@ import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
 import com.ndrmf.user.dto.UserItem;
+import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.Organisation;
 import com.ndrmf.user.model.Role;
 import com.ndrmf.user.model.Signup;
@@ -365,9 +366,13 @@ public class UserService {
 		userRepo.save(u);
 	}
 	
-	public void getUsersForRole(String roleName) {
-		List<User> users = userRepo.findUsersForRole(roleName);
+	public List<UserLookupItem> getActiveUsersForLookupByRole(String roleName) {
+		List<User> users = userRepo.findActiveUsersForRole(roleName);
 		
+		List<UserLookupItem> dtos = users.stream()
+				.map(u -> new UserLookupItem(u.getId(), u.getFullName()))
+				.collect(Collectors.toList());
 		
+		return dtos;
 	}
 }
