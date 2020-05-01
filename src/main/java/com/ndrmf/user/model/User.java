@@ -174,5 +174,5 @@ public class User extends Auditable<String> implements UserDetails{
 
 	public void setDesignation(Designation designation) {
 		this.designation = designation;
-	}
+	} 
 }
