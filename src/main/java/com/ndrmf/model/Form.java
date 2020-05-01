@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Size;
 
 import com.ndrmf.config.audit.Auditable;
+import com.ndrmf.setting.model.Section;
 
 @Entity(name = "forms")
 public class Form extends Auditable<String> {
@@ -47,13 +48,7 @@ public class Form extends Auditable<String> {
     private String component;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(
-            name = "section_key",
-            columnDefinition = "varchar(45)",
-            nullable = false,
-            referencedColumnName = "section_key",
-            foreignKey = @ForeignKey(name = "fk_form_section")
-    )
+    @JoinColumn(name = "section_key")
     private Section section;
 
     public long getId() {

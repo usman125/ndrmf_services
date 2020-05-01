@@ -5,16 +5,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.model.Form;
-import com.ndrmf.model.Section;
 import com.ndrmf.repository.FormRepository;
-import com.ndrmf.repository.SectionRepository;
 import com.ndrmf.request.FormCreationRequest;
 import com.ndrmf.request.FormUpdationRequest;
 import com.ndrmf.response.ServiceResponse;
+import com.ndrmf.setting.model.Section;
+import com.ndrmf.setting.repository.SectionRepository;
 import com.ndrmf.util.CommonConstants;
 import com.ndrmf.util.CommonUtils;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class FormServiceImpl implements FormService {
@@ -36,7 +37,7 @@ public class FormServiceImpl implements FormService {
             serviceResponse = CommonUtils.invalidClientReqResponse();
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
-            Section section = sectionRepository.findBySectionKey(formCreationRequest.getSectionKey());
+            Section section = sectionRepository.findById(UUID.fromString(formCreationRequest.getSectionKey())).get();
             if (null == section){
                 serviceResponse = CommonUtils.dataNotFoundResponse(null);
                 responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
@@ -60,7 +61,7 @@ public class FormServiceImpl implements FormService {
             serviceResponse = CommonUtils.invalidClientReqResponse();
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
-            Section section = sectionRepository.findBySectionKey(formUpdationRequest.getSectionKey());
+            Section section = sectionRepository.findById(UUID.fromString(formUpdationRequest.getSectionKey())).get();
             if (null == section){
                 serviceResponse = CommonUtils.dataNotFoundResponse(null);
                 responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
@@ -71,7 +72,7 @@ public class FormServiceImpl implements FormService {
                     responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
                 } else {
                     formRepository.save(form);
-                    serviceResponse = CommonUtils.mapFormUpdateResponse(form);
+                    serviceResponse = null;//CommonUtils.mapFormUpdateResponse(form);
                     responseEntity = ResponseEntity.ok(serviceResponse);
                 }
             }
@@ -90,7 +91,7 @@ public class FormServiceImpl implements FormService {
         if(CommonUtils.isNullOrEmptyCollection(formList)){
             serviceResponse = CommonUtils.dataNotFoundResponse(null);
         } else {
-            serviceResponse = CommonUtils.mapFormResponse(formList);
+            serviceResponse = null;//CommonUtils.mapFormResponse(formList);
         }
         responseEntity = ResponseEntity.ok(serviceResponse);
 

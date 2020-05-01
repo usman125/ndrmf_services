@@ -8,6 +8,8 @@ import com.ndrmf.model.*;
 import com.ndrmf.repository.*;
 import com.ndrmf.request.*;
 import com.ndrmf.response.ServiceResponse;
+import com.ndrmf.setting.model.Section;
+import com.ndrmf.setting.repository.SectionRepository;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.util.CommonConstants;
@@ -39,12 +41,12 @@ public class AccreditationServiceImpl implements AccreditationService {
         ServiceResponse serviceResponse;
         List<Section> sections = null;
 
-        sections = sectionRepository.findAllByActiveTrue();
+        sections = sectionRepository.findAllByEnabledTrue();
 
         if (CommonUtils.isNullOrEmptyCollection(sections)) {
             serviceResponse = CommonUtils.dataNotFoundResponse(null);
         } else {
-            serviceResponse = CommonUtils.mapGetSections(sections);
+            serviceResponse = null;//CommonUtils.mapGetSections(sections);
         }
         responseEntity = ResponseEntity.ok(serviceResponse);
         return responseEntity;
@@ -56,12 +58,12 @@ public class AccreditationServiceImpl implements AccreditationService {
         ResponseEntity<ServiceResponse> responseEntity;
         ServiceResponse serviceResponse;
         List<Section> sections = null;
-        sections = sectionRepository.findByFormIdentityAndActiveTrue(formIdentity);
+        sections = sectionRepository.findAll();
 
         if (CommonUtils.isNullOrEmptyCollection(sections)) {
             serviceResponse = CommonUtils.dataNotFoundResponse(null);
         } else {
-            serviceResponse = CommonUtils.mapGetSections(sections);
+            serviceResponse = null;//CommonUtils.mapGetSections(sections);
         }
         responseEntity = ResponseEntity.ok(serviceResponse);
         return responseEntity;
@@ -79,12 +81,12 @@ public class AccreditationServiceImpl implements AccreditationService {
             serviceResponse = CommonUtils.invalidClientReqResponse();
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
-            Section section = sectionRepository.findBySectionKey(sectionRequest.getSectionKey());
+            Section section = sectionRepository.findById(UUID.fromString(sectionRequest.getSectionKey())).get();
             if (null == section) {
                 serviceResponse = CommonUtils.dataNotFoundResponse(null);
                 responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
             } else {
-                section = sectionRepository.save(CommonUtils.mapSectionAdditionRequest(sectionRequest));
+                //section = sectionRepository.save(CommonUtils.mapSectionAdditionRequest(sectionRequest));
                 serviceResponse = CommonUtils.successResponse(CommonConstants.UPDATE_USER_SECTION_SUCCESS_DESC);
                 responseEntity = ResponseEntity.ok(serviceResponse);
             }
@@ -104,7 +106,7 @@ public class AccreditationServiceImpl implements AccreditationService {
             return ResponseEntity.badRequest().body(serviceResponse);
         }
 
-        Section section = CommonUtils.mapSectionAdditionRequest(sectionRequest);
+        Section section = null;//CommonUtils.mapSectionAdditionRequest(sectionRequest);
         sectionRepository.save(section);
         serviceResponse = CommonUtils.successResponse(CommonConstants.UPDATE_USER_SECTION_SUCCESS_DESC);
         return ResponseEntity.ok(serviceResponse);
@@ -136,7 +138,7 @@ public class AccreditationServiceImpl implements AccreditationService {
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
 
-            Optional<Accreditation> optionalAccreditation = Optional.ofNullable(accreditationRepository.findByAccreditationSection_SectionKeyAndAccUser_Username(accUpdateRequest.getSectionKey(), accUpdateRequest.getUserName()));
+            Optional<Accreditation> optionalAccreditation = Optional.ofNullable(null);
 
             if(!optionalAccreditation.isPresent()){
                 serviceResponse = CommonUtils.dataNotFoundResponse(null);
@@ -163,8 +165,8 @@ public class AccreditationServiceImpl implements AccreditationService {
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
             User user = userRepository.findByUsername(accCreateRequest.getUserName());
-            Section section = sectionRepository.findBySectionKey(accCreateRequest.getSectionKey());
-            Optional<Accreditation> optionalAccr = Optional.ofNullable(accreditationRepository.findByAccreditationSection_SectionKeyAndAccUser_Username(accCreateRequest.getSectionKey(), accCreateRequest.getUserName()));
+            Section section = sectionRepository.findById(UUID.fromString(accCreateRequest.getSectionKey())).get();
+            Optional<Accreditation> optionalAccr = Optional.ofNullable(null);
             if(null == user || null == section){
                 serviceResponse = CommonUtils.dataNotFoundResponse(null);
                 responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
@@ -192,7 +194,7 @@ public class AccreditationServiceImpl implements AccreditationService {
             serviceResponse = CommonUtils.invalidClientReqResponse();
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
-            Optional<Accreditation> optionalAccr = Optional.ofNullable(accreditationRepository.findByAccreditationSection_SectionKeyAndAccUser_Username(reviewCreateRequest.getSectionKey(), reviewCreateRequest.getUsername()));
+            Optional<Accreditation> optionalAccr = Optional.ofNullable(null);
             User sectionReviewer = userRepository.findByUsername(reviewCreateRequest.getSectionReviewer());
 
             if(optionalAccr.isPresent() || null == sectionReviewer){
@@ -242,7 +244,7 @@ public class AccreditationServiceImpl implements AccreditationService {
             serviceResponse = CommonUtils.invalidClientReqResponse();
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
-            Optional<Accreditation> optionalAccred = Optional.ofNullable(accreditationRepository.findByAccreditationSection_SectionKeyAndAccUser_Username(accredSectionReviewRequest.getSectionKey(), accredSectionReviewRequest.getUsername()));
+            Optional<Accreditation> optionalAccred = Optional.ofNullable(null);
             if(!optionalAccred.isPresent() || CommonUtils.isNullOrEmptyCollection(optionalAccred.get().getSectionReviewSet())){
                 serviceResponse = CommonUtils.dataNotFoundResponse(CommonConstants.SECTION_REVIEW_NOT_FOUND_DESC);
             } else {
@@ -263,7 +265,7 @@ public class AccreditationServiceImpl implements AccreditationService {
             serviceResponse = CommonUtils.invalidClientReqResponse();
             responseEntity = ResponseEntity.badRequest().body(serviceResponse);
         } else {
-            Optional<Accreditation> optionalAccred = Optional.ofNullable(accreditationRepository.findByAccreditationSection_SectionKeyAndAccUser_Username(accredSectionReviewRequest.getSectionKey(),accredSectionReviewRequest.getUsername()));
+            Optional<Accreditation> optionalAccred = Optional.ofNullable(null);
             if(!optionalAccred.isPresent() || CommonUtils.isNullOrEmptyCollection(optionalAccred.get().getSectionReviewSet())){
                 serviceResponse = CommonUtils.dataNotFoundResponse(CommonConstants.SECTION_REVIEW_NOT_FOUND_DESC);
             } else {
