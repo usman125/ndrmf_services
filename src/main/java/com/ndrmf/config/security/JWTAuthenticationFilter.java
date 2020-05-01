@@ -3,7 +3,6 @@ package com.ndrmf.config.security;
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.common.ApiResponse;
-import com.ndrmf.request.LoginRequest;
 import com.ndrmf.user.service.UserDetailsServiceImpl;
 
 import org.springframework.http.HttpStatus;

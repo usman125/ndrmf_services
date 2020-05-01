@@ -1,18 +1,15 @@
 package com.ndrmf.user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.exception.ValidationException;
-import com.ndrmf.request.*;
-import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.setting.repository.DepartmentRepository;
 import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
+import com.ndrmf.user.dto.RoleItem;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
 import com.ndrmf.user.dto.UserItem;
@@ -25,8 +22,6 @@ import com.ndrmf.user.repository.OrganisationRepository;
 import com.ndrmf.user.repository.RoleRepository;
 import com.ndrmf.user.repository.SignupRepository;
 import com.ndrmf.user.repository.UserRepository;
-import com.ndrmf.util.CommonConstants;
-import com.ndrmf.util.CommonUtils;
 import com.ndrmf.util.enums.SignupRequestStatus;
 
 import java.util.ArrayList;
@@ -71,149 +66,6 @@ public class UserService {
         }
         
         userRepo.save(u);
-    }
-
-    public ResponseEntity<ServiceResponse> addRolesForUser(AddRoleUserRequest addRoleUserRequest) {
-        ResponseEntity<ServiceResponse> addRoleUserResponseEntity;
-        ServiceResponse serviceResponse;
-
-        if (CommonUtils.isInvalidUserRoleRequest(addRoleUserRequest)) {
-            serviceResponse = CommonUtils.invalidClientReqResponse();
-            addRoleUserResponseEntity = ResponseEntity.badRequest().body(serviceResponse);
-        } else {
-            Role role = roleRepository.findByName(addRoleUserRequest.getName());
-            User user = userRepo.findByUsername(addRoleUserRequest.getUsername());
-
-            if (null == role || null == user) {
-                serviceResponse = CommonUtils.dataNotFoundResponse(null);
-                addRoleUserResponseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
-            } else {
-                //role.getUserSet().add(user);
-                User updatedUser = userRepo.save(user);
-                serviceResponse = CommonUtils.mapAddRoleUserResponse(updatedUser);
-                addRoleUserResponseEntity = ResponseEntity.ok(serviceResponse);
-            }
-        }
-
-        return addRoleUserResponseEntity;
-    }
-    
-    public ResponseEntity<ServiceResponse> updateProfile(UserActivationRequest userActivationRequest) {
-        ResponseEntity<ServiceResponse> responseEntity;
-        ServiceResponse serviceResponse;
-
-        if (CommonUtils.isInvalidProfileUpdate(userActivationRequest)) {
-
-            serviceResponse = CommonUtils.invalidClientReqResponse();
-            responseEntity = ResponseEntity.badRequest().body(serviceResponse);
-        } else {
-            User user = userRepo.findByUsername(userActivationRequest.getUsername());
-            if (null == user) {
-                serviceResponse = CommonUtils.dataNotFoundResponse(null);
-                responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
-            } else {
-                user.setEnabled(userActivationRequest.isActive());
-                userRepo.save(user);
-                serviceResponse = CommonUtils.successResponse(CommonConstants.UPDATE_USER_PROFILE_SUCCESS_DESC);
-                responseEntity = ResponseEntity.ok(serviceResponse);
-            }
-        }
-
-        return responseEntity;
-    }
-    
-    public ResponseEntity<ServiceResponse> updateProfile(UserEligibilityRequest userEligibilityRequest) {
-        ResponseEntity<ServiceResponse> responseEntity;
-        ServiceResponse serviceResponse;
-
-        if (CommonUtils.isInvalidProfileUpdate(userEligibilityRequest)) {
-
-            serviceResponse = CommonUtils.invalidClientReqResponse();
-            responseEntity = ResponseEntity.badRequest().body(serviceResponse);
-        } else {
-            User user = userRepo.findByUsername(userEligibilityRequest.getUsername());
-            if (null == user) {
-                serviceResponse = CommonUtils.dataNotFoundResponse(null);
-                responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
-            } else {
-                userRepo.save(user);
-                serviceResponse = CommonUtils.successResponse(CommonConstants.UPDATE_USER_PROFILE_SUCCESS_DESC);
-                responseEntity = ResponseEntity.ok(serviceResponse);
-            }
-        }
-
-        return responseEntity;
-    }
-    
-    public ResponseEntity<ServiceResponse> updateProfile(UserQualificationRequest userQualificationRequest) {
-        ResponseEntity<ServiceResponse> responseEntity;
-        ServiceResponse serviceResponse;
-
-        if (CommonUtils.isInvalidProfileUpdate(userQualificationRequest)) {
-
-            serviceResponse = CommonUtils.invalidClientReqResponse();
-            responseEntity = ResponseEntity.badRequest().body(serviceResponse);
-        } else {
-            User user = userRepo.findByUsername(userQualificationRequest.getUsername());
-            if (null == user) {
-                serviceResponse = CommonUtils.dataNotFoundResponse(null);
-                responseEntity = ResponseEntity.status(HttpStatus.NOT_FOUND).body(serviceResponse);
-            } else {
-                userRepo.save(user);
-                serviceResponse = CommonUtils.successResponse(CommonConstants.UPDATE_USER_PROFILE_SUCCESS_DESC);
-                responseEntity = ResponseEntity.ok(serviceResponse);
-            }
-        }
-
-        return responseEntity;
-    }
-    
-    public ResponseEntity<ServiceResponse> getUsers(String fetchOption) {
-        ResponseEntity<ServiceResponse> responseEntity;
-        ServiceResponse serviceResponse;
-        List<User> users = null;
-
-        if (CommonConstants.FETCH_ALL_USER_OPTION.equals(fetchOption)) {
-            users = userRepo.findAll();
-        } else if (CommonConstants.FETCH_ACTIVE_USER_OPTION.equals(fetchOption)) {
-            users = userRepo.findAllByEnabledTrue();
-        } else if (CommonConstants.FETCH_INACTIVE_USER_OPTION.equals(fetchOption)) {
-            users = userRepo.findAllByEnabledFalse();
-        }
-
-        if (CommonUtils.isNullOrEmptyCollection(users)) {
-            serviceResponse = CommonUtils.dataNotFoundResponse(null);
-        } else {
-            serviceResponse = CommonUtils.mapGetUsers(users);
-        }
-        responseEntity = ResponseEntity.ok(serviceResponse);
-
-        return responseEntity;
-    }
-    
-    public ResponseEntity<ServiceResponse> getUsersHavingRole(String roleName) {
-        ResponseEntity<ServiceResponse> responseEntity;
-        ServiceResponse serviceResponse;
-
-        if (null == roleName) {
-            serviceResponse = CommonUtils.invalidClientReqResponse();
-            responseEntity = ResponseEntity.badRequest().body(serviceResponse);
-        } else {
-            Role role = roleRepository.findByName(roleName);
-            if (null == role) {
-                serviceResponse = CommonUtils.dataNotFoundResponse(null);
-            } else {
-                List<User> users = userRepo.findAll();
-                if (CommonUtils.isNullOrEmptyCollection(users)) {
-                    serviceResponse = CommonUtils.dataNotFoundResponse(null);
-                } else {
-                    serviceResponse = CommonUtils.mapGetUsers(users);
-                }
-            }
-            responseEntity = ResponseEntity.ok(serviceResponse);
-        }
-
-        return responseEntity;
     }
     
 	public List<OrganisationAndRoles> getOrganisations() {
@@ -372,6 +224,14 @@ public class UserService {
 		List<UserLookupItem> dtos = users.stream()
 				.map(u -> new UserLookupItem(u.getId(), u.getFullName()))
 				.collect(Collectors.toList());
+		
+		return dtos;
+	}
+	
+	public List<RoleItem> getRolesForOrganisation(int orgId){
+		List<Role> roles = roleRepository.findRolesByOrg(orgId);
+		
+		List<RoleItem> dtos = roles.stream().map(r -> new RoleItem(r.getId(), r.getName())).collect(Collectors.toList());
 		
 		return dtos;
 	}

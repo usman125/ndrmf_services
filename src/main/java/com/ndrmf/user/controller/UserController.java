@@ -8,17 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.ndrmf.common.ApiResponse;
-import com.ndrmf.request.*;
-import com.ndrmf.response.ServiceResponse;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
+import com.ndrmf.user.dto.RoleItem;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
 import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.dto.UserLookupItem;
-import com.ndrmf.user.service.RoleService;
 import com.ndrmf.user.service.UserService;
-import com.ndrmf.util.CommonConstants;
 import com.ndrmf.util.enums.ProcessBoundRole;
 
 import io.swagger.annotations.Api;
@@ -39,8 +36,6 @@ public class UserController {
 	
 	@Autowired
     private UserService userService;
-	@Autowired
-    private RoleService roleService;
 
 	@RolesAllowed("ADMIN")
 	@GetMapping("/")
@@ -87,29 +82,10 @@ public class UserController {
     	return new ResponseEntity<List<OrganisationAndRoles>>(orgs, HttpStatus.OK);
     }
 
-    @PutMapping("/updateActiveStatus")
-    public ResponseEntity<ServiceResponse> updateActiveStatus(@Valid @RequestBody UserActivationRequest userActivationRequest){
-        return userService.updateProfile(userActivationRequest);
-    }
-
-    @PutMapping("/updateEligibleStatus")
-    public ResponseEntity<ServiceResponse> updateEligibleStatus(@Valid @RequestBody UserEligibilityRequest userEligibilityRequest){
-        return userService.updateProfile(userEligibilityRequest);
-    }
-
-    @PutMapping("/updateQualifiedStatus")
-    public ResponseEntity<ServiceResponse> updateQualifiedStatus(@Valid @RequestBody UserQualificationRequest userQualificationRequest){
-        return userService.updateProfile(userQualificationRequest);
-    }
 
     @GetMapping("/getActiveUser")
     public ResponseEntity<List<UserItem>> getActiveUser(){
     	return new ResponseEntity<List<UserItem>>(userService.getActiveUsers(), HttpStatus.OK);
-    }
-
-    @GetMapping("/getInActiveUser")
-    public ResponseEntity<ServiceResponse> getInActiveUser(){
-        return userService.getUsers(CommonConstants.FETCH_INACTIVE_USER_OPTION);
     }
 
     @RolesAllowed("ADMIN")
@@ -124,13 +100,9 @@ public class UserController {
         return new ResponseEntity<List<UserLookupItem>>(userService.getActiveUsersForLookupByRole(ProcessBoundRole.SME.getPersistenceValue()), HttpStatus.OK);
     }
 
-    @PutMapping("/addRole")
-    public ResponseEntity<ServiceResponse> addUserRoles(@Valid @RequestBody AddRoleUserRequest addRoleUserRequest){
-        return userService.addRolesForUser(addRoleUserRequest);
-    }
-
-    @GetMapping("/getRoles")
-    public ResponseEntity<ServiceResponse> getAllRoles(){
-        return roleService.getAllRoles();
+    @RolesAllowed("ADMIN")
+    @GetMapping("/role")
+    public ResponseEntity<List<RoleItem>> getAllRoles(@RequestParam(name = "orgId", required = true) int orgId){
+        return new ResponseEntity<List<RoleItem>>(userService.getRolesForOrganisation(orgId), HttpStatus.OK);
     }
 }
