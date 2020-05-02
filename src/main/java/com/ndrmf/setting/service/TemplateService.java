@@ -20,6 +20,7 @@ import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
+import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.repository.ProcessMetaRepository;
 import com.ndrmf.user.repository.UserRepository;
 
@@ -64,11 +65,27 @@ public class TemplateService {
 	}
 	
 	public ProcessTypeWithSectionsItem getMetaForProcess(String processType) {
+		ProcessType meta = processTypeRepo.findById(processType)
+				.orElseThrow(() -> new ValidationException("Invalid Process Type"));
+		
+		
 		List<Section> sections = sectionRepo.findAllSectionsForProcessType(processType);
 		
 		ProcessTypeWithSectionsItem dto = new ProcessTypeWithSectionsItem();
+		
+		if(meta.getOwner() != null) {
+			dto.setProcessOwner(new UserLookupItem(meta.getOwner().getId(), meta.getOwner().getFullName()));	
+		}
+		
 		sections.forEach(s -> {
-			dto.addSection(s.getId(), s.getName(), s.isEnabled());
+			if(s.getSme() != null) {
+				UserLookupItem sme = new UserLookupItem(s.getSme().getId(), s.getSme().getFullName());
+				
+				dto.addSection(s.getId(), s.getName(), s.isEnabled(), sme);	
+			}
+			else {
+				dto.addSection(s.getId(), s.getName(), s.isEnabled(), null);	
+			}
 		});
 		
 		return dto;

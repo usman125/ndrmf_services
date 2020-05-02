@@ -18,7 +18,7 @@ public class ProcessTypeWithSectionsItem {
 		this.sections = sections;
 	}
 	
-	public void addSection(UUID id, String name, boolean enabled) {
+	public void addSection(UUID id, String name, boolean enabled, UserLookupItem sme) {
 		if(this.sections == null) {
 			this.sections = new ArrayList<>();
 		}
@@ -27,6 +27,7 @@ public class ProcessTypeWithSectionsItem {
 		s.setId(id);
 		s.setName(name);
 		s.setEnabled(enabled);
+		s.setSme(sme);
 		
 		this.sections.add(s);
 	}
