@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 
 public class UpdateProcessMetaRequest {
 	private UUID processOwnerId;
-	private boolean ownerEffective;
 	private List<SectionMeta> sections;
 
 	@NotNull(message = "Process Owner ID cannot be null or empty")
@@ -29,18 +28,9 @@ public class UpdateProcessMetaRequest {
 		this.sections = sections;
 	}
 
-	public boolean isOwnerEffective() {
-		return ownerEffective;
-	}
-
-	public void setOwnerEffective(boolean ownerEffective) {
-		this.ownerEffective = ownerEffective;
-	}
-
 	public static class SectionMeta {
 		private UUID id;
 		private UUID smeId;
-		private boolean smeEffective;
 		
 		
 		@NotNull(message = "Specifiy SME User for each section")
@@ -57,12 +47,6 @@ public class UpdateProcessMetaRequest {
 		}
 		public void setId(UUID id) {
 			this.id = id;
-		}
-		public boolean isSmeEffective() {
-			return smeEffective;
-		}
-		public void setSmeEffective(boolean smeEffective) {
-			this.smeEffective = smeEffective;
 		}
 	}
 }

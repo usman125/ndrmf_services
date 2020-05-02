@@ -89,8 +89,9 @@ public class TemplateService {
 	
 	@Transactional
 	public void updateProcessMeta(String processType, UpdateProcessMetaRequest body) {
-		ProcessType meta = new ProcessType();
-		meta.setName(processType);
+		ProcessType meta = processTypeRepo.findById(processType)
+				.orElseThrow(() -> new ValidationException("Invalid Process Type"));
+		
 		meta.setOwner(userRepo.getOne(body.getProcessOwnerId()));
 		
 		processMetaRepo.save(meta);
@@ -100,6 +101,7 @@ public class TemplateService {
 				Section section = sectionRepo.findById(s.getId())
 						.orElseThrow(() -> new ValidationException("Invalid Section ID"));
 				
+				section.setSme(userRepo.getOne(s.getSmeId()));
 			});
 		}
 	}

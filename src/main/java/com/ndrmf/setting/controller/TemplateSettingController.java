@@ -50,8 +50,9 @@ public class TemplateSettingController {
 	}
 	
 	@PutMapping("/process/{processType}/meta")
-	public ResponseEntity<ApiResponse> updateProcessMeta(@Valid @RequestBody UpdateProcessMetaRequest body){
-		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Done"), HttpStatus.OK);
+	public ResponseEntity<ApiResponse> updateProcessMeta(@PathVariable(name = "processType", required = false) String processType, @Valid @RequestBody UpdateProcessMetaRequest body){
+		templateService.updateProcessMeta(processType, body);
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Process Meta updated successfully."), HttpStatus.OK);
 	}
 	
 	@GetMapping("/process/{processType}/template")

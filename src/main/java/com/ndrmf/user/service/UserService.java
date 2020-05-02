@@ -198,7 +198,7 @@ public class UserService {
 		Signup s = signupRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("No request found for ID: "+id.toString()));
 		
-		if(s.getApprovalStatus() != SignupRequestStatus.PENDING.toString()) {
+		if(!s.getApprovalStatus().equalsIgnoreCase(SignupRequestStatus.PENDING.toString())) {
 			throw new ValidationException("Cannot approve. Request is already: " + s.getApprovalStatus());
 		}
 		
