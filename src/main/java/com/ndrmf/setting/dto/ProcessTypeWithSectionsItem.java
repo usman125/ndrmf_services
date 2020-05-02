@@ -4,17 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class ProcessTypeWithSectionsItem {
-	private String processType;
-	private List<SectionItem> sections;
-	
-	public String getProcessType() {
-		return processType;
-	}
+import com.ndrmf.user.dto.UserLookupItem;
 
-	public void setProcessType(String processType) {
-		this.processType = processType;
-	}
+public class ProcessTypeWithSectionsItem {
+	private UserLookupItem processOwner;
+	private List<SectionItem> sections;
 
 	public List<SectionItem> getSections() {
 		return sections;
@@ -37,9 +31,18 @@ public class ProcessTypeWithSectionsItem {
 		this.sections.add(s);
 	}
 
+	public UserLookupItem getProcessOwner() {
+		return processOwner;
+	}
+
+	public void setProcessOwner(UserLookupItem processOwner) {
+		this.processOwner = processOwner;
+	}
+
 	public static class SectionItem{
 		private UUID id;
 		private String name;
+		private UserLookupItem sme;
 		private boolean enabled;
 		
 		public UUID getId() {
@@ -59,6 +62,12 @@ public class ProcessTypeWithSectionsItem {
 		}
 		public void setEnabled(boolean enabled) {
 			this.enabled = enabled;
+		}
+		public UserLookupItem getSme() {
+			return sme;
+		}
+		public void setSme(UserLookupItem sme) {
+			this.sme = sme;
 		}
 	}
 }

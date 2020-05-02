@@ -44,9 +44,9 @@ public class TemplateSettingController {
 		return new ResponseEntity<List<String>>(types, HttpStatus.OK);
 	}
 	
-	@GetMapping("/process/meta")
-	public ResponseEntity<List<ProcessTypeWithSectionsItem>> getAllProcessesMeta(){
-		return new ResponseEntity<List<ProcessTypeWithSectionsItem>>(templateService.getAllProcessesMeta(), HttpStatus.OK);
+	@GetMapping("/process/{processType}/meta")
+	public ResponseEntity<ProcessTypeWithSectionsItem> getProcessesMeta(@PathVariable(name = "processType", required = true) String processType){
+		return new ResponseEntity<ProcessTypeWithSectionsItem>(templateService.getMetaForProcess(processType), HttpStatus.OK);
 	}
 	
 	@PutMapping("/process/{processType}/meta")

@@ -78,6 +78,10 @@
 		    <artifactId>hibernate-types-52</artifactId>
 		    <version>2.9.8</version>
 		</dependency>
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-envers</artifactId>
+		</dependency>
     </dependencies>
 
     <build>
