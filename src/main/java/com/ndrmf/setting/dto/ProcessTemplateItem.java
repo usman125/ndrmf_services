@@ -2,6 +2,7 @@ package com.ndrmf.setting.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ProcessTemplateItem {
 	private String processType;
@@ -23,23 +24,25 @@ public class ProcessTemplateItem {
 		this.sections = sections;
 	}
 	
-	public void addSection(String sectionName, Integer totalScore, Integer passingScore, String templateType, String template) {
+	public void addSection(UUID id, String sectionName, Integer totalScore, Integer passingScore, String templateType, String template) {
 		if(this.sections == null) {
 			this.sections = new ArrayList<>();
 		}
 		
-		this.sections.add(new SectionTemplate(sectionName, totalScore, passingScore, templateType, template));
+		this.sections.add(new SectionTemplate(id, sectionName, totalScore, passingScore, templateType, template));
 	}
 
 	public static class SectionTemplate{
+		private UUID id;
 		private String sectionName;
 		private Integer totalScore;
 		private Integer passingScore;
 		private String templateType;
 		private String template;
 		
-		public SectionTemplate(String sectionName, Integer totalScore, Integer passingScore, String templateType,
+		public SectionTemplate(UUID id, String sectionName, Integer totalScore, Integer passingScore, String templateType,
 				String template) {
+			this.id = id;
 			this.sectionName = sectionName;
 			this.totalScore = totalScore;
 			this.passingScore = passingScore;
@@ -76,6 +79,14 @@ public class ProcessTemplateItem {
 		}
 		public void setTemplate(String template) {
 			this.template = template;
+		}
+
+		public UUID getId() {
+			return id;
+		}
+
+		public void setId(UUID id) {
+			this.id = id;
 		}
 	}
 }

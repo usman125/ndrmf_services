@@ -1,5 +1,8 @@
 package com.ndrmf.user.service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,8 +42,11 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 		respUser.setOrgName(user.getOrg().getName());
 		
 		if(user.getRoles() != null) {
-			String[] roles = user.getRoles().stream().map(r -> r.getName()).toArray(String[]::new);
-			respUser.setRoles(roles);
+			Set<String> roles = user.getRoles().stream().map(r -> r.getName()).collect(Collectors.toSet());
+			
+			roles.add(user.getOrg().getName());
+			
+			respUser.setRoles(roles.toArray(new String[0]));
 		}
 		
 		dto.setUser(respUser);

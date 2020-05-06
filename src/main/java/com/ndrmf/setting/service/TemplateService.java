@@ -1,7 +1,9 @@
 package com.ndrmf.setting.service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -94,11 +96,23 @@ public class TemplateService {
 	public ProcessTemplateItem getTemplateForProcessType(String processType) {
 		List<SectionTemplate> sts = templateRepo.findTemplatesForProcessType(processType);
 		
+		List<String> invalidSections = Collections.emptyList();
+		
+		sts.forEach(st -> {	
+			if(st.getSection().getSme() == null) {
+				invalidSections.add(st.getSection().getName());
+			}
+		});
+		
+		if(invalidSections.size() > 0) {
+			throw new ValidationException(String.format("Incomplete Process Meta. Specify SME for section(s): ", invalidSections.stream().collect(Collectors.joining(" , "))));
+		}
+		
 		ProcessTemplateItem dto = new ProcessTemplateItem();
 		dto.setProcessType(processType);
 		
-		sts.forEach(st -> {
-			dto.addSection(st.getSection().getName(), st.getTotalScore(), st.getPassingScore(), st.getTemplateType(), st.getTemplate());
+		sts.forEach(st -> {	
+			dto.addSection(st.getSection().getId(), st.getSection().getName(), st.getTotalScore(), st.getPassingScore(), st.getTemplateType(), st.getTemplate());
 		});
 		
 		return dto;

@@ -22,6 +22,7 @@ import com.ndrmf.user.repository.OrganisationRepository;
 import com.ndrmf.user.repository.RoleRepository;
 import com.ndrmf.user.repository.SignupRepository;
 import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.SignupRequestStatus;
 
 import java.util.ArrayList;
@@ -213,7 +214,8 @@ public class UserService {
 		u.setFirstName(s.getFirstName());
 		u.setLastName(s.getLastName());
 		u.setPassword(s.getPassword());
-		u.setOrg(orgRepo.findByName("FIP").get());
+		u.setOrg(orgRepo.findByName(SystemRoles.ORG_FIP).get());
+		u.addRole(roleRepository.findByName(SystemRoles.FIP_DATAENTRY));
 		
 		userRepo.save(u);
 	}
