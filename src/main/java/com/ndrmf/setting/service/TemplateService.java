@@ -1,6 +1,6 @@
 package com.ndrmf.setting.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -96,7 +96,7 @@ public class TemplateService {
 	public ProcessTemplateItem getTemplateForProcessType(String processType) {
 		List<SectionTemplate> sts = templateRepo.findTemplatesForProcessType(processType);
 		
-		List<String> invalidSections = Collections.emptyList();
+		List<String> invalidSections = new ArrayList<>();
 		
 		sts.forEach(st -> {	
 			if(st.getSection().getSme() == null) {
