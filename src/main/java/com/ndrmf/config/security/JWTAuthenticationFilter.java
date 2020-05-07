@@ -60,12 +60,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.withSubject(resBody.getUser().getUsername())
 				.withClaim("orgId", resBody.getUser().getOrgId())
 				.withClaim("orgName", resBody.getUser().getOrgName())
+				.withClaim("userId", resBody.getUser().getId().toString())
 				.withArrayClaim("roles", resBody.getUser().getRoles())
 				.withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
 				.sign(HMAC512(SecurityConstants.SECRET.getBytes()));
 		
 		String tokenWithPrefix = SecurityConstants.TOKEN_PREFIX + token;
-		
 		
 		resBody.setAccessToken(tokenWithPrefix);
 		

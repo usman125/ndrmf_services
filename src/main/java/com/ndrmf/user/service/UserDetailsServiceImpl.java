@@ -34,6 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 		LoginResponse dto = new LoginResponse();
 		LoginResponse.User respUser = new LoginResponse.User();
 		
+		respUser.setId(user.getId());
 		respUser.setUsername(user.getUsername());
 		respUser.setEmail(user.getEmail());
 		respUser.setFirstName(user.getFirstName());

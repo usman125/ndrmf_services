@@ -12,12 +12,12 @@ import com.ndrmf.engine.model.Eligibility;
 
 public interface EligibilityRepository extends JpaRepository<Eligibility, UUID> {
 	
-	@Query(value = "SELECT COUNT(e) FROM Eligibility e JOIN e.initiatedBy ib WHERE ib.username = :username AND e.status IN (:statuses)")
-	int checkCountForUserWithStatuses(@Param("username") String username, @Param("statuses") Set<String> statuses);
+	@Query(value = "SELECT COUNT(e) FROM Eligibility e JOIN e.initiatedBy ib WHERE ib.id = :userId AND e.status IN (:statuses)")
+	int checkCountForUserWithStatuses(@Param("userId") UUID userId, @Param("statuses") Set<String> statuses);
 	
-	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po WHERE po.username = :username AND e.status = :status")
-	List<Eligibility> findRequestsForOwnerByStatus(@Param("username") String username, @Param("status") String status);
+	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po WHERE po.id = :userId AND e.status = :status")
+	List<Eligibility> findRequestsForOwnerByStatus(@Param("userId") UUID userId, @Param("status") String status);
 	
-	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po WHERE po.username = :username")
-	List<Eligibility> findAllRequestsForOwner(@Param("username") String username);
+	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po WHERE po.id = :userId")
+	List<Eligibility> findAllRequestsForOwner(@Param("userId") UUID userId);
 }

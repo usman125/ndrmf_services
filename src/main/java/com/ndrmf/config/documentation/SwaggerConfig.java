@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import com.google.common.collect.Lists;
 
 import springfox.documentation.builders.PathSelectors;
@@ -30,7 +32,8 @@ public class SwaggerConfig {
     public Docket swaggerSpringfoxDocket() {
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
             .securityContexts(Lists.newArrayList(securityContext()))
-            .securitySchemes(Lists.newArrayList(apiKey()));
+            .securitySchemes(Lists.newArrayList(apiKey()))
+            .ignoredParameterTypes(AuthenticationPrincipal.class);
 
         docket = docket.select()
             .apis(RequestHandlerSelectors.basePackage("com.ndrmf"))

@@ -3,6 +3,7 @@ package com.ndrmf.config.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.ndrmf.common.AuthPrincipal;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -44,28 +45,30 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(SecurityConstants.HEADER_STRING);
-        if (token != null) {
-            //parse the token.
-            DecodedJWT jwtToken = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
-                    .build()
-                    .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
-            
-            String username = jwtToken.getSubject();
-            String[] roleClaims = jwtToken.getClaim("roles").asArray(String.class);
-            
-            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            if(roleClaims != null) {
-            	for(String r: roleClaims) {
-                	grantedAuthorities.add(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + r));
-                }	
-            }
-
-            if (username != null) {
-                return new UsernamePasswordAuthenticationToken(username, null, grantedAuthorities);
-            }
-            
-            return null;
+        if(token == null) {
+        	return null;
         }
-        return null;
+        
+        //parse the token.
+        DecodedJWT jwtToken = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET.getBytes()))
+                .build()
+                .verify(token.replace(SecurityConstants.TOKEN_PREFIX, ""));
+        
+        if(jwtToken == null) {
+        	return null;
+        }
+        
+        String username = jwtToken.getSubject();
+        String userId = jwtToken.getClaim("userId").asString();
+        String[] roleClaims = jwtToken.getClaim("roles").asArray(String.class);
+        
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        if(roleClaims != null) {
+        	for(String r: roleClaims) {
+            	grantedAuthorities.add(new SimpleGrantedAuthority(SecurityConstants.ROLE_PREFIX + r));
+            }	
+        }
+
+        return new UsernamePasswordAuthenticationToken(new AuthPrincipal(userId, username), null, grantedAuthorities);
     }
 }

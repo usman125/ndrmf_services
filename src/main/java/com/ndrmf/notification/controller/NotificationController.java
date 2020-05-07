@@ -5,12 +5,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.common.PagedList;
 import com.ndrmf.notification.dto.NotificationItem;
 import com.ndrmf.notification.service.NotificationService;
@@ -26,16 +27,12 @@ public class NotificationController {
 	
 	@GetMapping("/")
 	public ResponseEntity<PagedList<NotificationItem>>
-	getNotifications(@RequestParam(name = "page", defaultValue = "1") int page,
+	getNotifications(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "page", defaultValue = "1") int page,
 			@RequestParam(name = "size", defaultValue = "25") int pageSize){
 		
 		Pageable pageable = PageRequest.of(page - 1, pageSize);
-		PagedList<NotificationItem> dtos = notService.getNotifications(getCurrentUsername(), pageable);
+		PagedList<NotificationItem> dtos = notService.getNotifications(principal.getUserId(), pageable);
 		
 		return new ResponseEntity<PagedList<NotificationItem>>(dtos, HttpStatus.OK);
-	}
-	
-	private String getCurrentUsername() {
-		return SecurityContextHolder.getContext().getAuthentication().getName();
 	}
 }

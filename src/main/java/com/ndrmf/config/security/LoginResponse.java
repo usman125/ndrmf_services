@@ -1,5 +1,9 @@
 package com.ndrmf.config.security;
 
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class LoginResponse {
 	private String accessToken;
 	private User user;
@@ -19,6 +23,7 @@ public class LoginResponse {
 	}
 
 	public static class User{
+		private UUID id;
 		private String username;
 		private String email;
 		private String firstName;
@@ -68,6 +73,14 @@ public class LoginResponse {
 		}
 		public void setRoles(String[] roles) {
 			this.roles = roles;
+		}
+		
+		@JsonIgnore
+		public UUID getId() {
+			return id;
+		}
+		public void setId(UUID id) {
+			this.id = id;
 		}
 	}
 }

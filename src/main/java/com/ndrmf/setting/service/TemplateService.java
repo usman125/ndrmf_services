@@ -23,14 +23,12 @@ import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
-import com.ndrmf.user.repository.ProcessMetaRepository;
 import com.ndrmf.user.repository.UserRepository;
 
 @Service
 public class TemplateService {
 	@Autowired private SectionRepository sectionRepo;
 	@Autowired private SectionTemplateRepository templateRepo;
-	@Autowired private ProcessMetaRepository processMetaRepo;
 	@Autowired private UserRepository userRepo;
 	@Autowired private ProcessTypeRepository processTypeRepo;
 	
@@ -94,6 +92,13 @@ public class TemplateService {
 	}
 	
 	public ProcessTemplateItem getTemplateForProcessType(String processType) {
+		ProcessType pt = processTypeRepo.findById(processType)
+				.orElseThrow(() -> new ValidationException("Invalid Process Type"));
+		
+		if(pt.getOwner() == null) {
+			throw new ValidationException("Incomplete Process Meta. Missing Process Owner");
+		}
+		
 		List<SectionTemplate> sts = templateRepo.findTemplatesForProcessType(processType);
 		
 		List<String> invalidSections = new ArrayList<>();
@@ -105,7 +110,7 @@ public class TemplateService {
 		});
 		
 		if(invalidSections.size() > 0) {
-			throw new ValidationException(String.format("Incomplete Process Meta. Specify SME for section(s): %s", invalidSections.stream().collect(Collectors.joining(" , "))));
+			throw new ValidationException(String.format("Incomplete Process Meta. Missing SME for section(s): %s", invalidSections.stream().collect(Collectors.joining(" , "))));
 		}
 		
 		ProcessTemplateItem dto = new ProcessTemplateItem();
@@ -125,7 +130,7 @@ public class TemplateService {
 		
 		meta.setOwner(userRepo.getOne(body.getProcessOwnerId()));
 		
-		processMetaRepo.save(meta);
+		processTypeRepo.save(meta);
 		
 		if(body.getSections() != null) {
 			body.getSections().forEach(s -> {

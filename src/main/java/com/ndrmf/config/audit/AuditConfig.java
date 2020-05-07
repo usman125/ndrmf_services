@@ -7,8 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.ndrmf.common.AuthPrincipal;
 
 @Configuration
 @EnableJpaAuditing
@@ -27,13 +28,12 @@ class AuditConfig {
 
 		@Override
 		public Optional<String> getCurrentAuditor() {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-			if(auth == null) {
+			AuthPrincipal principal = (AuthPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if(principal == null) {
 				return null;
 			}
 			
-			return Optional.of(auth.getName());
+			return Optional.of(principal.getUsername());
 		}
-        
     }
 }

@@ -1,12 +1,7 @@
 package com.ndrmf.engine.controller;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
@@ -14,8 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
+import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationRequest;
@@ -44,67 +40,35 @@ public class AccreditationController {
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@GetMapping("/status")
-	public ResponseEntity<?> getAccreditationStatus(){
-		Set<String> roles = this.getCurrentUserRoles();
-		
-		Map<String, Object> res = new HashMap<String, Object>();
-		
-		if(roles.contains(SystemRoles.ACCREDITED)) {
-			res.put("accredited", true);
-			res.put("eligibility", true);
-			res.put("qualification", true);
-		}
-		else {
-			res.put("accredited", false);
-			res.put("eligibility", true);
-			res.put("qualification", false);
-		}
-		
-		return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+	public ResponseEntity<AccreditationStatusItem> getAccreditationStatus(@AuthenticationPrincipal AuthPrincipal principal){
+		return new ResponseEntity<AccreditationStatusItem>(accreditationService.getAccreditationStatus(principal.getUserId()), HttpStatus.OK);
 	}
 	
 	@GetMapping("/eligibility")
-	public ResponseEntity<?> getAllEligibilityRequests(@RequestParam(name = "status", required = false) ProcessStatus status){
-		return new ResponseEntity<List<EligibilityListItem>>(accreditationService.getEligibilityRequests(getCurrentUsername(), status), HttpStatus.OK);
+	public ResponseEntity<?> getAllEligibilityRequests(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "status", required = false) ProcessStatus status){
+		return new ResponseEntity<List<EligibilityListItem>>(accreditationService.getEligibilityRequests(principal.getUserId(), status), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@PostMapping("/eligibility/add")
-	public ResponseEntity<ApiResponse> addEligibility(@RequestBody @Valid EligibilityRequest body){
-		accreditationService.addEligibility(getCurrentUsername(), body);
+	public ResponseEntity<ApiResponse> addEligibility(@AuthenticationPrincipal AuthPrincipal principal, @RequestBody @Valid EligibilityRequest body){
+		accreditationService.addEligibility(principal.getUserId(), body);
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request added successfully."), HttpStatus.CREATED);
 	}
 	
 	@PostMapping("/eligibility/{id}/approve")
-	public ResponseEntity<ApiResponse> approveEligibility(@PathVariable(name = "id", required = true) UUID id){
-		accreditationService.approveEligibilityRequest(id, getCurrentUsername());
+	public ResponseEntity<ApiResponse> approveEligibility(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id){
+		accreditationService.approveEligibilityRequest(id, principal.getUserId());
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request approved successfully."), HttpStatus.ACCEPTED);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@PostMapping("/qualification/add")
-	public ResponseEntity<ApiResponse> addQualification(@RequestParam(name = "action", required = true) FormAction action, @RequestBody @Valid QualificationRequest body){
-		accreditationService.addQualification(getCurrentUsername(), body, action);
+	public ResponseEntity<ApiResponse> addQualification(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "action", required = true) FormAction action, @RequestBody @Valid QualificationRequest body){
+		accreditationService.addQualification(principal.getUserId(), body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification request added successfully."), HttpStatus.CREATED);
-	}
-	
-	private String getCurrentUsername() {
-		return SecurityContextHolder.getContext().getAuthentication().getName();
-	}
-	
-	private Set<String> getCurrentUserRoles(){
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		
-		if(auth.getAuthorities() == null) {
-			return Collections.emptySet();
-		}
-		
-		Set<String> userRoles = auth.getAuthorities()
-				.stream().map(r -> r.getAuthority()).collect(Collectors.toSet());
-		
-		return userRoles;
 	}
 }

@@ -20,8 +20,8 @@ public class NotificationService {
 	@Autowired private NotificationRepository notificationRepo;
 	@Autowired private UserRepository userRepo;
 	
-	public PagedList<NotificationItem> getNotifications(String username, Pageable pageable) {
-		Page<Notification> nots = notificationRepo.findNotificationsForUser(username, pageable);
+	public PagedList<NotificationItem> getNotifications(UUID userId, Pageable pageable) {
+		Page<Notification> nots = notificationRepo.findNotificationsForUser(userId, pageable);
 		
 		List<NotificationItem> nItems = nots.get().map(n -> new NotificationItem(n.getId(), n.getCreatedDate(), n.getC2a(), n.getText()))
 				.collect(Collectors.toList());

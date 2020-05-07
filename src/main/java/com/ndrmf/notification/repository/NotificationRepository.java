@@ -12,6 +12,6 @@ import com.ndrmf.notification.model.Notification;
 
 public interface NotificationRepository extends JpaRepository<Notification, UUID>{
 	
-	@Query(value = "SELECT n FROM Notification n JOIN n.to t WHERE t.username = :username ORDER BY n.createdDate DESC")
-	Page<Notification> findNotificationsForUser(@Param("username") String username, Pageable pageable);
+	@Query(value = "SELECT n FROM Notification n JOIN n.to t WHERE t.id = :userId ORDER BY n.createdDate DESC")
+	Page<Notification> findNotificationsForUser(@Param("userId") UUID userId, Pageable pageable);
 }
