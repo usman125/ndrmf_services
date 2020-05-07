@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -20,6 +21,7 @@ import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
 import com.ndrmf.engine.repository.EligibilityRepository;
 import com.ndrmf.engine.repository.QualificationRepository;
+import com.ndrmf.event.EligibilityApprovedEvent;
 import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.SectionTemplate;
@@ -129,6 +131,26 @@ public class AccreditationService {
 		if(action == FormAction.SUBMIT) {
 			eventPublisher.publishEvent(new QualificationCreatedEvent(this, persistedQual));	
 		}
+	}
+	
+	public void approveEligibilityRequest(UUID id, String approverUsername) {
+		Eligibility elig = eligbiligyRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		if(!elig.getProcessOwner().getUsername().equals(approverUsername)) {
+			throw new ValidationException("You cannot approve this request. Authorized user is: "+elig.getProcessOwner().getFullName());
+		}
+		
+		if(!elig.getStatus().equals(ProcessStatus.UNDER_REVIEW.getPersistenceValue())){
+			throw new ValidationException("Cannot approve request with status: "+elig.getStatus());
+		}
+		
+		elig.setStatus(ProcessStatus.APPROVED.getPersistenceValue());
+		
+		elig = eligbiligyRepo.save(elig);
+		
+		eventPublisher.publishEvent(new EligibilityApprovedEvent(this, elig));
+		
 	}
 	
 	private User getProcessOwnerForProcess(ProcessType processType) {

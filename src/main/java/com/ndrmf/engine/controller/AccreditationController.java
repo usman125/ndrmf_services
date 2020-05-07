@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,6 +74,13 @@ public class AccreditationController {
 		accreditationService.addEligibility(getCurrentUsername(), body);
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request added successfully."), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/eligibility/{id}/approve")
+	public ResponseEntity<ApiResponse> approveEligibility(@PathVariable(name = "id", required = true) UUID id){
+		accreditationService.approveEligibilityRequest(id, getCurrentUsername());
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request approved successfully."), HttpStatus.ACCEPTED);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)

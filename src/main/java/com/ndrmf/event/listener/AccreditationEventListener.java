@@ -7,6 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.ndrmf.event.EligibilityApprovedEvent;
 import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.notification.service.NotificationService;
 
@@ -26,5 +27,13 @@ public class AccreditationEventListener {
 		event.getQualification().getSections().forEach(s -> {
 			notiService.addNotification(s.getSme().getId(), String.format("Qualification Submitted. Please review section '%s'.", s.getName()), "Please Review");
 		});
+	}
+	
+	@Async
+	@EventListener
+	public void handleEligibilityApprovedEvent(EligibilityApprovedEvent event) {
+		logger.debug("Qualification Created Event Occurred.");
+		
+		notiService.addNotification(event.getEligibility().getInitiatedBy().getId(), "Eligibility Request Approved", "Your eligibility request has been approved. Please apply for Qualification.");
 	}
 }
