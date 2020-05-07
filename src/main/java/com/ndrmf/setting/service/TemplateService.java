@@ -105,7 +105,7 @@ public class TemplateService {
 		});
 		
 		if(invalidSections.size() > 0) {
-			throw new ValidationException(String.format("Incomplete Process Meta. Specify SME for section(s): ", invalidSections.stream().collect(Collectors.joining(" , "))));
+			throw new ValidationException(String.format("Incomplete Process Meta. Specify SME for section(s): %s", invalidSections.stream().collect(Collectors.joining(" , "))));
 		}
 		
 		ProcessTemplateItem dto = new ProcessTemplateItem();
