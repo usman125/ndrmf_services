@@ -4,56 +4,44 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import com.ndrmf.setting.model.Section;
+import com.ndrmf.config.audit.Auditable;
 import com.ndrmf.user.model.User;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
-@TypeDefs({
-    @TypeDef(name = "json", typeClass = JsonStringType.class),
-    @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
-
-public class ProcessSection {
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
+@Entity
+@Table(name = "qualification_sections")
+public class QualificationSection extends Auditable<String>{
 	private UUID id;
-	private Section section;
+	private String name;
 	private Integer totalScore;
 	private Integer passingScore;
 	private String templateType;
 	private String template;
 	private String data;
 	private int revisionNo;
-	private Form process;
+	private Qualification qualifcationRef;
 	private User sme;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(columnDefinition = "uuid", updatable = false)
 	public UUID getId() {
 		return id;
 	}
+	
 	public void setId(UUID id) {
 		this.id = id;
-	}
-	
-	@ManyToOne
-	@JoinColumn(name="section_id", nullable = false)
-	public Section getSection() {
-		return section;
-	}
-	public void setSection(Section section) {
-		this.section = section;
 	}
 	
 	public Integer getTotalScore() {
@@ -103,20 +91,42 @@ public class ProcessSection {
 	}
 	
 	@ManyToOne
-	@JoinColumn(name = "process_id", nullable = false)
-	public Form getProcess() {
-		return process;
-	}
-	public void setProcess(Form stateRef) {
-		this.process = stateRef;
-	}
-	
-	@ManyToOne
 	@JoinColumn(name = "sme_user_id", nullable = false)
 	public User getSme() {
 		return sme;
 	}
 	public void setSme(User sme) {
 		this.sme = sme;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "qualification_id", nullable = false)
+	public Qualification getQualifcationRef() {
+		return qualifcationRef;
+	}
+	public void setQualifcationRef(Qualification qualifcationRef) {
+		this.qualifcationRef = qualifcationRef;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	@PrePersist
+	public void prePersist() {
+		if(this.id == null) {
+			this.id = UUID.randomUUID();
+		}
+		
+		this.revisionNo = 1;
+	}
+	
+	@PreUpdate
+	public void preUpdate() {
+		this.revisionNo += 1;
 	}
 }

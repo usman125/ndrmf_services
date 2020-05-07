@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,8 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
+import com.ndrmf.engine.dto.QualificationRequest;
 import com.ndrmf.engine.service.AccreditationService;
 import com.ndrmf.util.constants.SystemRoles;
+import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 
 import io.swagger.annotations.Api;
@@ -61,7 +64,7 @@ public class AccreditationController {
 	
 	@GetMapping("/eligibility")
 	public ResponseEntity<?> getAllEligibilityRequests(@RequestParam(name = "status", required = false) ProcessStatus status){
-		return new ResponseEntity<List<EligibilityListItem>>(accreditationService.getRequests(getCurrentUsername(), status), HttpStatus.OK);
+		return new ResponseEntity<List<EligibilityListItem>>(accreditationService.getEligibilityRequests(getCurrentUsername(), status), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
@@ -70,6 +73,14 @@ public class AccreditationController {
 		accreditationService.addEligibility(getCurrentUsername(), body);
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request added successfully."), HttpStatus.CREATED);
+	}
+	
+	@RolesAllowed(SystemRoles.ORG_FIP)
+	@PostMapping("/qualification/add")
+	public ResponseEntity<ApiResponse> addQualification(@PathVariable(name = "action", required = true) FormAction action, @RequestBody @Valid QualificationRequest body){
+		accreditationService.addQualification(getCurrentUsername(), body, action);
+	
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification request added successfully."), HttpStatus.CREATED);
 	}
 	
 	private String getCurrentUsername() {

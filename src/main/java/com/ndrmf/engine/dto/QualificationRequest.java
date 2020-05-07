@@ -3,9 +3,12 @@ package com.ndrmf.engine.dto;
 import java.util.List;
 import java.util.UUID;
 
-public class FormSubmitRequest {
+import javax.validation.constraints.NotNull;
+
+public class QualificationRequest {
 	private List<Section> sections;
 
+	@NotNull
 	public List<Section> getSections() {
 		return sections;
 	}

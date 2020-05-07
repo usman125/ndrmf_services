@@ -38,6 +38,8 @@ public class ExceptionHandlerAdvice {
 	public ResponseEntity<ApiResponse> unhandledExceptions(Exception ex){
 		String message = NestedExceptionUtils.getMostSpecificCause(ex).getMessage();
 		
+		ex.printStackTrace();
+		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(false, message), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 	
