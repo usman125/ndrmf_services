@@ -1,6 +1,8 @@
 package com.ndrmf.engine.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
+import com.ndrmf.engine.dto.AddCommentRequest;
 import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
@@ -28,6 +31,7 @@ import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationRequest;
 import com.ndrmf.engine.service.AccreditationService;
+import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
@@ -40,6 +44,7 @@ import io.swagger.annotations.Api;
 public class AccreditationController {
 	
 	@Autowired private AccreditationService accreditationService;
+	@Autowired private CommentService commentService;
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@GetMapping("/status")
@@ -84,9 +89,26 @@ public class AccreditationController {
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@PostMapping("/qualification/add")
-	public ResponseEntity<ApiResponse> addQualification(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "action", required = true) FormAction action, @RequestBody @Valid QualificationRequest body){
+	public ResponseEntity<ApiResponse> addQualification(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestParam(name = "action", required = true) FormAction action,
+			@RequestBody @Valid QualificationRequest body){
 		accreditationService.addQualification(principal.getUserId(), body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification request added successfully."), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/comment/add")
+	public ResponseEntity<?> addComment(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestParam(name = "qualId", required = true) UUID qualId,
+			@RequestParam(name = "sectionId", required = true) UUID sectionId,
+			@RequestBody @Valid AddCommentRequest body){
+		
+		long commentId = commentService.addQualificationComment(principal.getUserId(), qualId, sectionId, body);
+		
+		Map<String, Object> dto = new HashMap<String, Object>();
+		
+		dto.put("commentId", commentId);
+		
+		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
 }

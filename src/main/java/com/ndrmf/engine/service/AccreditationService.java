@@ -254,8 +254,8 @@ public class AccreditationService {
 			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue());	
 		}
 		
-		if(result.get("eligibility", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())
-				&& result.get("qualification", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())){
+		if(result.get("eligibility", String.class) != null && result.get("eligibility", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())
+				&& result.get("qualification", String.class) != null && result.get("qualification", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())){
 			
 			return new AccreditationStatusItem(true, result.get("eligibility", String.class), result.get("qualification", String.class));	
 		}
