@@ -33,6 +33,7 @@ public class QualificationSection extends Auditable<String>{
 	private int revisionNo;
 	private Qualification qualifcationRef;
 	private User sme;
+	private Integer smeScore;
 	
 	@Id
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -128,5 +129,13 @@ public class QualificationSection extends Auditable<String>{
 	@PreUpdate
 	public void preUpdate() {
 		this.revisionNo += 1;
+	}
+
+	public Integer getSmeScore() {
+		return smeScore;
+	}
+
+	public void setSmeScore(Integer smeScore) {
+		this.smeScore = smeScore;
 	}
 }

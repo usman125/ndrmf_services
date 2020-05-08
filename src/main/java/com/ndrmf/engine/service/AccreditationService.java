@@ -1,6 +1,5 @@
 package com.ndrmf.engine.service;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
+import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationRequest;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
@@ -74,7 +74,7 @@ public class AccreditationService {
 	}
 	
 	public List<EligibilityListItem> getEligibilityRequests(UUID ownerUserId, ProcessStatus status) {
-		List<Eligibility> eligs = Collections.emptyList();
+		List<Eligibility> eligs;
 		
 		if(status == null) {
 			eligs = eligbiligyRepo.findAllRequestsForOwner(ownerUserId);
@@ -84,7 +84,24 @@ public class AccreditationService {
 		}
 		
 		List<EligibilityListItem> dtos = eligs.stream()
-				.map(e -> new EligibilityListItem(e.getId(), e.getProcessOwner().getFullName(), e.getCreatedDate(), e.getStatus()))
+				.map(e -> new EligibilityListItem(e.getId(), e.getInitiatedBy().getFullName(), e.getCreatedDate(), e.getStatus()))
+				.collect(Collectors.toList());
+		
+		return dtos;
+	}
+	
+	public List<QualificationListItem> getQualificationRequests(UUID ownerUserId, ProcessStatus status){
+		List<Qualification> quals;
+		
+		if(status == null) {
+			quals = qualificationRepo.findAllRequestsForOwner(ownerUserId);
+		}
+		else {
+			quals = qualificationRepo.findRequestsForOwnerByStatus(ownerUserId, status.getPersistenceValue());
+		}
+		
+		List<QualificationListItem> dtos = quals.stream()
+				.map(q -> new QualificationListItem(q.getId(), q.getInitiatedBy().getFullName(), q.getCreatedDate(), q.getStatus()))
 				.collect(Collectors.toList());
 		
 		return dtos;

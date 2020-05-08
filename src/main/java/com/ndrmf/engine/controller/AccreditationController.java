@@ -23,6 +23,7 @@ import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
+import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationRequest;
 import com.ndrmf.engine.service.AccreditationService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -62,6 +63,11 @@ public class AccreditationController {
 		accreditationService.approveEligibilityRequest(id, principal.getUserId());
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request approved successfully."), HttpStatus.ACCEPTED);
+	}
+	
+	@GetMapping("/qualification")
+	public ResponseEntity<?> getAllQualificationRequests(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "status", required = false) ProcessStatus status){
+		return new ResponseEntity<List<QualificationListItem>>(accreditationService.getQualificationRequests(principal.getUserId(), status), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
