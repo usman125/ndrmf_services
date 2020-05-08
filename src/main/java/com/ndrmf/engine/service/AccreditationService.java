@@ -20,6 +20,7 @@ import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
+import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationRequest;
 import com.ndrmf.engine.model.Eligibility;
@@ -104,6 +105,7 @@ public class AccreditationService {
 		dto.setProcessOwner(new UserLookupItem(elig.getProcessOwner().getId(), elig.getProcessOwner().getFullName()));
 		dto.setStatus(elig.getStatus());
 		dto.setTemplate(elig.getTemplate());
+		dto.setSubmittedAt(elig.getCreatedDate());
 		
 		return dto;
 	}
@@ -123,6 +125,37 @@ public class AccreditationService {
 				.collect(Collectors.toList());
 		
 		return dtos;
+	}
+	
+	public QualificationItem getQualificationRequest(UUID id, UUID userId) {
+		Qualification q = qualificationRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		QualificationItem dto = new QualificationItem();
+		
+		dto.setInitiatedBy(new UserLookupItem(q.getInitiatedBy().getId(), q.getInitiatedBy().getFullName()));
+		dto.setOwner(q.getProcessOwner().getId().equals(userId));
+		dto.setProcessOwner(new UserLookupItem(q.getProcessOwner().getId(), q.getProcessOwner().getFullName()));
+		dto.setStatus(q.getStatus());
+		dto.setSubmittedAt(q.getCreatedDate());
+		
+		q.getSections().forEach(qs -> {
+			QualificationItem.Section section = new QualificationItem.Section();
+			
+			section.setAssigned(qs.getSme().getId().equals(userId));
+			section.setData(qs.getData());
+			section.setId(qs.getId());
+			section.setName(qs.getName());
+			section.setPassingScore(qs.getPassingScore());
+			section.setSme(new UserLookupItem(qs.getSme().getId(), qs.getSme().getFullName()));
+			section.setTemplate(qs.getTemplate());
+			section.setTemplateType(qs.getTemplateType());
+			section.setTotalScore(qs.getTotalScore());
+			
+			dto.addSection(section);
+		});
+		
+		return dto;
 	}
 	
 	@Transactional

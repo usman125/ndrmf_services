@@ -24,6 +24,7 @@ import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
+import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationRequest;
 import com.ndrmf.engine.service.AccreditationService;
@@ -74,6 +75,11 @@ public class AccreditationController {
 	@GetMapping("/qualification")
 	public ResponseEntity<?> getAllQualificationRequests(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "status", required = false) ProcessStatus status){
 		return new ResponseEntity<List<QualificationListItem>>(accreditationService.getQualificationRequests(principal.getUserId(), status), HttpStatus.OK);
+	}
+	
+	@GetMapping("/qualification/{id}")
+	public ResponseEntity<QualificationItem> getQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id){
+		return new ResponseEntity<QualificationItem>(accreditationService.getQualificationRequest(id, principal.getUserId()), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
