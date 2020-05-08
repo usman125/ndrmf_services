@@ -15,9 +15,9 @@ public interface EligibilityRepository extends JpaRepository<Eligibility, UUID> 
 	@Query(value = "SELECT COUNT(e) FROM Eligibility e JOIN e.initiatedBy ib WHERE ib.id = :userId AND e.status IN (:statuses)")
 	int checkCountForUserWithStatuses(@Param("userId") UUID userId, @Param("statuses") Set<String> statuses);
 	
-	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po WHERE po.id = :userId AND e.status = :status")
-	List<Eligibility> findRequestsForOwnerByStatus(@Param("userId") UUID userId, @Param("status") String status);
+	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po JOIN e.initiatedBy ib WHERE (po.id = :userId OR ib.id = :userId) AND e.status = :status")
+	List<Eligibility> findRequestsForOwnerOrInitiatorByStatus(@Param("userId") UUID userId, @Param("status") String status);
 	
-	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po WHERE po.id = :userId")
-	List<Eligibility> findAllRequestsForOwner(@Param("userId") UUID userId);
+	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po JOIN e.initiatedBy ib WHERE po.id = :userId OR ib.id = :userId")
+	List<Eligibility> findAllRequestsForOwnerOrInitiator(@Param("userId") UUID userId);
 }

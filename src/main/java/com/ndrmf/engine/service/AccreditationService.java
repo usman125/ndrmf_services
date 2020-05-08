@@ -74,14 +74,14 @@ public class AccreditationService {
 		eligbiligyRepo.save(elig);
 	}
 	
-	public List<EligibilityListItem> getEligibilityRequests(UUID ownerUserId, ProcessStatus status) {
+	public List<EligibilityListItem> getEligibilityRequests(UUID userId, ProcessStatus status) {
 		List<Eligibility> eligs;
 		
 		if(status == null) {
-			eligs = eligbiligyRepo.findAllRequestsForOwner(ownerUserId);
+			eligs = eligbiligyRepo.findAllRequestsForOwnerOrInitiator(userId);
 		}
 		else {
-			eligs = eligbiligyRepo.findRequestsForOwnerByStatus(ownerUserId, status.getPersistenceValue());	
+			eligs = eligbiligyRepo.findRequestsForOwnerOrInitiatorByStatus(userId, status.getPersistenceValue());	
 		}
 		
 		List<EligibilityListItem> dtos = eligs.stream()
@@ -95,10 +95,10 @@ public class AccreditationService {
 		List<Qualification> quals;
 		
 		if(status == null) {
-			quals = qualificationRepo.findAllRequestsForOwner(ownerUserId);
+			quals = qualificationRepo.findAllRequestsForOwnerOrInitiator(ownerUserId);
 		}
 		else {
-			quals = qualificationRepo.findRequestsForOwnerByStatus(ownerUserId, status.getPersistenceValue());
+			quals = qualificationRepo.findRequestsForOwnerOrInitiatorByStatus(ownerUserId, status.getPersistenceValue());
 		}
 		
 		List<QualificationListItem> dtos = quals.stream()
