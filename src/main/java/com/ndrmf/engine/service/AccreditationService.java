@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.transaction.Transactional;
@@ -192,12 +193,15 @@ public class AccreditationService {
 				" left join qualifications qs on qs.initiator_user_id = er.initiator_user_id" + 
 				" where er.initiator_user_id = :userId";
 		
-		Tuple result = (Tuple) em.createNativeQuery(rawSql, Tuple.class)
-				.setParameter("userId", userId)
-				.getSingleResult();
+		Tuple result;
 		
-		if(result == null) {
-			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue());
+		try {
+			result = (Tuple) em.createNativeQuery(rawSql, Tuple.class)
+					.setParameter("userId", userId)
+					.getSingleResult();
+		}
+		catch(NoResultException ex) {
+			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue());	
 		}
 		
 		if(result.get("eligibility", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())
