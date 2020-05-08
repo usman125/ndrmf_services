@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
+import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationListItem;
@@ -46,8 +47,13 @@ public class AccreditationController {
 	}
 	
 	@GetMapping("/eligibility")
-	public ResponseEntity<?> getAllEligibilityRequests(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "status", required = false) ProcessStatus status){
+	public ResponseEntity<List<EligibilityListItem>> getAllEligibilityRequests(@AuthenticationPrincipal AuthPrincipal principal, @RequestParam(name = "status", required = false) ProcessStatus status){
 		return new ResponseEntity<List<EligibilityListItem>>(accreditationService.getEligibilityRequests(principal.getUserId(), status), HttpStatus.OK);
+	}
+	
+	@GetMapping("/eligibility/{id}")
+	public ResponseEntity<EligibilityItem> getEligibilityRequest(@PathVariable(name = "id", required = true) UUID id){
+		return new ResponseEntity<EligibilityItem>(accreditationService.getEligibilityRequest(id), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)

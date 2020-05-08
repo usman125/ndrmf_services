@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.engine.dto.AccreditationStatusItem;
+import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationListItem;
@@ -32,6 +33,7 @@ import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
+import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.util.enums.FormAction;
@@ -89,6 +91,21 @@ public class AccreditationService {
 				.collect(Collectors.toList());
 		
 		return dtos;
+	}
+	
+	public EligibilityItem getEligibilityRequest(UUID id) {
+		Eligibility elig = eligbiligyRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		EligibilityItem dto = new EligibilityItem();
+		
+		dto.setData(elig.getData());
+		dto.setInitiatedBy(new UserLookupItem(elig.getInitiatedBy().getId(), elig.getInitiatedBy().getFullName()));
+		dto.setProcessOwner(new UserLookupItem(elig.getProcessOwner().getId(), elig.getProcessOwner().getFullName()));
+		dto.setStatus(elig.getStatus());
+		dto.setTemplate(elig.getTemplate());
+		
+		return dto;
 	}
 	
 	public List<QualificationListItem> getQualificationRequests(UUID ownerUserId, ProcessStatus status){
