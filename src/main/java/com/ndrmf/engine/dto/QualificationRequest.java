@@ -6,18 +6,18 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 public class QualificationRequest {
-	private List<Section> sections;
+	private List<QualSection> sections;
 
 	@NotNull
-	public List<Section> getSections() {
+	public List<QualSection> getSections() {
 		return sections;
 	}
 
-	public void setSections(List<Section> sections) {
+	public void setSections(List<QualSection> sections) {
 		this.sections = sections;
 	}
 
-	public static class Section{
+	public static class QualSection{
 		private UUID id;
 		private String data;
 
