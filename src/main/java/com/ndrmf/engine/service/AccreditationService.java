@@ -10,7 +10,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -22,7 +21,7 @@ import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
-import com.ndrmf.engine.dto.QualificationRequest;
+import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
@@ -33,6 +32,7 @@ import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
+import com.ndrmf.setting.repository.SectionRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
@@ -49,6 +49,7 @@ public class AccreditationService {
 	@Autowired private SectionTemplateRepository sectionTemplateRepo;
 	@Autowired private QualificationRepository qualificationRepo;
 	@Autowired private ApplicationEventPublisher eventPublisher;
+	@Autowired private SectionRepository sectionRepo;
 	
 	@PersistenceContext private EntityManager em;
 	
@@ -158,29 +159,59 @@ public class AccreditationService {
 		return dto;
 	}
 	
-	@Transactional
-	public void addQualification(UUID initiatedByUseId, QualificationRequest body, FormAction action) {
-		boolean areAllUnique = body.getSections().stream().map(s -> s.getId()).allMatch(new HashSet<>()::add);
-		
-		if(!areAllUnique) {
-			throw new ValidationException("A Section ID cannot appear twice in a form");
-		}
-		
+	public UUID commenceQualification(UUID initiatorUserId) {
 		Set<String> constraintStatuses = new HashSet<>(); 
 		constraintStatuses.add(ProcessStatus.DRAFT.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.APPROVED.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
 		
-		int existingRequests = qualificationRepo.checkCountForUserWithStatuses(initiatedByUseId, constraintStatuses);
+		int existingRequests = qualificationRepo.checkCountForUserWithStatuses(initiatorUserId, constraintStatuses);
 		
 		if(existingRequests > 0) {
 			throw new ValidationException("A request for this username already exists which is either APPROVED, UNDER REVIEW or in DRAFT Status");
 		}
 		
-		final Qualification q = new Qualification();
+		Qualification q = new Qualification();
 		
-		q.setInitiatedBy(userRepo.getOne(initiatedByUseId));
+		q.setInitiatedBy(userRepo.getOne(initiatorUserId));
 		q.setProcessOwner(this.getProcessOwnerForProcess(ProcessType.QUALIFICATION));
+		q.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
+		
+		q = qualificationRepo.save(q);
+		
+		return q.getId();
+	}
+	
+	public void addQualificationSection(UUID initiatedByUseId, UUID requestId, QualificationSectionRequest body, FormAction action) {
+		Qualification q = qualificationRepo.findById(requestId)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		if(!q.getStatus().equals(ProcessStatus.DRAFT.getPersistenceValue())) {
+			throw new ValidationException("Request is already: " + q.getStatus());
+		}
+		
+		QualificationSection alreadySubmittedSection = q.getSections().stream().filter(s -> s.getSectionRef().getId().equals(body.getId())).findAny().orElse(null);
+		
+		if(alreadySubmittedSection != null) {
+			alreadySubmittedSection.setData(body.getData());
+		}
+		else {
+			SectionTemplate template =
+					sectionTemplateRepo.findEnabledTemplateBySectionId(body.getId())
+					.orElseThrow(() -> new ValidationException("Invalid Section ID: " + body.getId().toString()));
+			
+			QualificationSection qs = new QualificationSection();
+			qs.setName(template.getSection().getName());
+			qs.setPassingScore(template.getPassingScore());
+			qs.setTotalScore(template.getTotalScore());
+			qs.setTemplateType(template.getTemplateType());
+			qs.setTemplate(template.getTemplate());
+			qs.setData(body.getData());
+			qs.setSme(template.getSection().getSme());
+			qs.setSectionRef(sectionRepo.getOne(body.getId()));
+			
+			q.addSection(qs);
+		}
 		
 		if(action == FormAction.SAVE) {
 			q.setStatus(ProcessStatus.DRAFT.getPersistenceValue());	
@@ -192,28 +223,10 @@ public class AccreditationService {
 			q.setStatus(ProcessStatus.DRAFT.getPersistenceValue()); //For lack of a better default
 		}
 		
-		body.getSections().forEach(s -> {
-			SectionTemplate template =
-					sectionTemplateRepo.findEnabledTemplateBySectionId(s.getId())
-					.orElseThrow(() -> new ValidationException("Invalid Section ID: "+s.getId().toString()));
-			
-			QualificationSection qs = new QualificationSection();
-			qs.setName(template.getSection().getName());
-			qs.setPassingScore(template.getPassingScore());
-			qs.setTotalScore(template.getTotalScore());
-			qs.setTemplateType(template.getTemplateType());
-			qs.setTemplate(template.getTemplate());
-			qs.setData(s.getData());
-			qs.setSme(template.getSection().getSme());
-			
-			q.addSection(qs);
-			
-		});
-		
-		Qualification persistedQual = qualificationRepo.save(q);
+		qualificationRepo.save(q);
 		
 		if(action == FormAction.SUBMIT) {
-			eventPublisher.publishEvent(new QualificationCreatedEvent(this, persistedQual));	
+			eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));	
 		}
 	}
 	

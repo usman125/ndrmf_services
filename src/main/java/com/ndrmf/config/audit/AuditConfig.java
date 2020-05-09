@@ -14,6 +14,7 @@ import com.ndrmf.common.AuthPrincipal;
 @Configuration
 @EnableJpaAuditing
 class AuditConfig {
+	
     @Bean
     public AuditorAware<String> createAuditorProvider() {
         return new SecurityAuditor();
@@ -25,15 +26,19 @@ class AuditConfig {
     }
 
     public static class SecurityAuditor implements AuditorAware<String> {
-
+    	
 		@Override
 		public Optional<String> getCurrentAuditor() {
-			AuthPrincipal principal = (AuthPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if(principal == null) {
-				return null;
-			}
+			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			
-			return Optional.of(principal.getUsername());
+			if(principal instanceof AuthPrincipal) {
+				AuthPrincipal customPrincipal = (AuthPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+				
+				return Optional.of(customPrincipal.getUsername());	
+			}
+			else {
+				return Optional.of(principal.toString());
+			}
 		}
     }
 }

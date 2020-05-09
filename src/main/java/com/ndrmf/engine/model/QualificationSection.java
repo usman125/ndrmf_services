@@ -16,6 +16,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import com.ndrmf.config.audit.Auditable;
+import com.ndrmf.setting.model.Section;
 import com.ndrmf.user.model.User;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
@@ -32,6 +33,7 @@ public class QualificationSection extends Auditable<String>{
 	private String data;
 	private int revisionNo;
 	private Qualification qualifcationRef;
+	private Section sectionRef;
 	private User sme;
 	private Integer smeScore;
 	
@@ -137,5 +139,15 @@ public class QualificationSection extends Auditable<String>{
 
 	public void setSmeScore(Integer smeScore) {
 		this.smeScore = smeScore;
+	}
+
+	@ManyToOne
+	@JoinColumn(name = "ref_section_id")
+	public Section getSectionRef() {
+		return sectionRef;
+	}
+
+	public void setSectionRef(Section sectionRef) {
+		this.sectionRef = sectionRef;
 	}
 }

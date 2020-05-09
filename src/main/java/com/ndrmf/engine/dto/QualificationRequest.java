@@ -5,19 +5,22 @@ import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 
+import io.swagger.annotations.ApiModel;
+
 public class QualificationRequest {
-	private List<QualSection> sections;
+	private List<Section> sections;
 
 	@NotNull
-	public List<QualSection> getSections() {
+	public List<Section> getSections() {
 		return sections;
 	}
 
-	public void setSections(List<QualSection> sections) {
+	public void setSections(List<Section> sections) {
 		this.sections = sections;
 	}
 
-	public static class QualSection{
+	@ApiModel("QualSection")
+	public static class Section{
 		private UUID id;
 		private String data;
 

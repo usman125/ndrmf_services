@@ -29,7 +29,7 @@ import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
-import com.ndrmf.engine.dto.QualificationRequest;
+import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.service.AccreditationService;
 import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -88,11 +88,20 @@ public class AccreditationController {
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
-	@PostMapping("/qualification/add")
+	@GetMapping("/qualification/commence")
+	public ResponseEntity<?> startQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal){
+		Map<String, UUID> dto = new HashMap<>();
+		dto.put("id", accreditationService.commenceQualification(principal.getUserId()));
+		return new ResponseEntity<>(dto, HttpStatus.CREATED);
+	}
+	
+	@RolesAllowed(SystemRoles.ORG_FIP)
+	@PostMapping("/qualification/{requestId}/section/add")
 	public ResponseEntity<ApiResponse> addQualification(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestParam(name = "action", required = true) FormAction action,
-			@RequestBody @Valid QualificationRequest body){
-		accreditationService.addQualification(principal.getUserId(), body, action);
+			@PathVariable(name = "requestId", required = true) UUID requestId,
+			@RequestBody @Valid QualificationSectionRequest body){
+		accreditationService.addQualificationSection(principal.getUserId(), requestId, body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification request added successfully."), HttpStatus.CREATED);
 	}
