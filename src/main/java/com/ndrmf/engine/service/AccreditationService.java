@@ -32,7 +32,6 @@ import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
-import com.ndrmf.setting.repository.SectionRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
@@ -49,7 +48,6 @@ public class AccreditationService {
 	@Autowired private SectionTemplateRepository sectionTemplateRepo;
 	@Autowired private QualificationRepository qualificationRepo;
 	@Autowired private ApplicationEventPublisher eventPublisher;
-	@Autowired private SectionRepository sectionRepo;
 	
 	@PersistenceContext private EntityManager em;
 	
@@ -177,6 +175,21 @@ public class AccreditationService {
 		q.setProcessOwner(this.getProcessOwnerForProcess(ProcessType.QUALIFICATION));
 		q.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
 		
+		List<SectionTemplate> sts = sectionTemplateRepo.findTemplatesForProcessType(ProcessType.QUALIFICATION.toString());
+		
+		for(SectionTemplate st: sts) {
+			QualificationSection qs = new QualificationSection();
+			qs.setName(st.getSection().getName());
+			qs.setPassingScore(st.getPassingScore());
+			qs.setTotalScore(st.getTotalScore());
+			qs.setTemplateType(st.getTemplateType());
+			qs.setTemplate(st.getTemplate());
+			qs.setSme(st.getSection().getSme());
+			qs.setSectionRef(st.getSection());
+			
+			q.addSection(qs);
+		}
+		
 		q = qualificationRepo.save(q);
 		
 		return q.getId();
@@ -190,28 +203,13 @@ public class AccreditationService {
 			throw new ValidationException("Request is already: " + q.getStatus());
 		}
 		
-		QualificationSection alreadySubmittedSection = q.getSections().stream().filter(s -> s.getSectionRef().getId().equals(body.getId())).findAny().orElse(null);
+		QualificationSection section = q.getSections().stream().filter(s -> s.getId().equals(body.getId())).findAny().orElse(null);
 		
-		if(alreadySubmittedSection != null) {
-			alreadySubmittedSection.setData(body.getData());
+		if(section == null) {
+			throw new ValidationException("Invalid ID");
 		}
-		else {
-			SectionTemplate template =
-					sectionTemplateRepo.findEnabledTemplateBySectionId(body.getId())
-					.orElseThrow(() -> new ValidationException("Invalid Section ID: " + body.getId().toString()));
-			
-			QualificationSection qs = new QualificationSection();
-			qs.setName(template.getSection().getName());
-			qs.setPassingScore(template.getPassingScore());
-			qs.setTotalScore(template.getTotalScore());
-			qs.setTemplateType(template.getTemplateType());
-			qs.setTemplate(template.getTemplate());
-			qs.setData(body.getData());
-			qs.setSme(template.getSection().getSme());
-			qs.setSectionRef(sectionRepo.getOne(body.getId()));
-			
-			q.addSection(qs);
-		}
+		
+		section.setData(body.getData());
 		
 		if(action == FormAction.SAVE) {
 			q.setStatus(ProcessStatus.DRAFT.getPersistenceValue());	

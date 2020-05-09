@@ -63,7 +63,7 @@ public class Qualification extends Auditable<String>{
 		this.status = status;
 	}
 	
-	@OneToMany(mappedBy="qualifcationRef", fetch = FetchType.LAZY, cascade=CascadeType.MERGE)
+	@OneToMany(mappedBy="qualifcationRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
 	public List<QualificationSection> getSections() {
 		return sections;
 	}
