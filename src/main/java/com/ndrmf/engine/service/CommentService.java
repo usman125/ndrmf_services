@@ -5,33 +5,28 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ndrmf.engine.dto.AddCommentRequest;
-import com.ndrmf.engine.model.QualificationComment;
-import com.ndrmf.engine.repository.QualificationCommentRepository;
-import com.ndrmf.engine.repository.QualificationRepository;
+import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
+import com.ndrmf.engine.model.QualificationSection;
 import com.ndrmf.engine.repository.QualificationSectionRepository;
-import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.exception.ValidationException;
 
 @Service
 public class CommentService {
-	@Autowired private QualificationCommentRepository qualCommentRepo;
-	@Autowired private UserRepository userRepo;
-	@Autowired private QualificationRepository qualRepo;
 	@Autowired private QualificationSectionRepository qualSectionRepo;
 	
-	public long addQualificationComment(UUID byUserId, UUID qualId, UUID sectionId, AddCommentRequest body) {
-		QualificationComment c = new QualificationComment();
+	public void addQualificationSectionReview(UUID byUserId, UUID sectionId, AddQualificationSectionReviewRequest body) {
+		QualificationSection section = qualSectionRepo.findById(sectionId)
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
 		
-		c.setQualification(qualRepo.getOne(qualId));
-		c.setSection(qualSectionRepo.getOne(sectionId));
-		c.setForFip(body.isToFip());
-		c.setBy(userRepo.getOne(byUserId));
-		c.setText(body.getText());
-		
-		if(body.getThreadId() != null) {
-			c.setThread(qualCommentRepo.getOne(body.getThreadId()));	
+		if(!section.getSme().getId().equals(byUserId)) {
+			throw new ValidationException("Only SME can add review for this section. Authorized SME is: " + section.getSme().getFullName());
 		}
 		
-		return qualCommentRepo.save(c).getId();
+		section.setComments(body.getComments());
+		section.setControlWiseComments(body.getControlWiseComments());
+		section.setRating(body.getRating());
+		section.setStatus(body.getStatus());
+		
+		qualSectionRepo.save(section);
 	}
 }

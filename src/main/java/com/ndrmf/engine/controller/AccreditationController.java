@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
-import com.ndrmf.engine.dto.AddCommentRequest;
+import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
 import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
@@ -106,18 +106,13 @@ public class AccreditationController {
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification request added successfully."), HttpStatus.CREATED);
 	}
 	
-	@PostMapping("/comment/add")
-	public ResponseEntity<?> addComment(@AuthenticationPrincipal AuthPrincipal principal,
-			@RequestParam(name = "qualId", required = true) UUID qualId,
-			@RequestParam(name = "sectionId", required = true) UUID sectionId,
-			@RequestBody @Valid AddCommentRequest body){
+	@PostMapping("/qualification/section/{sectionId}/review/add")
+	public ResponseEntity<ApiResponse> addReview(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "sectionId", required = true) UUID sectionId,
+			@RequestBody @Valid AddQualificationSectionReviewRequest body){
 		
-		long commentId = commentService.addQualificationComment(principal.getUserId(), qualId, sectionId, body);
+		commentService.addQualificationSectionReview(principal.getUserId(), sectionId, body);
 		
-		Map<String, Object> dto = new HashMap<String, Object>();
-		
-		dto.put("commentId", commentId);
-		
-		return new ResponseEntity<>(dto, HttpStatus.OK);
+		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
 	}
 }
