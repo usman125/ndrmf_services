@@ -1,12 +1,18 @@
 package com.ndrmf.setting.controller;
 
 import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.security.RolesAllowed;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,9 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.setting.dto.AddDepartmentRequest;
 import com.ndrmf.setting.dto.AddDesignationRequest;
+import com.ndrmf.setting.dto.AddThematicAreaRequest;
 import com.ndrmf.setting.dto.DepartmentItem;
 import com.ndrmf.setting.dto.DesignationItem;
+import com.ndrmf.setting.dto.ThematicAreaItem;
 import com.ndrmf.setting.service.SettingService;
+import com.ndrmf.util.constants.SystemRoles;
 
 import io.swagger.annotations.Api;
 
@@ -47,5 +56,28 @@ public class SettingController {
 	public ResponseEntity<ApiResponse> addDesignations(@RequestBody AddDesignationRequest body){
 		settingService.addDesignation(body);
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Designation added"), HttpStatus.OK);
+	}
+	
+	@GetMapping("/thematic-area")
+	public ResponseEntity<List<ThematicAreaItem>> getAllThematicAreas(){
+		
+		return new ResponseEntity<>(settingService.getAllThematicAreas(), HttpStatus.OK);
+	}
+	
+	@RolesAllowed(SystemRoles.ADMIN)
+	@PostMapping("/thematic-area/add")
+	public ResponseEntity<ApiResponse> addThematicArea(@RequestBody @Valid AddThematicAreaRequest body){
+		settingService.addThematicArea(body);
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Thematic Area added"), HttpStatus.CREATED);
+	}
+	
+	@RolesAllowed(SystemRoles.ADMIN)
+	@PutMapping("/thematic-area/{id}/update")
+	public ResponseEntity<ApiResponse> updateThematicArea(@PathVariable(name = "id", required = true) UUID id,
+			@RequestBody @Valid AddThematicAreaRequest body){
+		settingService.udpateThematicArea(id, body);
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Thematic Area updated"), HttpStatus.CREATED);
 	}
 }
