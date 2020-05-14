@@ -16,6 +16,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.engine.dto.AccreditationStatusItem;
+import com.ndrmf.engine.dto.AddQualificationTaskRequest;
 import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
@@ -25,8 +26,11 @@ import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
+import com.ndrmf.engine.model.QualificationTask;
 import com.ndrmf.engine.repository.EligibilityRepository;
 import com.ndrmf.engine.repository.QualificationRepository;
+import com.ndrmf.engine.repository.QualificationSectionRepository;
+import com.ndrmf.engine.repository.QualificationTaskRepository;
 import com.ndrmf.event.EligibilityApprovedEvent;
 import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.exception.ValidationException;
@@ -48,6 +52,8 @@ public class AccreditationService {
 	@Autowired private SectionTemplateRepository sectionTemplateRepo;
 	@Autowired private QualificationRepository qualificationRepo;
 	@Autowired private ApplicationEventPublisher eventPublisher;
+	@Autowired private QualificationTaskRepository qtaskRepo;
+	@Autowired private QualificationSectionRepository qsectionRepo;
 	
 	@PersistenceContext private EntityManager em;
 	
@@ -150,6 +156,8 @@ public class AccreditationService {
 			section.setTemplate(qs.getTemplate());
 			section.setTemplateType(qs.getTemplateType());
 			section.setTotalScore(qs.getTotalScore());
+			
+			section.setReview(qs.getControlWiseComments(), qs.getRating(), qs.getStatus(), qs.getComments());
 			
 			dto.addSection(section);
 		});
@@ -273,6 +281,24 @@ public class AccreditationService {
 		else {
 			return new AccreditationStatusItem(false, result.get("eligibility", String.class), result.get("qualification", String.class));
 		}
+	}
+	
+	public void addQualificationTask(UUID sectionId, AddQualificationTaskRequest body) {
+		QualificationSection section = qsectionRepo.findById(sectionId)
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+		
+		QualificationTask task = new QualificationTask();
+		
+		task.setStartDate(body.getStartDate());
+		task.setEndDate(body.getEndDate());
+		task.setComments(body.getComments());
+		
+		task.setSection(section);
+		task.setAssignee(section.getSme());
+		
+		qtaskRepo.save(task);
+		
+		//TODO - trigger notification event
 	}
 	
 	private User getProcessOwnerForProcess(ProcessType processType) {

@@ -81,6 +81,8 @@ public class QualificationItem {
 		private String data;
 		private UserLookupItem sme;
 		private boolean assigned;
+		private Review review;
+		
 		
 		public UUID getId() {
 			return id;
@@ -135,6 +137,50 @@ public class QualificationItem {
 		}
 		public void setAssigned(boolean assigned) {
 			this.assigned = assigned;
+		}
+		public Review getReview() {
+			return review;
+		}
+		
+		public void setReview(String controlWiseComments, String rating, String status, String comments) {
+			this.review = new Review();
+			
+			this.review.setControlWiseComments(controlWiseComments);
+			this.review.setRating(rating);
+			this.review.setStatus(status);
+			this.review.setComments(comments);
+		}
+	}
+	
+	public static class Review{
+		private String controlWiseComments;
+		private String rating;
+		private String status;
+		private String comments;
+		
+		public String getControlWiseComments() {
+			return controlWiseComments;
+		}
+		public void setControlWiseComments(String controlWiseComments) {
+			this.controlWiseComments = controlWiseComments;
+		}
+		public String getRating() {
+			return rating;
+		}
+		public void setRating(String rating) {
+			this.rating = rating;
+		}
+		public String getStatus() {
+			return status;
+		}
+		public void setStatus(String status) {
+			this.status = status;
+		}
+		public String getComments() {
+			return comments;
+		}
+		public void setComments(String comments) {
+			this.comments = comments;
 		}
 	}
 }

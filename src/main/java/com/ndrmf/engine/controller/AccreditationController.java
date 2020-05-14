@@ -24,6 +24,7 @@ import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
+import com.ndrmf.engine.dto.AddQualificationTaskRequest;
 import com.ndrmf.engine.dto.EligibilityItem;
 import com.ndrmf.engine.dto.EligibilityListItem;
 import com.ndrmf.engine.dto.EligibilityRequest;
@@ -114,5 +115,12 @@ public class AccreditationController {
 		commentService.addQualificationSectionReview(principal.getUserId(), sectionId, body);
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
+	}
+	
+	@PostMapping("qualification/section/{sectionId}/task/add")
+	public ResponseEntity<ApiResponse> addTaskForSection(@PathVariable(name = "sectionId", required = true) UUID sectionId,
+		@RequestBody @Valid AddQualificationTaskRequest body){
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Task added successfully."), HttpStatus.OK);
 	}
 }
