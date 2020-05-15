@@ -9,6 +9,7 @@ import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
 import com.ndrmf.engine.model.QualificationSection;
 import com.ndrmf.engine.repository.QualificationSectionRepository;
 import com.ndrmf.exception.ValidationException;
+import com.ndrmf.util.enums.ReviewStatus;
 
 @Service
 public class CommentService {
@@ -26,6 +27,8 @@ public class CommentService {
 		section.setControlWiseComments(body.getControlWiseComments());
 		section.setRating(body.getRating());
 		section.setStatus(body.getStatus());
+		
+		section.setReviewStatus(ReviewStatus.COMPLETED.getPersistenceValue());
 		
 		qualSectionRepo.save(section);
 	}

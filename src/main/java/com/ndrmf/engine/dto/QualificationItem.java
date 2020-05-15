@@ -82,6 +82,7 @@ public class QualificationItem {
 		private UserLookupItem sme;
 		private boolean assigned;
 		private Review review;
+		private String reviewStatus;
 		
 		
 		public UUID getId() {
@@ -149,6 +150,12 @@ public class QualificationItem {
 			this.review.setRating(rating);
 			this.review.setStatus(status);
 			this.review.setComments(comments);
+		}
+		public String getReviewStatus() {
+			return reviewStatus;
+		}
+		public void setReviewStatus(String reviewStatus) {
+			this.reviewStatus = reviewStatus;
 		}
 	}
 	

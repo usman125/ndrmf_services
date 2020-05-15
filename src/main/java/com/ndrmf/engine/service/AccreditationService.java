@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,6 +44,8 @@ import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
+import com.ndrmf.util.enums.ReviewStatus;
+import com.ndrmf.util.enums.TaskStatus;
 
 @Service
 public class AccreditationService {
@@ -156,6 +159,8 @@ public class AccreditationService {
 			section.setTemplate(qs.getTemplate());
 			section.setTemplateType(qs.getTemplateType());
 			section.setTotalScore(qs.getTotalScore());
+			
+			section.setReviewStatus(qs.getReviewStatus());
 			
 			section.setReview(qs.getControlWiseComments(), qs.getRating(), qs.getStatus(), qs.getComments());
 			
@@ -283,6 +288,7 @@ public class AccreditationService {
 		}
 	}
 	
+	@Transactional
 	public void addQualificationTask(UUID sectionId, UUID currentUserId, AddQualificationTaskRequest body) {
 		QualificationSection section = qsectionRepo.findById(sectionId)
 				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
@@ -299,6 +305,10 @@ public class AccreditationService {
 		
 		task.setSection(section);
 		task.setAssignee(section.getSme());
+		
+		task.setStatus(TaskStatus.PENDING.getPersistenceValue());
+		
+		section.setReviewStatus(ReviewStatus.PENDING.getPersistenceValue());
 		
 		qtaskRepo.save(task);
 		

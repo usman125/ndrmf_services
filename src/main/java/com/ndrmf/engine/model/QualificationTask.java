@@ -26,6 +26,7 @@ public class QualificationTask extends Auditable<String> {
 	private String comments;
 	private User assignee;
 	private QualificationSection section;
+	private String status;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -75,5 +76,12 @@ public class QualificationTask extends Auditable<String> {
 	}
 	public void setSection(QualificationSection section) {
 		this.section = section;
+	}
+	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

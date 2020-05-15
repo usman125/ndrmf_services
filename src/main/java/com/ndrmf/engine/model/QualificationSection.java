@@ -40,6 +40,7 @@ public class QualificationSection extends Auditable<String>{
 	private String rating;
 	private String status;
 	private String comments;
+	private String reviewStatus;
 
 	@Id
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -187,5 +188,13 @@ public class QualificationSection extends Auditable<String>{
 
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
 	}
 }
