@@ -118,9 +118,10 @@ public class AccreditationController {
 	}
 	
 	@PostMapping("qualification/section/{sectionId}/task/add")
-	public ResponseEntity<ApiResponse> addTaskForSection(@PathVariable(name = "sectionId", required = true) UUID sectionId,
-		@RequestBody @Valid AddQualificationTaskRequest body){
-		
+	public ResponseEntity<ApiResponse> addTaskForSection(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "sectionId", required = true) UUID sectionId,
+			@RequestBody @Valid AddQualificationTaskRequest body){
+		accreditationService.addQualificationTask(sectionId, principal.getUserId(), body);
 		return new ResponseEntity<>(new ApiResponse(true, "Task added successfully."), HttpStatus.OK);
 	}
 }

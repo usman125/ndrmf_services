@@ -283,9 +283,13 @@ public class AccreditationService {
 		}
 	}
 	
-	public void addQualificationTask(UUID sectionId, AddQualificationTaskRequest body) {
+	public void addQualificationTask(UUID sectionId, UUID currentUserId, AddQualificationTaskRequest body) {
 		QualificationSection section = qsectionRepo.findById(sectionId)
 				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+		
+		if(!section.getQualifcationRef().getProcessOwner().getId().equals(currentUserId)) {
+			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ section.getQualifcationRef().getProcessOwner().getFullName());
+		}
 		
 		QualificationTask task = new QualificationTask();
 		
