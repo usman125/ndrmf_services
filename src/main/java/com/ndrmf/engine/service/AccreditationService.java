@@ -24,6 +24,7 @@ import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationSectionRequest;
+import com.ndrmf.engine.dto.ReassignQualificationRequest;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
@@ -45,6 +46,7 @@ import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
+import com.ndrmf.util.enums.ReassignmentStatus;
 import com.ndrmf.util.enums.ReviewStatus;
 import com.ndrmf.util.enums.TaskStatus;
 
@@ -350,5 +352,37 @@ public class AccreditationService {
 		qualificationRepo.save(q);
 		
 		//TODO - raise event, notify FIP, update accreditation status
+	}
+	
+	@Transactional
+	public void reassignQualificationRequest(UUID id, UUID userId, ReassignQualificationRequest body) {
+		Qualification q = qualificationRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		if(!q.getProcessOwner().getId().equals(userId)) {
+			throw new ValidationException("Cannot re-assign. Authorized user is: " + q.getProcessOwner().getFullName());
+		}
+		
+		QualificationTask task = new QualificationTask();
+		task.setStartDate(body.getStartDate());
+		task.setEndDate(body.getEndDate());
+		task.setComments(body.getComments());
+		task.setAssignee(q.getInitiatedBy());
+		task.setStatus(TaskStatus.PENDING.getPersistenceValue());
+		
+		qtaskRepo.save(task);
+		
+		body.getSectionIds().forEach(sid -> {
+			QualificationSection section = q.getSections()
+					.stream().filter(s -> s.getId().equals(sid))
+					.findAny()
+					.orElseThrow(() -> new ValidationException("Invalid section ID"));
+			
+			section.setReassignmentStatus(ReassignmentStatus.PENDING.getPersistenceValue());
+		});
+		
+		q.setStatus(ProcessStatus.REASSIGNED.getPersistenceValue());
+		
+		//TODO: Raise event, inform FIP about reassignment
 	}
 }

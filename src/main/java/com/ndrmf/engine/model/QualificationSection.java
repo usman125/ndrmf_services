@@ -43,6 +43,7 @@ public class QualificationSection extends Auditable<String>{
 	private Integer smeScore;
 	private String status;
 	private String reviewStatus;
+	private String reassignmentStatus;
 	private List<QualificationSectionReview> reviews;
 
 	@Id
@@ -192,5 +193,13 @@ public class QualificationSection extends Auditable<String>{
 		review.setSectionRef(this);
 		
 		this.reviews.add(review);
+	}
+
+	public String getReassignmentStatus() {
+		return reassignmentStatus;
+	}
+
+	public void setReassignmentStatus(String reassignmentStatus) {
+		this.reassignmentStatus = reassignmentStatus;
 	}
 }

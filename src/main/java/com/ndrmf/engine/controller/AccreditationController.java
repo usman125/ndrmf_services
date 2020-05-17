@@ -32,6 +32,7 @@ import com.ndrmf.engine.dto.EligibilityRequest;
 import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationSectionRequest;
+import com.ndrmf.engine.dto.ReassignQualificationRequest;
 import com.ndrmf.engine.service.AccreditationService;
 import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -133,5 +134,15 @@ public class AccreditationController {
 			@RequestBody @Valid AddQualificationTaskRequest body){
 		accreditationService.addQualificationTask(sectionId, principal.getUserId(), body);
 		return new ResponseEntity<>(new ApiResponse(true, "Task added successfully."), HttpStatus.OK);
+	}
+	
+	@PostMapping("qualification/{id}/reassign")
+	public ResponseEntity<ApiResponse> reassignQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "id", required = true) UUID id,
+			@RequestBody ReassignQualificationRequest body){
+		
+		accreditationService.reassignQualificationRequest(id, principal.getUserId(), body);
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Qualification re-assigned successfully."), HttpStatus.OK);
 	}
 }
