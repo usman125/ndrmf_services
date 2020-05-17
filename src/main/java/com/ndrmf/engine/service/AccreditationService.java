@@ -322,4 +322,16 @@ public class AccreditationService {
 		
 		return processMeta.getOwner();
 	}
+	
+	public void updateQualificationStatus(UUID id, ProcessStatus status) {
+		Qualification q = qualificationRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		
+		q.setStatus(status.getPersistenceValue());
+		
+		qualificationRepo.save(q);
+		
+		//TODO - raise event, notify FIP, update accreditation status
+	}
 }
