@@ -165,6 +165,8 @@ public class AccreditationService {
 			
 			section.setReviewStatus(qs.getReviewStatus());
 			
+			section.setReassignmentStatus(qs.getReassignmentStatus());
+			
 			
 			if(qs.getReviews() != null && qs.getReviews().size() > 0) {
 				QualificationSectionReview latestReview = 

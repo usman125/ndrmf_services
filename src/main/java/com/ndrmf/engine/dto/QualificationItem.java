@@ -84,7 +84,7 @@ public class QualificationItem {
 		private List<Review> reviewHistory;
 		private Review review;
 		private String reviewStatus;
-		
+		private String reassignmentStatus;
 		
 		public UUID getId() {
 			return id;
@@ -180,6 +180,12 @@ public class QualificationItem {
 			r.setComments(comments);
 			
 			this.reviewHistory.add(r);
+		}
+		public String getReassignmentStatus() {
+			return reassignmentStatus;
+		}
+		public void setReassignmentStatus(String reassignmentStatus) {
+			this.reassignmentStatus = reassignmentStatus;
 		}
 	}
 	
