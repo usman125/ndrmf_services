@@ -32,6 +32,9 @@ public class TaskService {
 			ti.setRequestId(t.getSection().getQualifcationRef().getId());
 			ti.setStartDate(t.getStartDate());
 			ti.setTaskId(t.getId());
+			ti.setSectionId(t.getSection().getId());
+			ti.setSectionName(t.getSection().getName());
+			ti.setStatus(t.getStatus());
 			
 			qualTasks.add(ti);
 		});

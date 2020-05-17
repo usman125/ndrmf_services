@@ -6,7 +6,28 @@ import java.util.UUID;
 public class TaskItem {
 	private UUID taskId;
 	private UUID requestId;
+	private UUID sectionId;
+	private String sectionName;
+	private String status;
 	private Date startDate;
+	public UUID getSectionId() {
+		return sectionId;
+	}
+	public void setSectionId(UUID sectionId) {
+		this.sectionId = sectionId;
+	}
+	public String getSectionName() {
+		return sectionName;
+	}
+	public void setSectionName(String sectionName) {
+		this.sectionName = sectionName;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 	private Date endDate;
 	private String comments;
 	

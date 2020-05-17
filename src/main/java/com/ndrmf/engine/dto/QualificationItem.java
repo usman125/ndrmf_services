@@ -159,7 +159,7 @@ public class QualificationItem {
 		}
 	}
 	
-	public static class Review{
+	public static class Review {
 		private String controlWiseComments;
 		private String rating;
 		private String status;
