@@ -1,12 +1,17 @@
 package com.ndrmf.engine.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -36,11 +41,9 @@ public class QualificationSection extends Auditable<String>{
 	private Section sectionRef;
 	private User sme;
 	private Integer smeScore;
-	private String controlWiseComments;
-	private String rating;
 	private String status;
-	private String comments;
 	private String reviewStatus;
+	private List<QualificationSectionReview> reviews;
 
 	@Id
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -155,24 +158,6 @@ public class QualificationSection extends Auditable<String>{
 	public void setSectionRef(Section sectionRef) {
 		this.sectionRef = sectionRef;
 	}
-	
-	@Type(type = "jsonb")
-	@Column(columnDefinition = "jsonb")
-	public String getControlWiseComments() {
-		return controlWiseComments;
-	}
-
-	public void setControlWiseComments(String controlWiseComments) {
-		this.controlWiseComments = controlWiseComments;
-	}
-
-	public String getRating() {
-		return rating;
-	}
-
-	public void setRating(String rating) {
-		this.rating = rating;
-	}
 
 	public String getStatus() {
 		return status;
@@ -182,19 +167,30 @@ public class QualificationSection extends Auditable<String>{
 		this.status = status;
 	}
 
-	public String getComments() {
-		return comments;
-	}
-
-	public void setComments(String comments) {
-		this.comments = comments;
-	}
-
 	public String getReviewStatus() {
 		return reviewStatus;
 	}
 
 	public void setReviewStatus(String reviewStatus) {
 		this.reviewStatus = reviewStatus;
+	}
+
+	@OneToMany(mappedBy="sectionRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+	public List<QualificationSectionReview> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<QualificationSectionReview> reviews) {
+		this.reviews = reviews;
+	}
+	
+	public void addReview(QualificationSectionReview review) {
+		if(this.reviews == null) {
+			this.reviews = new ArrayList<QualificationSectionReview>();
+		}
+		
+		review.setSectionRef(this);
+		
+		this.reviews.add(review);
 	}
 }

@@ -81,6 +81,7 @@ public class QualificationItem {
 		private String data;
 		private UserLookupItem sme;
 		private boolean assigned;
+		private List<Review> reviewHistory;
 		private Review review;
 		private String reviewStatus;
 		
@@ -143,19 +144,42 @@ public class QualificationItem {
 			return review;
 		}
 		
-		public void setReview(String controlWiseComments, String rating, String status, String comments) {
+		public void setReview(Date createdDate, String controlWiseComments, String rating, String status, String comments) {
 			this.review = new Review();
 			
+			this.review.setCreatedDate(createdDate);
 			this.review.setControlWiseComments(controlWiseComments);
 			this.review.setRating(rating);
 			this.review.setStatus(status);
 			this.review.setComments(comments);
 		}
+		
 		public String getReviewStatus() {
 			return reviewStatus;
 		}
 		public void setReviewStatus(String reviewStatus) {
 			this.reviewStatus = reviewStatus;
+		}
+		public List<Review> getReviewHistory() {
+			return reviewHistory;
+		}
+		public void setReviewHistory(List<Review> reviewHistory) {
+			this.reviewHistory = reviewHistory;
+		}
+		
+		public void addReviewHistory(Date createdDate, String controlWiseComments, String rating, String status, String comments) {
+			if(this.reviewHistory == null) {
+				this.reviewHistory = new ArrayList<>();
+			}
+			
+			Review r = new Review();
+			r.setCreatedDate(createdDate);
+			r.setControlWiseComments(controlWiseComments);
+			r.setRating(rating);
+			r.setStatus(status);
+			r.setComments(comments);
+			
+			this.reviewHistory.add(r);
 		}
 	}
 	
@@ -164,6 +188,7 @@ public class QualificationItem {
 		private String rating;
 		private String status;
 		private String comments;
+		private Date createdDate;
 		
 		public String getControlWiseComments() {
 			return controlWiseComments;
@@ -188,6 +213,12 @@ public class QualificationItem {
 		}
 		public void setComments(String comments) {
 			this.comments = comments;
+		}
+		public Date getCreatedDate() {
+			return createdDate;
+		}
+		public void setCreatedDate(Date createdDate) {
+			this.createdDate = createdDate;
 		}
 	}
 }

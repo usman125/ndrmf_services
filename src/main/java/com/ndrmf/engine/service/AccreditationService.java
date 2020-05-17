@@ -27,6 +27,7 @@ import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
+import com.ndrmf.engine.model.QualificationSectionReview;
 import com.ndrmf.engine.model.QualificationTask;
 import com.ndrmf.engine.repository.EligibilityRepository;
 import com.ndrmf.engine.repository.QualificationRepository;
@@ -162,7 +163,23 @@ public class AccreditationService {
 			
 			section.setReviewStatus(qs.getReviewStatus());
 			
-			section.setReview(qs.getControlWiseComments(), qs.getRating(), qs.getStatus(), qs.getComments());
+			
+			if(qs.getReviews() != null && qs.getReviews().size() > 0) {
+				QualificationSectionReview latestReview = 
+						qs.getReviews().get(qs.getReviews().size() - 1);
+				
+				
+				section.setReview(latestReview.getCreatedDate(),
+						latestReview.getControlWiseComments(),
+						latestReview.getRating(),
+						latestReview.getStatus(),
+						latestReview.getComments());
+			
+				
+				qs.getReviews().forEach(r -> {
+					section.addReviewHistory(r.getCreatedDate(), r.getControlWiseComments(), r.getRating(), r.getStatus(), r.getComments());
+				});
+			}
 			
 			dto.addSection(section);
 		});

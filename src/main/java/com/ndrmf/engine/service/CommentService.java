@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
 import com.ndrmf.engine.model.QualificationSection;
+import com.ndrmf.engine.model.QualificationSectionReview;
 import com.ndrmf.engine.repository.QualificationSectionRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.util.enums.ReviewStatus;
@@ -23,12 +24,16 @@ public class CommentService {
 			throw new ValidationException("Only SME can add review for this section. Authorized SME is: " + section.getSme().getFullName());
 		}
 		
-		section.setComments(body.getComments());
-		section.setControlWiseComments(body.getControlWiseComments());
-		section.setRating(body.getRating());
-		section.setStatus(body.getStatus());
+		QualificationSectionReview qsr = new QualificationSectionReview();
+		qsr.setComments(body.getComments());
+		qsr.setControlWiseComments(body.getControlWiseComments());
+		qsr.setRating(body.getRating());
+		qsr.setStatus(body.getStatus());
 		
+		section.setStatus(body.getStatus());
 		section.setReviewStatus(ReviewStatus.COMPLETED.getPersistenceValue());
+		
+		section.addReview(qsr);
 		
 		qualSectionRepo.save(section);
 	}
