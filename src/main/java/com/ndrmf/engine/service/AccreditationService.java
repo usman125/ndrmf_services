@@ -266,6 +266,10 @@ public class AccreditationService {
 			q.setStatus(ProcessStatus.DRAFT.getPersistenceValue()); //For lack of a better default
 		}
 		
+		if(section.getReassignmentStatus() != null && section.getReassignmentStatus().equals(ReassignmentStatus.PENDING.getPersistenceValue())) {
+			section.setReassignmentStatus(ReassignmentStatus.COMPLETED.getPersistenceValue());
+		}
+		
 		qualificationRepo.save(q);
 		
 		if(action == FormAction.SUBMIT) {
