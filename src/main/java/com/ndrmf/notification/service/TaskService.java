@@ -35,6 +35,9 @@ public class TaskService {
 			ti.setSectionId(t.getSection().getId());
 			ti.setSectionName(t.getSection().getName());
 			ti.setStatus(t.getStatus());
+			if(t.getQualification() != null) {
+				ti.setFipName(t.getQualification().getInitiatedBy().getFullName());	
+			}
 			
 			qualTasks.add(ti);
 		});

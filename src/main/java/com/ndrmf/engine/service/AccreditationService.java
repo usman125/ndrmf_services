@@ -37,6 +37,7 @@ import com.ndrmf.engine.repository.QualificationTaskRepository;
 import com.ndrmf.event.EligibilityApprovedEvent;
 import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.exception.ValidationException;
+import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
@@ -154,10 +155,17 @@ public class AccreditationService {
 			List<QualificationTask> reassignmentComments = 
 					qtaskRepo.findAllTasksForAssigneeAndRequest(userId, id);
 			
-			List<String> comments =
-					reassignmentComments.stream().map(r -> r.getComments()).collect(Collectors.toList());
-			
-			dto.setReassignmentComments(comments);
+			if(reassignmentComments != null && reassignmentComments.size() > 0) {
+				QualificationTask lastTask = reassignmentComments.get(reassignmentComments.size() - 1);
+				
+				TaskItem ti = new TaskItem();
+				ti.setComments(lastTask.getComments());
+				ti.setEndDate(lastTask.getEndDate());
+				ti.setStartDate(lastTask.getStartDate());
+				ti.setStatus(lastTask.getStatus());
+				
+				dto.setReassignmentTask(ti);
+			}
 		}
 		
 		q.getSections().forEach(qs -> {

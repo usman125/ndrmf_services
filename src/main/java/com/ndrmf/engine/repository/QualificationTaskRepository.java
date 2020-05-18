@@ -15,4 +15,7 @@ public interface QualificationTaskRepository extends JpaRepository<Qualification
 	
 	@Query(value = "SELECT t FROM QualificationTask t JOIN t.assignee u JOIN t.qualification q WHERE u.id = :userId AND q.id = :qualificationId")
 	List<QualificationTask> findAllTasksForAssigneeAndRequest(@Param("userId") UUID userId, @Param("qualificationId") UUID qualificationId);
+	
+	@Query(value = "SELECT t FROM QualificationTask t JOIN t.assignee u JOIN t.section s WHERE u.id = :userId AND s.id = :sectionId")
+	List<QualificationTask> findTasksForSectionAndAssignee(@Param("userId") UUID userId, @Param("sectionId") UUID sectionId);
 }

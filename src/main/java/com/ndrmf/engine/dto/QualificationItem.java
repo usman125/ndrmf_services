@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.user.dto.UserLookupItem;
 
 public class QualificationItem {
@@ -14,7 +15,7 @@ public class QualificationItem {
 	private Date submittedAt;
 	private List<Section> sections;
 	private boolean owner;
-	private List<String> reassignmentComments;
+	private TaskItem reassignmentTask;
 	
 	public UserLookupItem getInitiatedBy() {
 		return initiatedBy;
@@ -72,12 +73,12 @@ public class QualificationItem {
 		this.owner = owner;
 	}
 
-	public List<String> getReassignmentComments() {
-		return reassignmentComments;
+	public TaskItem getReassignmentTask() {
+		return reassignmentTask;
 	}
 
-	public void setReassignmentComments(List<String> reassignmentComments) {
-		this.reassignmentComments = reassignmentComments;
+	public void setReassignmentTask(TaskItem reassignmentTask) {
+		this.reassignmentTask = reassignmentTask;
 	}
 
 	public static class Section{

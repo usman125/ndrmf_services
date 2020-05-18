@@ -10,6 +10,8 @@ public class TaskItem {
 	private String sectionName;
 	private String status;
 	private Date startDate;
+	private String fipName;
+	
 	public UUID getSectionId() {
 		return sectionId;
 	}
@@ -60,5 +62,11 @@ public class TaskItem {
 	}
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+	public String getFipName() {
+		return fipName;
+	}
+	public void setFipName(String fipName) {
+		this.fipName = fipName;
 	}
 }
