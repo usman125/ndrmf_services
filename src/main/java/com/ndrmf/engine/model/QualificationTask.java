@@ -26,6 +26,7 @@ public class QualificationTask extends Auditable<String> {
 	private String comments;
 	private User assignee;
 	private QualificationSection section;
+	private Qualification qualification;
 	private String status;
 	
 	@Id
@@ -83,5 +84,15 @@ public class QualificationTask extends Auditable<String> {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "qualification_id")
+	public Qualification getQualification() {
+		return qualification;
+	}
+	
+	public void setQualification(Qualification qualification) {
+		this.qualification = qualification;
 	}
 }

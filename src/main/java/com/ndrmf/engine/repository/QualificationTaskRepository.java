@@ -12,4 +12,7 @@ import com.ndrmf.engine.model.QualificationTask;
 public interface QualificationTaskRepository extends JpaRepository<QualificationTask, UUID>{
 	@Query(value = "SELECT t FROM QualificationTask t JOIN t.assignee u WHERE u.id = :userId")
 	List<QualificationTask> findAllTasksForAssignee(@Param("userId") UUID userId);
+	
+	@Query(value = "SELECT t FROM QualificationTask t JOIN t.assignee u JOIN t.qualification q WHERE u.id = :userId AND q.id = :qualificationId")
+	List<QualificationTask> findAllTasksForAssigneeAndRequest(@Param("userId") UUID userId, @Param("qualificationId") UUID qualificationId);
 }

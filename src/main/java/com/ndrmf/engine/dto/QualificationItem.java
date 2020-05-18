@@ -14,6 +14,7 @@ public class QualificationItem {
 	private Date submittedAt;
 	private List<Section> sections;
 	private boolean owner;
+	private List<String> reassignmentComments;
 	
 	public UserLookupItem getInitiatedBy() {
 		return initiatedBy;
@@ -69,6 +70,14 @@ public class QualificationItem {
 
 	public void setOwner(boolean owner) {
 		this.owner = owner;
+	}
+
+	public List<String> getReassignmentComments() {
+		return reassignmentComments;
+	}
+
+	public void setReassignmentComments(List<String> reassignmentComments) {
+		this.reassignmentComments = reassignmentComments;
 	}
 
 	public static class Section{

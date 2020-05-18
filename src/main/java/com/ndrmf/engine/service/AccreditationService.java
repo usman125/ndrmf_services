@@ -150,6 +150,16 @@ public class AccreditationService {
 		dto.setStatus(q.getStatus());
 		dto.setSubmittedAt(q.getCreatedDate());
 		
+		if(q.getInitiatedBy().getId().equals(userId)) {
+			List<QualificationTask> reassignmentComments = 
+					qtaskRepo.findAllTasksForAssigneeAndRequest(userId, id);
+			
+			List<String> comments =
+					reassignmentComments.stream().map(r -> r.getComments()).collect(Collectors.toList());
+			
+			dto.setReassignmentComments(comments);
+		}
+		
 		q.getSections().forEach(qs -> {
 			QualificationItem.Section section = new QualificationItem.Section();
 			
@@ -233,7 +243,8 @@ public class AccreditationService {
 		Qualification q = qualificationRepo.findById(requestId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
-		if(!q.getStatus().equals(ProcessStatus.DRAFT.getPersistenceValue())) {
+		if(!q.getStatus().equals(ProcessStatus.DRAFT.getPersistenceValue())
+				&& !q.getStatus().equals(ProcessStatus.REASSIGNED.getPersistenceValue())) {
 			throw new ValidationException("Request is already: " + q.getStatus());
 		}
 		
@@ -371,6 +382,7 @@ public class AccreditationService {
 		task.setComments(body.getComments());
 		task.setAssignee(q.getInitiatedBy());
 		task.setStatus(TaskStatus.PENDING.getPersistenceValue());
+		task.setQualification(q);
 		
 		qtaskRepo.save(task);
 		
