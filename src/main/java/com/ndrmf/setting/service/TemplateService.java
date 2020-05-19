@@ -95,7 +95,9 @@ public class TemplateService {
 		ProcessType pt = processTypeRepo.findById(processType)
 				.orElseThrow(() -> new ValidationException("Invalid Process Type"));
 		
-		if(pt.getOwner() == null) {
+		if((processType.equals(com.ndrmf.util.enums.ProcessType.ELIGIBILITY.toString())
+				|| processType.equals(com.ndrmf.util.enums.ProcessType.QUALIFICATION.toString())
+			) && pt.getOwner() == null) {
 			throw new ValidationException("Incomplete Process Meta. Missing Process Owner");
 		}
 		
@@ -128,9 +130,9 @@ public class TemplateService {
 		ProcessType meta = processTypeRepo.findById(processType)
 				.orElseThrow(() -> new ValidationException("Invalid Process Type"));
 		
-		meta.setOwner(userRepo.getOne(body.getProcessOwnerId()));
-		
-		processTypeRepo.save(meta);
+		if(body.getProcessOwnerId() != null) {
+			meta.setOwner(userRepo.getOne(body.getProcessOwnerId()));	
+		}
 		
 		if(body.getSections() != null) {
 			body.getSections().forEach(s -> {

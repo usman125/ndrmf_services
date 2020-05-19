@@ -25,6 +25,7 @@ import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.dto.ReassignQualificationRequest;
+import com.ndrmf.engine.dto.SectionItem;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
@@ -169,7 +170,7 @@ public class AccreditationService {
 		}
 		
 		q.getSections().forEach(qs -> {
-			QualificationItem.Section section = new QualificationItem.Section();
+			SectionItem section = new SectionItem();
 			
 			section.setAssigned(qs.getSme().getId().equals(userId));
 			section.setData(qs.getData());
@@ -214,6 +215,7 @@ public class AccreditationService {
 		constraintStatuses.add(ProcessStatus.DRAFT.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.APPROVED.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
+		constraintStatuses.add(ProcessStatus.REASSIGNED.getPersistenceValue());
 		
 		int existingRequests = qualificationRepo.checkCountForUserWithStatuses(initiatorUserId, constraintStatuses);
 		

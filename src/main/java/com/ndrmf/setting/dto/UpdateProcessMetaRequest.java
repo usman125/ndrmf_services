@@ -10,7 +10,6 @@ public class UpdateProcessMetaRequest {
 	private UUID processOwnerId;
 	private List<SectionMeta> sections;
 
-	@NotNull(message = "Process Owner ID cannot be null or empty")
 	public UUID getProcessOwnerId() {
 		return processOwnerId;
 	}

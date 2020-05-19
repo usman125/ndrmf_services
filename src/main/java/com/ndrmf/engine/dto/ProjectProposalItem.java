@@ -7,7 +7,7 @@ import java.util.List;
 import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.user.dto.UserLookupItem;
 
-public class QualificationItem {
+public class ProjectProposalItem {
 	private UserLookupItem initiatedBy;
 	private UserLookupItem processOwner;
 	private String status;
