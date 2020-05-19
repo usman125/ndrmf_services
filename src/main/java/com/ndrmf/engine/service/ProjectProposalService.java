@@ -38,6 +38,7 @@ public class ProjectProposalService {
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		ProjectProposal p = new ProjectProposal();
 		
+		p.setName(body.getName());
 		p.setInitiatedBy(userRepo.getOne(initiatorUserId));
 		p.setProcessOwner(this.getProcessOwnerForThematicArea(body.getThematicAreaId()));
 		p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());

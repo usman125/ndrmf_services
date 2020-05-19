@@ -23,6 +23,7 @@ import com.ndrmf.user.model.User;
 @Table(name = "project_proposals")
 public class ProjectProposal extends Auditable<String> {
 	private UUID id;
+	private String name;
 	private User initiatedBy;
 	private User processOwner;
 	private String status;
@@ -79,5 +80,11 @@ public class ProjectProposal extends Auditable<String> {
 		section.setProposalRef(this);
 		
 		this.sections.add(section);
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
 }
