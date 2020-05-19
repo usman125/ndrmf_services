@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.ndrmf.config.audit.Auditable;
+import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.user.model.User;
 
 @Entity
@@ -24,6 +25,7 @@ import com.ndrmf.user.model.User;
 public class ProjectProposal extends Auditable<String> {
 	private UUID id;
 	private String name;
+	private ThematicArea thematicArea;
 	private User initiatedBy;
 	private User processOwner;
 	private String status;
@@ -86,5 +88,14 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "thematic_area_id")
+	public ThematicArea getThematicArea() {
+		return thematicArea;
+	}
+	public void setThematicArea(ThematicArea thematicArea) {
+		this.thematicArea = thematicArea;
 	}
 }

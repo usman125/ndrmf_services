@@ -1,6 +1,7 @@
 package com.ndrmf.engine.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,13 +16,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
+import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.service.ProjectProposalService;
 import com.ndrmf.util.constants.SystemRoles;
+import com.ndrmf.util.enums.ProcessStatus;
 
 import io.swagger.annotations.Api;
 
@@ -30,6 +34,12 @@ import io.swagger.annotations.Api;
 @RequestMapping("/project-proposal")
 public class ProjectProposalController {
 	@Autowired private ProjectProposalService projProposalService;
+	
+	@GetMapping("/")
+	public ResponseEntity<List<ProjectProposalListItem>> getProjectProposals(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestParam(name = "status", required = false) ProcessStatus status){
+		return new ResponseEntity<>(projProposalService.getProjectProposalRequests(principal.getUserId(), status), HttpStatus.OK);
+	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@PostMapping("/commence")

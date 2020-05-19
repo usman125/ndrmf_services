@@ -2,12 +2,14 @@ package com.ndrmf.engine.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
+import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.dto.SectionItem;
 import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalSection;
@@ -150,5 +152,22 @@ public class ProjectProposalService {
 		});
 		
 		return dto;
+	}
+	
+	public List<ProjectProposalListItem> getProjectProposalRequests(UUID userId, ProcessStatus status){
+		List<ProjectProposal> props;
+		
+		if(status == null) {
+			props = projProposalRepo.findAllRequestsForOwnerOrInitiator(userId);
+		}
+		else {
+			props = projProposalRepo.findRequestsForOwnerOrInitiatorByStatus(userId, status.getPersistenceValue());
+		}
+		
+		List<ProjectProposalListItem> dtos = props.stream()
+				.map(q -> new ProjectProposalListItem(q.getId(), q.getName(), q.getThematicArea().getName(), q.getInitiatedBy().getFullName(), q.getCreatedDate(), q.getStatus()))
+				.collect(Collectors.toList());
+		
+		return dtos;
 	}
 }
