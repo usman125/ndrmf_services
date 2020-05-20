@@ -76,7 +76,9 @@ public class SettingService {
 		dto.setId(ta.getId());
 		dto.setEnabled(ta.isEnabled());
 		dto.setName(ta.getName());
-		dto.setProcessOwner(new UserLookupItem(ta.getProcessOwner().getId(), ta.getProcessOwner().getFullName()));
+		if(ta.getProcessOwner() != null) {
+			dto.setProcessOwner(new UserLookupItem(ta.getProcessOwner().getId(), ta.getProcessOwner().getFullName()));	
+		}
 		
 		return dto;
 	}
