@@ -47,6 +47,7 @@ public class ProjectProposalService {
 		p.setInitiatedBy(userRepo.getOne(initiatorUserId));
 		p.setProcessOwner(this.getProcessOwnerForThematicArea(body.getThematicAreaId()));
 		p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
+		p.setThematicArea(thematicAreaRepo.getOne(body.getThematicAreaId()));
 		
 		List<SectionTemplate> sts = 
 				sectionTemplateRepo.findTemplatesForProcessType(ProcessType.PROJECT_PROPOSAL.toString());
