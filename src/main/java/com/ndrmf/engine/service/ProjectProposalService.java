@@ -38,6 +38,9 @@ public class ProjectProposalService {
 	@Autowired private ProjectProposalTaskRepository ptaskRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
+		if(body.getThematicAreaId() == null) {
+			throw new ValidationException("Thematic area cannot be null");
+		}
 		ProjectProposal p = new ProjectProposal();
 		
 		p.setName(body.getName());
