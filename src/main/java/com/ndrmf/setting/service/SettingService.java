@@ -60,7 +60,7 @@ public class SettingService {
 		return dtos;
 	}
 	
-	public void addThematicArea(AddThematicAreaRequest body) {
+	public ThematicAreaItem addThematicArea(AddThematicAreaRequest body) {
 		ThematicArea ta = new ThematicArea();
 		ta.setName(body.getName());
 		ta.setEnabled(body.isEnabled());
@@ -69,7 +69,16 @@ public class SettingService {
 			ta.setProcessOwner(userRepo.getOne(body.getProcessOwnerId()));
 		}
 		
-		thematicAreaRepo.save(ta);
+		ta = thematicAreaRepo.save(ta);
+		
+		ThematicAreaItem dto = new ThematicAreaItem();
+		
+		dto.setId(ta.getId());
+		dto.setEnabled(ta.isEnabled());
+		dto.setName(ta.getName());
+		dto.setProcessOwner(new UserLookupItem(ta.getProcessOwner().getId(), ta.getProcessOwner().getFullName()));
+		
+		return dto;
 	}
 	
 	public List<ThematicAreaItem> getAllThematicAreas() {

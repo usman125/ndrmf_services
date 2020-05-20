@@ -10,6 +10,10 @@ public class ThematicAreaItem {
 	private UserLookupItem processOwner;
 	private boolean enabled;
 	
+	public ThematicAreaItem() {
+		
+	}
+	
 	public ThematicAreaItem(UUID id, String name, UserLookupItem processOwner, boolean enabled) {
 		this.id = id;
 		this.name = name;

@@ -43,7 +43,7 @@ public class ProjectProposalController {
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@PostMapping("/commence")
-	public ResponseEntity<?> startQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal,
+	public ResponseEntity<?> commentProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestBody CommenceProjectProposalRequest body){
 		Map<String, UUID> dto = new HashMap<>();
 		dto.put("id", projProposalService.commenceProjectProposal(principal.getUserId(), body));

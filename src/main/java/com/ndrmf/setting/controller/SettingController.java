@@ -66,10 +66,10 @@ public class SettingController {
 	
 	@RolesAllowed(SystemRoles.ADMIN)
 	@PostMapping("/thematic-area/add")
-	public ResponseEntity<ApiResponse> addThematicArea(@RequestBody @Valid AddThematicAreaRequest body){
-		settingService.addThematicArea(body);
+	public ResponseEntity<ThematicAreaItem> addThematicArea(@RequestBody @Valid AddThematicAreaRequest body){
+		ThematicAreaItem dto = settingService.addThematicArea(body);
 		
-		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Thematic Area added"), HttpStatus.CREATED);
+		return new ResponseEntity<ThematicAreaItem>(dto, HttpStatus.CREATED);
 	}
 	
 	@RolesAllowed(SystemRoles.ADMIN)
