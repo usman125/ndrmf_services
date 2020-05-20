@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
+import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
 import com.ndrmf.engine.dto.SectionItem;
 import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalSection;
@@ -26,8 +27,10 @@ import com.ndrmf.setting.repository.ThematicAreaRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
+import com.ndrmf.util.enums.ReassignmentStatus;
 
 @Service
 public class ProjectProposalService {
@@ -173,5 +176,40 @@ public class ProjectProposalService {
 				.collect(Collectors.toList());
 		
 		return dtos;
+	}
+	
+	public void submitSection(UUID userId, UUID requestId, ProjectProposalSectionRequest body, FormAction action) {
+		ProjectProposal p = projProposalRepo.findById(requestId)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		if(!p.getStatus().equals(ProcessStatus.DRAFT.getPersistenceValue())
+				&& !p.getStatus().equals(ProcessStatus.REASSIGNED.getPersistenceValue())) {
+			throw new ValidationException("Request is already: " + p.getStatus());
+		}
+		
+		ProjectProposalSection section =
+				p.getSections().stream().filter(s -> s.getId().equals(body.getId()))
+				.findAny()
+				.orElseThrow(() -> new ValidationException("Invalid ID"));
+		
+		section.setData(body.getData());
+		
+		if(action == FormAction.SAVE) {
+			p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());	
+		}
+		else if(action == FormAction.SUBMIT) {
+			p.setStatus(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
+		}
+		
+		if(section.getReassignmentStatus() != null && section.getReassignmentStatus().equals(ReassignmentStatus.PENDING.getPersistenceValue())) {
+			section.setReassignmentStatus(ReassignmentStatus.COMPLETED.getPersistenceValue());
+		}
+		
+		projProposalRepo.save(p);
+		
+		if(action == FormAction.SUBMIT) {
+			//TODO raise event
+			//eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));	
+		}
 	}
 }

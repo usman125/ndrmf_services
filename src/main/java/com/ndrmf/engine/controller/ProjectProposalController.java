@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,12 +20,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
+import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
 import com.ndrmf.engine.service.ProjectProposalService;
 import com.ndrmf.util.constants.SystemRoles;
+import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 
 import io.swagger.annotations.Api;
@@ -54,5 +58,16 @@ public class ProjectProposalController {
 	public ResponseEntity<ProjectProposalItem> getProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "id", required = true) UUID id){
 		return new ResponseEntity<>(projProposalService.getProjectProposalRequest(id, principal.getUserId()), HttpStatus.OK);
+	}
+	
+	@RolesAllowed(SystemRoles.ORG_FIP)
+	@PostMapping("/{requestId}/section/add")
+	public ResponseEntity<ApiResponse> submitSection(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestParam(name = "action", required = true) FormAction action,
+			@PathVariable(name = "requestId", required = true) UUID requestId,
+			@RequestBody @Valid ProjectProposalSectionRequest body){
+		projProposalService.submitSection(principal.getUserId(), requestId, body, action);
+	
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section saved successfully."), HttpStatus.CREATED);
 	}
 }
