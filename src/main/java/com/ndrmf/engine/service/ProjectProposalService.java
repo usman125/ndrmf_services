@@ -1,21 +1,29 @@
 package com.ndrmf.engine.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
+import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
+import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
+import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
 import com.ndrmf.engine.dto.SectionItem;
+import com.ndrmf.engine.model.PreliminaryAppraisal;
 import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalSection;
 import com.ndrmf.engine.model.ProjectProposalSectionReview;
 import com.ndrmf.engine.model.ProjectProposalTask;
+import com.ndrmf.engine.repository.PreliminaryAppraisalRepository;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
 import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
 import com.ndrmf.exception.ValidationException;
@@ -27,6 +35,7 @@ import com.ndrmf.setting.repository.ThematicAreaRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.user.service.UserService;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
@@ -39,6 +48,8 @@ public class ProjectProposalService {
 	@Autowired private ThematicAreaRepository thematicAreaRepo;
 	@Autowired private UserRepository userRepo;
 	@Autowired private ProjectProposalTaskRepository ptaskRepo;
+	@Autowired private UserService userService;
+	@Autowired private PreliminaryAppraisalRepository preAppRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -211,5 +222,89 @@ public class ProjectProposalService {
 			//TODO raise event
 			//eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));	
 		}
+	}
+	
+	@Transactional
+	public void proposalSubmittedPostProcessor(ProjectProposal proposal) {
+		List<SectionTemplate> sts = 
+				sectionTemplateRepo.findTemplatesForProcessType(ProcessType.PRELIMINARY_APPRAISAL.toString());
+		
+		if(sts == null || sts.size() == 0) {
+			throw new ValidationException("No template defined for PRELIMINARY_APPRAISAL process");
+		}
+		
+		PreliminaryAppraisal appraisal = new PreliminaryAppraisal();
+		
+		User dmPAM = userService.getDMPAM()
+				.orElseThrow(() -> new ValidationException("No DM PAM is defined in the system"));
+		
+		appraisal.setAssignee(dmPAM);
+		appraisal.setPassingScore(sts.get(0).getPassingScore());
+		appraisal.setTotalScore(sts.get(0).getTotalScore());
+		appraisal.setTemplateType(sts.get(0).getTemplateType());
+		appraisal.setTemplate(sts.get(0).getTemplate());
+		appraisal.setStatus(ProcessStatus.PENDING.getPersistenceValue());
+		
+		proposal.setPreAppraisal(appraisal);
+	}
+	
+	@Transactional
+	public void addPreliminaryAppraisal(UUID userId, UUID proposalId, PreliminaryAppraisalRequest body) {
+		ProjectProposal proposal = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
+		
+		PreliminaryAppraisal appraisal = proposal.getPreAppraisal();
+		
+		User dmPAM = userService.getDMPAM()
+				.orElseThrow(() -> new ValidationException("No DM PAM is defined in the system"));
+		
+		if(!dmPAM.getId().equals(userId)) {
+			throw new ValidationException("Only DM PAM can add Pre-Appriasal. Authorized User is: "+dmPAM.getFullName());
+		}
+		
+		appraisal.setData(body.getData());
+		appraisal.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+		
+		proposal.setPreAppraisal(appraisal);
+	}
+	
+	public List<PreliminaryAppraisalListItem> getAllPreliminaryAppraisals(UUID userId, ProcessStatus status) {
+		List<PreliminaryAppraisal> preApps;
+		
+		if(status != null) {
+			preApps = preAppRepo.findAllAppraisalsForAssigneeAndStatus(userId, status.getPersistenceValue());
+		}
+		else {
+			preApps = preAppRepo.findAllAppraisalsForAssignee(userId);
+		}
+		
+		List<PreliminaryAppraisalListItem> dtos = new ArrayList<>();
+		
+		preApps.forEach(p -> {
+			PreliminaryAppraisalListItem dto = new PreliminaryAppraisalListItem();
+			
+			dto.setFipName(p.getProposalRef().getInitiatedBy().getFullName());
+			dto.setId(p.getId());
+			dto.setProposalId(p.getProposalRef().getId());
+			dto.setProposalName(p.getProposalRef().getName());
+			
+			dtos.add(dto);
+		});
+		
+		return dtos;
+	}
+	
+	public PreliminaryAppraisalItem getPreliminaryAppraisal(UUID id) {
+		PreliminaryAppraisal preApp = preAppRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid Appraisal ID"));
+		
+		PreliminaryAppraisalItem dto = new PreliminaryAppraisalItem();
+		
+		dto.setData(preApp.getData());
+		dto.setId(preApp.getId());
+		dto.setProposalName(preApp.getName());
+		dto.setTemplate(preApp.getTemplate());
+		
+		return dto;
 	}
 }

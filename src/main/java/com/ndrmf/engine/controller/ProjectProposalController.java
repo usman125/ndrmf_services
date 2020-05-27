@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
+import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
+import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
+import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
@@ -69,5 +72,24 @@ public class ProjectProposalController {
 		projProposalService.submitSection(principal.getUserId(), requestId, body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section saved successfully."), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/{proposalId}/pre-appraisal/add")
+	public ResponseEntity<ApiResponse> addPreliminaryAppraisal(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody PreliminaryAppraisalRequest body){
+		projProposalService.addPreliminaryAppraisal(principal.getUserId(), proposalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "Pre-Appraisal added successfully"), HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/pre-appraisal")
+	public ResponseEntity<List<PreliminaryAppraisalListItem>> getPreliminaryAppraisals(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestParam(name = "status", required = false) ProcessStatus status){
+		return new ResponseEntity<>(projProposalService.getAllPreliminaryAppraisals(principal.getUserId(), status), HttpStatus.OK);
+	}
+	
+	@GetMapping("/pre-appraisal/{id}")
+	public ResponseEntity<PreliminaryAppraisalItem> getPreliminaryAppraisal(@PathVariable(name = "id", required = true) UUID id){
+		return new ResponseEntity<>(projProposalService.getPreliminaryAppraisal(id), HttpStatus.OK);
 	}
 }

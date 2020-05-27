@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.ndrmf.config.audit.Auditable;
@@ -30,6 +31,7 @@ public class ProjectProposal extends Auditable<String> {
 	private User processOwner;
 	private String status;
 	private List<ProjectProposalSection> sections;
+	private PreliminaryAppraisal preAppraisal;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -97,5 +99,14 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setThematicArea(ThematicArea thematicArea) {
 		this.thematicArea = thematicArea;
+	}
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "pre_appraisal_id", referencedColumnName = "id")
+	public PreliminaryAppraisal getPreAppraisal() {
+		return preAppraisal;
+	}
+	public void setPreAppraisal(PreliminaryAppraisal preAppraisal) {
+		this.preAppraisal = preAppraisal;
 	}
 }

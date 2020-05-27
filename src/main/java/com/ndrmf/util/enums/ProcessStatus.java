@@ -7,7 +7,9 @@ public enum ProcessStatus {
 	DEFERRED("Deferred"),
 	REJECTED("Rejected"),
 	NOT_INITIATED("Not Initiated"),
-	REASSIGNED("Re Assigned");
+	REASSIGNED("Re Assigned"),
+	PENDING("Pending"),
+	COMPLETED("Completed");
 	
 	private final String persistenceValue;
 	

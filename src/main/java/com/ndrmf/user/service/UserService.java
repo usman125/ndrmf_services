@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -236,5 +237,15 @@ public class UserService {
 		List<RoleItem> dtos = roles.stream().map(r -> new RoleItem(r.getId(), r.getName())).collect(Collectors.toList());
 		
 		return dtos;
+	}
+	
+	public Optional<User> getDMPAM() {
+		List<User> users = userRepo.findActiveUsersForRole(SystemRoles.DM_PAM);
+		
+		if(users == null || users.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return Optional.of(users.get(0));
 	}
 }

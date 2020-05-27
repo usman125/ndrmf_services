@@ -15,4 +15,6 @@ public class SystemRoles {
 	public static final String PROCESS_OWNER = "PROCESS OWNER";
 	
 	public static final String ACCREDITED = "ACCREDITED";
+	
+	public static final String DM_PAM = "DM PAM";
 }
