@@ -175,12 +175,14 @@ public class ProjectProposalService {
 			
 			preAppItem.setData(p.getPreAppraisal().getData());
 			preAppItem.setId(p.getPreAppraisal().getId());
-			preAppItem.setProposalName(p.getPreAppraisal().getName());
+			preAppItem.setProposalName(p.getName());
 			preAppItem.setTemplate(p.getPreAppraisal().getTemplate());
 			preAppItem.setStartDate(p.getPreAppraisal().getStartDate());
 			preAppItem.setEndDate(p.getPreAppraisal().getEndDate());
 			preAppItem.setAssigned(p.getPreAppraisal().getAssignee().getId().equals(userId));
 			preAppItem.setStatus(p.getPreAppraisal().getStatus());
+			
+			dto.setPreAppraisal(preAppItem);
 		}
 		
 		return dto;
@@ -193,7 +195,7 @@ public class ProjectProposalService {
 			props = projProposalRepo.findAllRequestsForOwnerOrInitiator(userId);
 		}
 		else {
-			props = projProposalRepo.findRequestsForOwnerOrInitiatorByStatus(userId, status.getPersistenceValue());
+			props = projProposalRepo.findRequestsForOwnerOrInitiatorOrDMPAMByStatus(userId, status.getPersistenceValue());
 		}
 		
 		List<ProjectProposalListItem> dtos = props.stream()
