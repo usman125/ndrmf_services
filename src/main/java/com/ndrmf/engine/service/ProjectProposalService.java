@@ -180,6 +180,7 @@ public class ProjectProposalService {
 			preAppItem.setStartDate(p.getPreAppraisal().getStartDate());
 			preAppItem.setEndDate(p.getPreAppraisal().getEndDate());
 			preAppItem.setAssigned(p.getPreAppraisal().getAssignee().getId().equals(userId));
+			preAppItem.setStatus(p.getPreAppraisal().getStatus());
 		}
 		
 		return dto;
@@ -265,6 +266,8 @@ public class ProjectProposalService {
 		
 		proposal.setPreAppraisal(appraisal);
 		proposal.setStatus(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue());
+		
+		projProposalRepo.save(proposal);
 	}
 	
 	@Transactional

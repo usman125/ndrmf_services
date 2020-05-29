@@ -102,7 +102,7 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	
 	@OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "pre_appraisal_id", referencedColumnName = "id")
+    @JoinColumn(name = "pre_appraisal_id")
 	public PreliminaryAppraisal getPreAppraisal() {
 		return preAppraisal;
 	}
