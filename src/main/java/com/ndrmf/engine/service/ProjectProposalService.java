@@ -10,8 +10,11 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
+import com.ndrmf.engine.dto.ExtendedAppraisalItem;
+import com.ndrmf.engine.dto.ExtendedAppraisalItem.ExtendedAppraisalSectionItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
@@ -19,11 +22,14 @@ import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
 import com.ndrmf.engine.dto.SectionItem;
+import com.ndrmf.engine.model.ExtendedAppraisal;
+import com.ndrmf.engine.model.ExtendedAppraisalSection;
 import com.ndrmf.engine.model.PreliminaryAppraisal;
 import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalSection;
 import com.ndrmf.engine.model.ProjectProposalSectionReview;
 import com.ndrmf.engine.model.ProjectProposalTask;
+import com.ndrmf.engine.repository.ExtendedAppraisalRepository;
 import com.ndrmf.engine.repository.PreliminaryAppraisalRepository;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
 import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
@@ -51,6 +57,7 @@ public class ProjectProposalService {
 	@Autowired private ProjectProposalTaskRepository ptaskRepo;
 	@Autowired private UserService userService;
 	@Autowired private PreliminaryAppraisalRepository preAppRepo;
+	@Autowired private ExtendedAppraisalRepository extAppRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -249,14 +256,13 @@ public class ProjectProposalService {
 			throw new ValidationException("No template defined for PRELIMINARY_APPRAISAL process");
 		}
 		
+		User dmPAM = userService.getDMPAM()
+				.orElseThrow(() -> new ValidationException("No DM PAM is defined in the system"));
+		
 		ProjectProposal proposal = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
 		
 		PreliminaryAppraisal appraisal = new PreliminaryAppraisal();
-		
-		User dmPAM = userService.getDMPAM()
-				.orElseThrow(() -> new ValidationException("No DM PAM is defined in the system"));
-		
 		appraisal.setAssignee(dmPAM);
 		appraisal.setPassingScore(sts.get(0).getPassingScore());
 		appraisal.setTotalScore(sts.get(0).getTotalScore());
@@ -268,8 +274,6 @@ public class ProjectProposalService {
 		
 		proposal.setPreAppraisal(appraisal);
 		proposal.setStatus(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue());
-		
-		projProposalRepo.save(proposal);
 	}
 	
 	@Transactional
@@ -328,6 +332,74 @@ public class ProjectProposalService {
 		dto.setId(preApp.getId());
 		dto.setProposalName(preApp.getName());
 		dto.setTemplate(preApp.getTemplate());
+		
+		return dto;
+	}
+	
+	@Transactional
+	public ExtendedAppraisalItem commenceExtendedAppraisal(UUID processOwnerId, UUID proposalId, CommenceExtendedAppraisalRequest body) {
+		List<SectionTemplate> sts = 
+				sectionTemplateRepo.findTemplatesForProcessType(ProcessType.EXTENDED_APPRAISAL.toString());
+		
+		if(sts == null || sts.size() == 0) {
+			throw new ValidationException("No template defined for EXTENDED_APPRAISAL process");
+		}
+		
+		User dmPAM = userService.getDMPAM()
+				.orElseThrow(() -> new ValidationException("No DM PAM is defined in the system"));
+		
+		ProjectProposal proposal = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
+		
+		ExtendedAppraisal e = new ExtendedAppraisal();
+		e.setAssignee(dmPAM);
+		e.setComments(body.getComments());
+		e.setStartDate(body.getStartDate());
+		e.setEndDate(body.getEndDate());
+		e.setStatus(ProcessStatus.PENDING.getPersistenceValue());
+		
+		for(SectionTemplate t: sts) {
+			ExtendedAppraisalSection s = new ExtendedAppraisalSection();
+			s.setSme(t.getSection().getSme());
+			s.setTemplate(t.getTemplate());
+			s.setTemplateType(t.getTemplateType());
+			s.setStatus(ProcessStatus.PENDING.getPersistenceValue());
+			s.setSectionRef(t.getSection());
+			
+			e.addSection(s);
+		}
+		
+		proposal.setExtendedAppraisal(e);
+		
+		proposal.setStatus(ProcessStatus.EXTENDED_APPRAISAL.getPersistenceValue());
+		
+		try {
+			proposal = projProposalRepo.save(proposal);
+			e = proposal.getExtendedAppraisal();
+		} catch(Exception ex) {
+			throw new RuntimeException("An error occurred while commencing Extended Appraisal", ex);
+		}
+		
+		ExtendedAppraisalItem dto = new ExtendedAppraisalItem();
+		dto.setAssigned(e.getAssignee().getId().equals(processOwnerId));
+		dto.setAssignee(new UserLookupItem(e.getAssignee().getId(), e.getAssignee().getFullName()));
+		dto.setComments(e.getComments());
+		dto.setEndDate(e.getEndDate());
+		dto.setStartDate(e.getStartDate());
+		dto.setStatus(e.getStatus());
+		
+		e.getSections().forEach(s -> {
+			ExtendedAppraisalSectionItem item = new ExtendedAppraisalSectionItem();
+			item.setAssigned(s.getSme().getId().equals(processOwnerId));
+			item.setData(s.getData());
+			item.setId(s.getId());
+			item.setSme(new UserLookupItem(s.getSme().getId(), s.getSme().getFullName()));
+			item.setStatus(s.getStatus());
+			item.setTemplate(s.getTemplate());
+			item.setTemplateType(s.getTemplateType());
+			
+			dto.addSection(item);
+		});
 		
 		return dto;
 	}

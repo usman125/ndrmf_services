@@ -32,6 +32,7 @@ public class ProjectProposal extends Auditable<String> {
 	private String status;
 	private List<ProjectProposalSection> sections;
 	private PreliminaryAppraisal preAppraisal;
+	private ExtendedAppraisal extendedAppraisal;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -108,5 +109,14 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setPreAppraisal(PreliminaryAppraisal preAppraisal) {
 		this.preAppraisal = preAppraisal;
+	}
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ext_appraisal_id")
+	public ExtendedAppraisal getExtendedAppraisal() {
+		return extendedAppraisal;
+	}
+	public void setExtendedAppraisal(ExtendedAppraisal extendedAppraisal) {
+		this.extendedAppraisal = extendedAppraisal;
 	}
 }

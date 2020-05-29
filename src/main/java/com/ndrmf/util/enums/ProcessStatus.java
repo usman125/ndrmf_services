@@ -10,7 +10,8 @@ public enum ProcessStatus {
 	REASSIGNED("Re Assigned"),
 	PENDING("Pending"),
 	COMPLETED("Completed"),
-	PRELIMINARY_APPRAISAL("Preliminary Appraisal");
+	PRELIMINARY_APPRAISAL("Preliminary Appraisal"),
+	EXTENDED_APPRAISAL("Extended Appraisal");
 	
 	private final String persistenceValue;
 	

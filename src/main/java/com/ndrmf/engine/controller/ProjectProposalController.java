@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
+import com.ndrmf.engine.dto.ExtendedAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
@@ -100,5 +102,15 @@ public class ProjectProposalController {
 	@GetMapping("/pre-appraisal/{id}")
 	public ResponseEntity<PreliminaryAppraisalItem> getPreliminaryAppraisal(@PathVariable(name = "id", required = true) UUID id){
 		return new ResponseEntity<>(projProposalService.getPreliminaryAppraisal(id), HttpStatus.OK);
+	}
+	
+	@PostMapping("/{proposalId}/ext-appraisal/commence")
+	public ResponseEntity<ExtendedAppraisalItem> commenceExtendedAppraisal(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody CommenceExtendedAppraisalRequest body){
+		
+		ExtendedAppraisalItem dto = projProposalService.commenceExtendedAppraisal(principal.getUserId(), proposalId, body);
+		
+		return new ResponseEntity<ExtendedAppraisalItem>(dto, HttpStatus.CREATED);
 	}
 }
