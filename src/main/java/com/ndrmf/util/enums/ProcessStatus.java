@@ -9,7 +9,8 @@ public enum ProcessStatus {
 	NOT_INITIATED("Not Initiated"),
 	REASSIGNED("Re Assigned"),
 	PENDING("Pending"),
-	COMPLETED("Completed");
+	COMPLETED("Completed"),
+	PRELIMINARY_APPRAISAL("Preliminary Appraisal");
 	
 	private final String persistenceValue;
 	

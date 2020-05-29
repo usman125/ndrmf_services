@@ -1,5 +1,6 @@
 package com.ndrmf.engine.model;
 
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -9,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -32,6 +35,8 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	private ProjectProposal proposalRef;
 	private String status;
 	private User assignee;
+	private Date startDate;
+	private Date endDate;
 	
 	@Id
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -105,5 +110,21 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	}
 	public void setAssignee(User assignee) {
 		this.assignee = assignee;
+	}
+	
+	@Temporal(TemporalType.DATE)
+	public Date getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+	
+	@Temporal(TemporalType.DATE)
+	public Date getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 }

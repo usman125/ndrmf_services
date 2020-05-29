@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
@@ -74,7 +75,15 @@ public class ProjectProposalController {
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section saved successfully."), HttpStatus.CREATED);
 	}
 	
-	@PostMapping("/{proposalId}/pre-appraisal/add")
+	@PostMapping("/{proposalId}/pre-appraisal/commence")
+	public ResponseEntity<ApiResponse> commencePreliminaryAppraisal(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody CommencePreliminaryAppraisalRequest body){
+		projProposalService.commencePreliminaryAppraisal(principal.getUserId(), proposalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "Pre-Appraisal Commenced successfully"), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/{proposalId}/pre-appraisal/submit")
 	public ResponseEntity<ApiResponse> addPreliminaryAppraisal(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "proposalId") UUID proposalId,
 			@RequestBody PreliminaryAppraisalRequest body){

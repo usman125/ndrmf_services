@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
@@ -225,13 +226,16 @@ public class ProjectProposalService {
 	}
 	
 	@Transactional
-	public void proposalSubmittedPostProcessor(ProjectProposal proposal) {
+	public void commencePreliminaryAppraisal(UUID processOwnerId, UUID proposalId, CommencePreliminaryAppraisalRequest body) {
 		List<SectionTemplate> sts = 
 				sectionTemplateRepo.findTemplatesForProcessType(ProcessType.PRELIMINARY_APPRAISAL.toString());
 		
 		if(sts == null || sts.size() == 0) {
 			throw new ValidationException("No template defined for PRELIMINARY_APPRAISAL process");
 		}
+		
+		ProjectProposal proposal = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
 		
 		PreliminaryAppraisal appraisal = new PreliminaryAppraisal();
 		
@@ -243,9 +247,12 @@ public class ProjectProposalService {
 		appraisal.setTotalScore(sts.get(0).getTotalScore());
 		appraisal.setTemplateType(sts.get(0).getTemplateType());
 		appraisal.setTemplate(sts.get(0).getTemplate());
+		appraisal.setStartDate(body.getStartDate());
+		appraisal.setEndDate(body.getEndDate());
 		appraisal.setStatus(ProcessStatus.PENDING.getPersistenceValue());
 		
 		proposal.setPreAppraisal(appraisal);
+		proposal.setStatus(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue());
 	}
 	
 	@Transactional
