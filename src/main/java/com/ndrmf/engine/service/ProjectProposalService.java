@@ -170,6 +170,18 @@ public class ProjectProposalService {
 			dto.addSection(section);
 		});
 		
+		if(p.getPreAppraisal() != null) {
+			PreliminaryAppraisalItem preAppItem = new PreliminaryAppraisalItem();
+			
+			preAppItem.setData(p.getPreAppraisal().getData());
+			preAppItem.setId(p.getPreAppraisal().getId());
+			preAppItem.setProposalName(p.getPreAppraisal().getName());
+			preAppItem.setTemplate(p.getPreAppraisal().getTemplate());
+			preAppItem.setStartDate(p.getPreAppraisal().getStartDate());
+			preAppItem.setEndDate(p.getPreAppraisal().getEndDate());
+			preAppItem.setAssigned(p.getPreAppraisal().getAssignee().getId().equals(userId));
+		}
+		
 		return dto;
 	}
 	

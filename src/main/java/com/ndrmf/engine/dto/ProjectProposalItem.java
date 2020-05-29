@@ -15,7 +15,8 @@ public class ProjectProposalItem {
 	private List<SectionItem> sections;
 	private boolean owner;
 	private TaskItem reassignmentTask;
-	
+	private PreliminaryAppraisalItem preAppraisal;
+
 	public UserLookupItem getInitiatedBy() {
 		return initiatedBy;
 	}
@@ -78,5 +79,13 @@ public class ProjectProposalItem {
 
 	public void setReassignmentTask(TaskItem reassignmentTask) {
 		this.reassignmentTask = reassignmentTask;
+	}
+	
+	public PreliminaryAppraisalItem getPreAppraisal() {
+		return preAppraisal;
+	}
+
+	public void setPreAppraisal(PreliminaryAppraisalItem preAppraisal) {
+		this.preAppraisal = preAppraisal;
 	}
 }
