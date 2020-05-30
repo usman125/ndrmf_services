@@ -99,6 +99,12 @@ public class UserController {
     public ResponseEntity<List<UserLookupItem>> getUserHavingRoleSME(){
         return new ResponseEntity<List<UserLookupItem>>(userService.getActiveUsersForLookupByRole(SystemRoles.SME), HttpStatus.OK);
     }
+    
+    @RolesAllowed("ADMIN")
+    @GetMapping("/withRoleDMPAM")
+    public ResponseEntity<List<UserLookupItem>> getUserHavingRoleDMPAM(){
+        return new ResponseEntity<List<UserLookupItem>>(userService.getActiveUsersForLookupByRole(SystemRoles.DM_PAM), HttpStatus.OK);
+    }
 
     @RolesAllowed("ADMIN")
     @GetMapping("/role")
