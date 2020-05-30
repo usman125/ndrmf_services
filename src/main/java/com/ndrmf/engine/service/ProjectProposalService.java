@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
@@ -33,6 +34,7 @@ import com.ndrmf.engine.model.ProjectProposalTask;
 import com.ndrmf.engine.repository.ExtendedAppraisalRepository;
 import com.ndrmf.engine.repository.PreliminaryAppraisalRepository;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
+import com.ndrmf.engine.repository.ProjectProposalSectionRepository;
 import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.notification.dto.TaskItem;
@@ -48,6 +50,8 @@ import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
 import com.ndrmf.util.enums.ReassignmentStatus;
+import com.ndrmf.util.enums.ReviewStatus;
+import com.ndrmf.util.enums.TaskStatus;
 
 @Service
 public class ProjectProposalService {
@@ -59,6 +63,8 @@ public class ProjectProposalService {
 	@Autowired private UserService userService;
 	@Autowired private PreliminaryAppraisalRepository preAppRepo;
 	@Autowired private ExtendedAppraisalRepository extAppRepo;
+	@Autowired private ProjectProposalTaskRepository projPropTaskRepo;
+	@Autowired private ProjectProposalSectionRepository projPropSectionRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -457,5 +463,31 @@ public class ProjectProposalService {
 			a.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
 			//TODO Also update Proposal Status
 		}
+	}
+	
+	@Transactional
+	public void addProjectProposalTask(UUID sectionId, UUID currentUserId, AddProposalTaskRequest body) {
+		ProjectProposalSection section = projPropSectionRepo.findById(sectionId)
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+		
+		if(!section.getProposalRef().getProcessOwner().getId().equals(currentUserId)) {
+			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ section.getProposalRef().getProcessOwner().getFullName());
+		}
+		
+		ProjectProposalTask task = new ProjectProposalTask();
+		
+		task.setStartDate(body.getStartDate());
+		task.setEndDate(body.getEndDate());
+		task.setComments(body.getComments());
+		task.setSection(section);
+		task.setProposal(section.getProposalRef());
+		task.setAssignee(section.getSme());
+		task.setStatus(TaskStatus.PENDING.getPersistenceValue());
+		
+		section.setReviewStatus(ReviewStatus.PENDING.getPersistenceValue());
+		
+		projPropTaskRepo.save(task);
+		
+		//TODO - trigger notification event
 	}
 }

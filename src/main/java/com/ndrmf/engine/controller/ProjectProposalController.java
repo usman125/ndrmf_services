@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
@@ -123,5 +124,13 @@ public class ProjectProposalController {
 		projProposalService.submitExtendedAppraisalSection(principal.getUserId(), extendedAppraisalId, body);
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Section submitted successfully."), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/section/{sectionId}/task/add")
+	public ResponseEntity<ApiResponse> addTaskForProposalSection(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "sectionId", required = true) UUID sectionId,
+			@RequestBody @Valid AddProposalTaskRequest body){
+		projProposalService.addProjectProposalTask(sectionId, principal.getUserId(), body);
+		return new ResponseEntity<>(new ApiResponse(true, "Task added successfully."), HttpStatus.OK);
 	}
 }
