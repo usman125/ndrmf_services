@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
@@ -34,6 +35,7 @@ import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
+import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.engine.service.ProjectProposalService;
 import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.FormAction;
@@ -46,6 +48,7 @@ import io.swagger.annotations.Api;
 @RequestMapping("/project-proposal")
 public class ProjectProposalController {
 	@Autowired private ProjectProposalService projProposalService;
+	@Autowired private CommentService commentService;
 	
 	@GetMapping("/")
 	public ResponseEntity<List<ProjectProposalListItem>> getProjectProposals(@AuthenticationPrincipal AuthPrincipal principal,
@@ -132,5 +135,15 @@ public class ProjectProposalController {
 			@RequestBody @Valid AddProposalTaskRequest body){
 		projProposalService.addProjectProposalTask(sectionId, principal.getUserId(), body);
 		return new ResponseEntity<>(new ApiResponse(true, "Task added successfully."), HttpStatus.OK);
+	}
+	
+	@PostMapping("/section/{sectionId}/review/add")
+	public ResponseEntity<ApiResponse> addReview(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "sectionId", required = true) UUID sectionId,
+			@RequestBody @Valid AddProposalSectionReviewRequest body){
+		
+		commentService.addProjectProposalSectionReview(principal.getUserId(), sectionId, body);
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
 	}
 }

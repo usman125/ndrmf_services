@@ -2,7 +2,6 @@ package com.ndrmf.engine.model;
 
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,20 +13,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-
-@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
 @Table(name = "project_proposal_reviews")
 public class ProjectProposalSectionReview {
 
 	private long id;
-	private String controlWiseComments;
-	private String rating;
 	private String status;
 	private String comments;
 	private ProjectProposalSection sectionRef;
@@ -42,20 +32,6 @@ public class ProjectProposalSectionReview {
 		this.id = id;
 	}
 	
-	@Type(type = "jsonb")
-	@Column(columnDefinition = "jsonb")
-	public String getControlWiseComments() {
-		return controlWiseComments;
-	}
-	public void setControlWiseComments(String controlWiseComments) {
-		this.controlWiseComments = controlWiseComments;
-	}
-	public String getRating() {
-		return rating;
-	}
-	public void setRating(String rating) {
-		this.rating = rating;
-	}
 	public String getStatus() {
 		return status;
 	}

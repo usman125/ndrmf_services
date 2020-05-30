@@ -8,10 +8,16 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
 import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
+import com.ndrmf.engine.model.ProjectProposalSection;
+import com.ndrmf.engine.model.ProjectProposalSectionReview;
+import com.ndrmf.engine.model.ProjectProposalTask;
 import com.ndrmf.engine.model.QualificationSection;
 import com.ndrmf.engine.model.QualificationSectionReview;
 import com.ndrmf.engine.model.QualificationTask;
+import com.ndrmf.engine.repository.ProjectProposalSectionRepository;
+import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
 import com.ndrmf.engine.repository.QualificationSectionRepository;
 import com.ndrmf.engine.repository.QualificationTaskRepository;
 import com.ndrmf.exception.ValidationException;
@@ -22,6 +28,8 @@ import com.ndrmf.util.enums.TaskStatus;
 public class CommentService {
 	@Autowired private QualificationSectionRepository qualSectionRepo;
 	@Autowired private QualificationTaskRepository qtaskRepo;
+	@Autowired private ProjectProposalSectionRepository projPropSectionRepo;
+	@Autowired private ProjectProposalTaskRepository projPropTaskRepo;
 	
 	@Transactional
 	public void addQualificationSectionReview(UUID byUserId, UUID sectionId, AddQualificationSectionReviewRequest body) {
@@ -44,6 +52,30 @@ public class CommentService {
 		section.addReview(qsr);
 		
 		List<QualificationTask> tasks = qtaskRepo.findTasksForSectionAndAssignee(byUserId, sectionId);
+		
+		tasks.forEach(t -> {
+			t.setStatus(TaskStatus.COMPLETED.getPersistenceValue());
+		});
+	}
+	
+	@Transactional
+	public void addProjectProposalSectionReview(UUID byUserId, UUID sectionId, AddProposalSectionReviewRequest body) {
+		ProjectProposalSection section = projPropSectionRepo.findById(sectionId)
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+		
+		if(!section.getSme().getId().equals(byUserId)) {
+			throw new ValidationException("Only SME can add review for this section. Authorized SME is: " + section.getSme().getFullName());
+		}
+		
+		ProjectProposalSectionReview qsr = new ProjectProposalSectionReview();
+		qsr.setComments(body.getComments());
+		
+		section.setStatus(body.getStatus());
+		section.setReviewStatus(ReviewStatus.COMPLETED.getPersistenceValue());
+		
+		section.addReview(qsr);
+		
+		List<ProjectProposalTask> tasks = projPropTaskRepo.findTasksForSectionAndAssignee(byUserId, sectionId);
 		
 		tasks.forEach(t -> {
 			t.setStatus(TaskStatus.COMPLETED.getPersistenceValue());

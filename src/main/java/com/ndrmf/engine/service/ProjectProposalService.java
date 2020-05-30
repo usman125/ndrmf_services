@@ -170,14 +170,14 @@ public class ProjectProposalService {
 				
 				
 				section.setReview(latestReview.getCreatedDate(),
-						latestReview.getControlWiseComments(),
-						latestReview.getRating(),
+						null,
+						null,
 						latestReview.getStatus(),
 						latestReview.getComments());
 			
 				
 				qs.getReviews().forEach(r -> {
-					section.addReviewHistory(r.getCreatedDate(), r.getControlWiseComments(), r.getRating(), r.getStatus(), r.getComments());
+					section.addReviewHistory(r.getCreatedDate(), null, null, r.getStatus(), r.getComments());
 				});
 			}
 			
