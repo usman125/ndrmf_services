@@ -15,6 +15,7 @@ import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ExtendedAppraisalItem;
 import com.ndrmf.engine.dto.ExtendedAppraisalItem.ExtendedAppraisalSectionItem;
+import com.ndrmf.engine.dto.ExtendedAppraisalSectionRequest;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
@@ -29,6 +30,7 @@ import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalSection;
 import com.ndrmf.engine.model.ProjectProposalSectionReview;
 import com.ndrmf.engine.model.ProjectProposalTask;
+import com.ndrmf.engine.repository.ExtendedAppraisalRepository;
 import com.ndrmf.engine.repository.PreliminaryAppraisalRepository;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
 import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
@@ -56,6 +58,7 @@ public class ProjectProposalService {
 	@Autowired private ProjectProposalTaskRepository ptaskRepo;
 	@Autowired private UserService userService;
 	@Autowired private PreliminaryAppraisalRepository preAppRepo;
+	@Autowired private ExtendedAppraisalRepository extAppRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -237,8 +240,8 @@ public class ProjectProposalService {
 		return dtos;
 	}
 	
-	public void submitSection(UUID userId, UUID requestId, ProjectProposalSectionRequest body, FormAction action) {
-		ProjectProposal p = projProposalRepo.findById(requestId)
+	public void submitProposalSection(UUID userId, UUID proposalId, ProjectProposalSectionRequest body, FormAction action) {
+		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
 		if(!p.getStatus().equals(ProcessStatus.DRAFT.getPersistenceValue())
@@ -428,5 +431,31 @@ public class ProjectProposalService {
 		});
 		
 		return dto;
+	}
+	
+	@Transactional
+	public void submitExtendedAppraisalSection(UUID userId, UUID extAppraisalId, ExtendedAppraisalSectionRequest body) {
+		ExtendedAppraisal a = extAppRepo.findById(extAppraisalId)
+				.orElseThrow(() -> new ValidationException("Invalid Extended Appraisal ID"));
+		
+		ExtendedAppraisalSection section = a.getSections().stream()
+				.filter(s -> s.getId().equals(body.getId()))
+				.findAny()
+				.orElseThrow(() -> new ValidationException("Invalid ID"));
+		
+		if(!section.getSme().getId().equals(userId)) {
+			throw new ValidationException("Unauthorized. Authorized User is: " + section.getSme().getFullName());
+		}
+		
+		section.setData(body.getData());
+		section.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+		
+		boolean allSectionsCompleted = a.getSections().stream()
+				.allMatch(s -> s.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue()));
+		
+		if(allSectionsCompleted) {
+			a.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+			//TODO Also update Proposal Status
+		}
 	}
 }

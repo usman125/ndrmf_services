@@ -26,6 +26,7 @@ import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ExtendedAppraisalItem;
+import com.ndrmf.engine.dto.ExtendedAppraisalSectionRequest;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
@@ -67,12 +68,12 @@ public class ProjectProposalController {
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
-	@PostMapping("/{requestId}/section/add")
+	@PostMapping("/{proposalId}/section/add")
 	public ResponseEntity<ApiResponse> submitSection(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestParam(name = "action", required = true) FormAction action,
-			@PathVariable(name = "requestId", required = true) UUID requestId,
+			@PathVariable(name = "proposalId", required = true) UUID proposalId,
 			@RequestBody @Valid ProjectProposalSectionRequest body){
-		projProposalService.submitSection(principal.getUserId(), requestId, body, action);
+		projProposalService.submitProposalSection(principal.getUserId(), proposalId, body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section saved successfully."), HttpStatus.CREATED);
 	}
@@ -112,5 +113,15 @@ public class ProjectProposalController {
 		ExtendedAppraisalItem dto = projProposalService.commenceExtendedAppraisal(principal.getUserId(), proposalId, body);
 		
 		return new ResponseEntity<ExtendedAppraisalItem>(dto, HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/ext-appraisal/{extendedAppraisalId}/section/submit")
+	public ResponseEntity<ApiResponse> submitExtendedAppraisalSection(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "extendedAppraisalId") UUID extendedAppraisalId,
+			@RequestBody ExtendedAppraisalSectionRequest body){
+		
+		projProposalService.submitExtendedAppraisalSection(principal.getUserId(), extendedAppraisalId, body);
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Section submitted successfully."), HttpStatus.CREATED);
 	}
 }
