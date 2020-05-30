@@ -16,6 +16,7 @@ public class ProjectProposalItem {
 	private boolean owner;
 	private TaskItem reassignmentTask;
 	private PreliminaryAppraisalItem preAppraisal;
+	private ExtendedAppraisalItem extendedAppraisal;
 
 	public UserLookupItem getInitiatedBy() {
 		return initiatedBy;
@@ -87,5 +88,13 @@ public class ProjectProposalItem {
 
 	public void setPreAppraisal(PreliminaryAppraisalItem preAppraisal) {
 		this.preAppraisal = preAppraisal;
+	}
+
+	public ExtendedAppraisalItem getExtendedAppraisal() {
+		return extendedAppraisal;
+	}
+
+	public void setExtendedAppraisal(ExtendedAppraisalItem extendedAppraisal) {
+		this.extendedAppraisal = extendedAppraisal;
 	}
 }

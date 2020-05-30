@@ -29,7 +29,6 @@ import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalSection;
 import com.ndrmf.engine.model.ProjectProposalSectionReview;
 import com.ndrmf.engine.model.ProjectProposalTask;
-import com.ndrmf.engine.repository.ExtendedAppraisalRepository;
 import com.ndrmf.engine.repository.PreliminaryAppraisalRepository;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
 import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
@@ -57,7 +56,6 @@ public class ProjectProposalService {
 	@Autowired private ProjectProposalTaskRepository ptaskRepo;
 	@Autowired private UserService userService;
 	@Autowired private PreliminaryAppraisalRepository preAppRepo;
-	@Autowired private ExtendedAppraisalRepository extAppRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -192,6 +190,33 @@ public class ProjectProposalService {
 			dto.setPreAppraisal(preAppItem);
 		}
 		
+		if(p.getExtendedAppraisal() != null) {
+			ExtendedAppraisal e = p.getExtendedAppraisal();
+			ExtendedAppraisalItem eaItem = new ExtendedAppraisalItem();
+			eaItem.setId(e.getId());
+			eaItem.setAssigned(e.getAssignee().getId().equals(userId));
+			eaItem.setAssignee(new UserLookupItem(e.getAssignee().getId(), e.getAssignee().getFullName()));
+			eaItem.setComments(e.getComments());
+			eaItem.setEndDate(e.getEndDate());
+			eaItem.setStartDate(e.getStartDate());
+			eaItem.setStatus(e.getStatus());
+			
+			e.getSections().forEach(s -> {
+				ExtendedAppraisalSectionItem item = new ExtendedAppraisalSectionItem();
+				item.setAssigned(s.getSme().getId().equals(userId));
+				item.setData(s.getData());
+				item.setId(s.getId());
+				item.setSme(new UserLookupItem(s.getSme().getId(), s.getSme().getFullName()));
+				item.setStatus(s.getStatus());
+				item.setTemplate(s.getTemplate());
+				item.setTemplateType(s.getTemplateType());
+				
+				eaItem.addSection(item);
+			});
+			
+			dto.setExtendedAppraisal(eaItem);
+		}
+		
 		return dto;
 	}
 	
@@ -199,10 +224,10 @@ public class ProjectProposalService {
 		List<ProjectProposal> props;
 		
 		if(status == null) {
-			props = projProposalRepo.findAllRequestsForOwnerOrInitiator(userId);
+			props = projProposalRepo.findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(userId);
 		}
 		else {
-			props = projProposalRepo.findRequestsForOwnerOrInitiatorOrDMPAMByStatus(userId, status.getPersistenceValue());
+			props = projProposalRepo.findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(userId, status.getPersistenceValue());
 		}
 		
 		List<ProjectProposalListItem> dtos = props.stream()
@@ -381,6 +406,7 @@ public class ProjectProposalService {
 		}
 		
 		ExtendedAppraisalItem dto = new ExtendedAppraisalItem();
+		dto.setId(e.getId());
 		dto.setAssigned(e.getAssignee().getId().equals(processOwnerId));
 		dto.setAssignee(new UserLookupItem(e.getAssignee().getId(), e.getAssignee().getFullName()));
 		dto.setComments(e.getComments());
