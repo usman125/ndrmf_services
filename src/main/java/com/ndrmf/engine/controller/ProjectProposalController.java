@@ -95,7 +95,7 @@ public class ProjectProposalController {
 	public ResponseEntity<ApiResponse> addPreliminaryAppraisal(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "proposalId") UUID proposalId,
 			@RequestBody PreliminaryAppraisalRequest body){
-		projProposalService.addPreliminaryAppraisal(principal.getUserId(), proposalId, body);
+		projProposalService.submitPreliminaryAppraisal(principal.getUserId(), proposalId, body);
 		return new ResponseEntity<>(new ApiResponse(true, "Pre-Appraisal added successfully"), HttpStatus.CREATED);
 	}
 	

@@ -31,6 +31,7 @@ public class ExtendedAppraisal extends Auditable<String> {
 	private User assignee;
 	private Date startDate;
 	private Date endDate;
+	private Date completedOn;
 	private String comments;
 	
 	private ProjectProposal proposalRef;
@@ -119,4 +120,11 @@ public class ExtendedAppraisal extends Auditable<String> {
 		this.sections.add(section);
 	}
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	public Date getCompletedOn() {
+		return completedOn;
+	}
+	public void setCompletedOn(Date completedOn) {
+		this.completedOn = completedOn;
+	}
 }

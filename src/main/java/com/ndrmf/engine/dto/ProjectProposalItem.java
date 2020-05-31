@@ -11,6 +11,7 @@ public class ProjectProposalItem {
 	private UserLookupItem initiatedBy;
 	private UserLookupItem processOwner;
 	private String status;
+	private String subStatus;
 	private Date submittedAt;
 	private List<SectionItem> sections;
 	private boolean owner;
@@ -96,5 +97,13 @@ public class ProjectProposalItem {
 
 	public void setExtendedAppraisal(ExtendedAppraisalItem extendedAppraisal) {
 		this.extendedAppraisal = extendedAppraisal;
+	}
+
+	public String getSubStatus() {
+		return subStatus;
+	}
+
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 }

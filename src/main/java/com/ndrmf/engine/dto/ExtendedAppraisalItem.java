@@ -12,6 +12,7 @@ public class ExtendedAppraisalItem {
 	private UserLookupItem assignee;
 	private Date startDate;
 	private Date endDate;
+	private Date completedDate;
 	private String comments;
 	private boolean assigned;
 	private String status;
@@ -87,6 +88,13 @@ public class ExtendedAppraisalItem {
 		}
 		
 		this.sections.add(section);
+	}
+	
+	public Date getCompletedDate() {
+		return completedDate;
+	}
+	public void setCompletedDate(Date completedDate) {
+		this.completedDate = completedDate;
 	}
 
 	public static class ExtendedAppraisalSectionItem {

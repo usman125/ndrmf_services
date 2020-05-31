@@ -1,6 +1,7 @@
 package com.ndrmf.engine.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -42,6 +45,7 @@ public class ProjectProposalSection extends Auditable<String>{
 	private Integer smeScore;
 	private String status;
 	private String reviewStatus;
+	private Date reviewCompletedOn;
 	private String reassignmentStatus;
 	private List<ProjectProposalSectionReview> reviews;
 	
@@ -181,5 +185,13 @@ public class ProjectProposalSection extends Auditable<String>{
 		}
 		
 		this.revisionNo = 1;
+	}
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	public Date getReviewCompletedOn() {
+		return reviewCompletedOn;
+	}
+	public void setReviewCompletedOn(Date reviewCompletedOn) {
+		this.reviewCompletedOn = reviewCompletedOn;
 	}
 }

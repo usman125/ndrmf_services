@@ -20,6 +20,7 @@ public class SectionItem {
 	private List<ReviewItem> reviewHistory;
 	private ReviewItem review;
 	private String reviewStatus;
+	private Date reviewCompletedDate;
 	private String reassignmentStatus;
 	
 	public UUID getId() {
@@ -122,5 +123,11 @@ public class SectionItem {
 	}
 	public void setReassignmentStatus(String reassignmentStatus) {
 		this.reassignmentStatus = reassignmentStatus;
+	}
+	public Date getReviewCompletedDate() {
+		return reviewCompletedDate;
+	}
+	public void setReviewCompletedDate(Date reviewCompletedDate) {
+		this.reviewCompletedDate = reviewCompletedDate;
 	}
 }

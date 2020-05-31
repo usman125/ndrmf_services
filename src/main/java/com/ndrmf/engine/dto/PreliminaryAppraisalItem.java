@@ -10,6 +10,7 @@ public class PreliminaryAppraisalItem {
 	private String data;
 	private Date startDate;
 	private Date endDate;
+	private Date completedDate;
 	private boolean assigned;
 	private String status;
 	
@@ -61,5 +62,11 @@ public class PreliminaryAppraisalItem {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public Date getCompletedDate() {
+		return completedDate;
+	}
+	public void setCompletedDate(Date completedDate) {
+		this.completedDate = completedDate;
 	}
 }

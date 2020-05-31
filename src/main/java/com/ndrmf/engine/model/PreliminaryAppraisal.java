@@ -39,6 +39,7 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	private User assignee;
 	private Date startDate;
 	private Date endDate;
+	private Date completedOn;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -129,5 +130,13 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	}
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
+	}
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	public Date getCompletedOn() {
+		return completedOn;
+	}
+	public void setCompletedOn(Date completedOn) {
+		this.completedOn = completedOn;
 	}
 }

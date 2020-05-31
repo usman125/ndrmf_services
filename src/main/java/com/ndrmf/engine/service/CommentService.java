@@ -1,5 +1,6 @@
 package com.ndrmf.engine.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -72,6 +73,7 @@ public class CommentService {
 		
 		section.setStatus(body.getStatus());
 		section.setReviewStatus(ReviewStatus.COMPLETED.getPersistenceValue());
+		section.setReviewCompletedOn(new Date());
 		
 		section.addReview(qsr);
 		

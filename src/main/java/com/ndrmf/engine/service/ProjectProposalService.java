@@ -1,6 +1,7 @@
 package com.ndrmf.engine.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -158,9 +159,8 @@ public class ProjectProposalService {
 			section.setTemplate(qs.getTemplate());
 			section.setTemplateType(qs.getTemplateType());
 			section.setTotalScore(qs.getTotalScore());
-			
 			section.setReviewStatus(qs.getReviewStatus());
-			
+			section.setReviewCompletedDate(qs.getReviewCompletedOn());
 			section.setReassignmentStatus(qs.getReassignmentStatus());
 			
 			
@@ -174,7 +174,6 @@ public class ProjectProposalService {
 						null,
 						latestReview.getStatus(),
 						latestReview.getComments());
-			
 				
 				qs.getReviews().forEach(r -> {
 					section.addReviewHistory(r.getCreatedDate(), null, null, r.getStatus(), r.getComments());
@@ -195,8 +194,10 @@ public class ProjectProposalService {
 			preAppItem.setEndDate(p.getPreAppraisal().getEndDate());
 			preAppItem.setAssigned(p.getPreAppraisal().getAssignee().getId().equals(userId));
 			preAppItem.setStatus(p.getPreAppraisal().getStatus());
+			preAppItem.setCompletedDate(p.getPreAppraisal().getCompletedOn());
 			
 			dto.setPreAppraisal(preAppItem);
+			dto.setSubStatus(p.getPreAppraisal().getStatus());
 		}
 		
 		if(p.getExtendedAppraisal() != null) {
@@ -209,6 +210,7 @@ public class ProjectProposalService {
 			eaItem.setEndDate(e.getEndDate());
 			eaItem.setStartDate(e.getStartDate());
 			eaItem.setStatus(e.getStatus());
+			eaItem.setCompletedDate(e.getCompletedOn());
 			
 			e.getSections().forEach(s -> {
 				ExtendedAppraisalSectionItem item = new ExtendedAppraisalSectionItem();
@@ -224,6 +226,7 @@ public class ProjectProposalService {
 			});
 			
 			dto.setExtendedAppraisal(eaItem);
+			dto.setSubStatus(e.getStatus());
 		}
 		
 		return dto;
@@ -311,7 +314,7 @@ public class ProjectProposalService {
 	}
 	
 	@Transactional
-	public void addPreliminaryAppraisal(UUID userId, UUID proposalId, PreliminaryAppraisalRequest body) {
+	public void submitPreliminaryAppraisal(UUID userId, UUID proposalId, PreliminaryAppraisalRequest body) {
 		ProjectProposal proposal = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
 		
@@ -326,6 +329,7 @@ public class ProjectProposalService {
 		
 		appraisal.setData(body.getData());
 		appraisal.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+		appraisal.setCompletedOn(new Date());
 		
 		proposal.setPreAppraisal(appraisal);
 	}
@@ -461,6 +465,7 @@ public class ProjectProposalService {
 		
 		if(allSectionsCompleted) {
 			a.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+			a.setCompletedOn(new Date());
 			//TODO Also update Proposal Status
 		}
 	}
