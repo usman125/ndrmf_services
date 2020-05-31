@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import com.ndrmf.engine.model.ProjectProposal;
 
 public interface ProjectProposalRepository extends JpaRepository<ProjectProposal, UUID>{
-	@Query(value = "SELECT p FROM ProjectProposal p "
+	@Query(value = "SELECT DISTINCT p FROM ProjectProposal p "
 			+ "JOIN p.processOwner po "
 			+ "JOIN p.initiatedBy ib "
 			+ "LEFT JOIN p.preAppraisal pa "
@@ -22,7 +22,7 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 			+ "AND p.status = :status")
 	List<ProjectProposal> findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(@Param("userId") UUID userId, @Param("status") String status);
 	
-	@Query(value = "SELECT p FROM ProjectProposal p "
+	@Query(value = "SELECT DISTINCT p FROM ProjectProposal p "
 			+ "JOIN p.processOwner po "
 			+ "JOIN p.initiatedBy ib "
 			+ "LEFT JOIN p.preAppraisal pa "
