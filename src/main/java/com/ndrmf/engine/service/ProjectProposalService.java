@@ -475,8 +475,11 @@ public class ProjectProposalService {
 		ProjectProposalSection section = projPropSectionRepo.findById(sectionId)
 				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
 		
-		if(!section.getProposalRef().getProcessOwner().getId().equals(currentUserId)) {
-			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ section.getProposalRef().getProcessOwner().getFullName());
+		User dmPAM = userService.getDMPAM()
+				.orElseThrow(() -> new ValidationException("Missing Configuration - DM PAM not defined"));
+		
+		if(!currentUserId.equals(dmPAM.getId())) {
+			throw new ValidationException("Only DM PAM can add tasks. Authorized user is: "+ dmPAM.getFullName());	
 		}
 		
 		ProjectProposalTask task = new ProjectProposalTask();
