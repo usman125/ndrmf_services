@@ -11,7 +11,11 @@ public enum ProcessStatus {
 	PENDING("Pending"),
 	COMPLETED("Completed"),
 	PRELIMINARY_APPRAISAL("Preliminary Appraisal"),
-	EXTENDED_APPRAISAL("Extended Appraisal");
+	EXTENDED_APPRAISAL("Extended Appraisal"),
+	TAC_MEETING("TAC Meeting"),
+	RMC_MEETING("RMC Meeting"),
+	BOD_MEETING("BOD Meeting"),
+	OFFER_LETTER("Offer Letter");
 	
 	private final String persistenceValue;
 	

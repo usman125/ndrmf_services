@@ -490,4 +490,16 @@ public class ProjectProposalService {
 		
 		//TODO - trigger notification event
 	}
+	
+	@Transactional
+	public void updateProposalStatus(UUID proposalId, UUID userId, ProcessStatus status) {
+		ProjectProposal p = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		if(!p.getProcessOwner().getId().equals(proposalId)) {
+			throw new ValidationException("Only Process Owner for this process can update the status. Authorized user is: "+ p.getProcessOwner().getFullName());
+		}
+		
+		p.setStatus(status.getPersistenceValue());
+	}
 }

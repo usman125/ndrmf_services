@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -145,5 +146,15 @@ public class ProjectProposalController {
 		commentService.addProjectProposalSectionReview(principal.getUserId(), sectionId, body);
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
+	}
+	
+	@PutMapping("/{id}")
+	public ResponseEntity<ApiResponse> updateProposalStatus(@PathVariable(name = "id", required = true) UUID proposalId,
+			@RequestParam(name = "status", required = true) ProcessStatus status,
+			@AuthenticationPrincipal AuthPrincipal principal){
+		
+		projProposalService.updateProposalStatus(proposalId, principal.getUserId(), status);
+	
+		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
 	}
 }
