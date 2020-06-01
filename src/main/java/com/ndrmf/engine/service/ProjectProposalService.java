@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
@@ -51,6 +52,7 @@ import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.user.service.UserService;
+import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
@@ -268,14 +270,27 @@ public class ProjectProposalService {
 		return dto;
 	}
 	
-	public List<ProjectProposalListItem> getProjectProposalRequests(UUID userId, ProcessStatus status){
+	public List<ProjectProposalListItem> getProjectProposalRequests(AuthPrincipal currentUser, ProcessStatus status){
 		List<ProjectProposal> props;
 		
-		if(status == null) {
-			props = projProposalRepo.findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(userId);
+		if(currentUser.getRoles() != null &&
+				(currentUser.getRoles().contains(SystemRoles.GM)
+				|| currentUser.getRoles().contains(SystemRoles.GM)
+				)) {
+			if(status == null) {
+				props = projProposalRepo.findAll();
+			}
+			else {
+				props = projProposalRepo.findAllRequestsByStatus(status.getPersistenceValue());
+			}
 		}
 		else {
-			props = projProposalRepo.findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(userId, status.getPersistenceValue());
+			if(status == null) {
+				props = projProposalRepo.findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(currentUser.getUserId());
+			}
+			else {
+				props = projProposalRepo.findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(currentUser.getUserId(), status.getPersistenceValue());
+			}
 		}
 		
 		List<ProjectProposalListItem> dtos = props.stream()

@@ -55,7 +55,7 @@ public class ProjectProposalController {
 	@GetMapping("/")
 	public ResponseEntity<List<ProjectProposalListItem>> getProjectProposals(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestParam(name = "status", required = false) ProcessStatus status){
-		return new ResponseEntity<>(projProposalService.getProjectProposalRequests(principal.getUserId(), status), HttpStatus.OK);
+		return new ResponseEntity<>(projProposalService.getProjectProposalRequests(principal, status), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)

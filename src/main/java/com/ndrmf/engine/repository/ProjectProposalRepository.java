@@ -38,4 +38,7 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 			+ "WHERE po.id = :userId OR ib.id = :userId "
 			+ "OR assig.id = :userId OR eassme.id = :userId OR pssme.id = :userId")
 	List<ProjectProposal> findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(@Param("userId") UUID userId);
+	
+	@Query(value = "SELECT p FROM ProjectProposal p WHERE p.status = :status")
+	List<ProjectProposal> findAllRequestsByStatus(@Param("status") String status);
 }
