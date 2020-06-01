@@ -1,6 +1,7 @@
 package com.ndrmf.engine.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
@@ -18,6 +20,7 @@ import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
 import com.ndrmf.engine.dto.ExtendedAppraisalItem;
 import com.ndrmf.engine.dto.ExtendedAppraisalItem.ExtendedAppraisalSectionItem;
 import com.ndrmf.engine.dto.ExtendedAppraisalSectionRequest;
+import com.ndrmf.engine.dto.GeneralCommentItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
@@ -29,6 +32,7 @@ import com.ndrmf.engine.model.ExtendedAppraisal;
 import com.ndrmf.engine.model.ExtendedAppraisalSection;
 import com.ndrmf.engine.model.PreliminaryAppraisal;
 import com.ndrmf.engine.model.ProjectProposal;
+import com.ndrmf.engine.model.ProjectProposalGeneralCommentModel;
 import com.ndrmf.engine.model.ProjectProposalSection;
 import com.ndrmf.engine.model.ProjectProposalSectionReview;
 import com.ndrmf.engine.model.ProjectProposalTask;
@@ -66,6 +70,7 @@ public class ProjectProposalService {
 	@Autowired private ExtendedAppraisalRepository extAppRepo;
 	@Autowired private ProjectProposalTaskRepository projPropTaskRepo;
 	@Autowired private ProjectProposalSectionRepository projPropSectionRepo;
+	@Autowired private ObjectMapper objectMapper;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -177,6 +182,16 @@ public class ProjectProposalService {
 				
 				qs.getReviews().forEach(r -> {
 					section.addReviewHistory(r.getCreatedDate(), null, null, r.getStatus(), r.getComments());
+					
+					GeneralCommentItem gci = new GeneralCommentItem();
+					if(r.getReviewAddedBy() != null) {
+						gci.setAddedBy(r.getReviewAddedBy().getFullName());	
+					}
+					gci.setComment(r.getComments());
+					gci.setCreatedAt(r.getCreatedDate());
+					gci.setSections(Arrays.asList(r.getSectionRef().getName()));
+					
+					dto.addComment(gci);
 				});
 			}
 			
@@ -227,6 +242,27 @@ public class ProjectProposalService {
 			
 			dto.setExtendedAppraisal(eaItem);
 			dto.setSubStatus(e.getStatus());
+		}
+		
+		String generalCommentsJSON = p.getGeneralComments();
+		List<ProjectProposalGeneralCommentModel> generalComments = new ArrayList<ProjectProposalGeneralCommentModel>();
+		
+		if(generalCommentsJSON != null) {
+			try {
+				generalComments = objectMapper.readValue(generalCommentsJSON, objectMapper.getTypeFactory().constructCollectionType(List.class, ProjectProposalGeneralCommentModel.class));
+			} catch (Exception e) {
+				throw new RuntimeException("General Comments are not null but couldn't read it as JSON", e);
+			}
+			
+			generalComments.forEach(gc -> {
+				GeneralCommentItem gci = new GeneralCommentItem();
+				gci.setAddedBy(gc.getAddedBy().getName());
+				gci.setComment(gc.getComment());
+				gci.setCreatedAt(gc.getCreatedAt());
+				gci.setSections(gc.getSections().stream().map(gcs -> gcs.getName()).collect(Collectors.toList()));
+				
+				dto.addComment(gci);
+			});
 		}
 		
 		return dto;

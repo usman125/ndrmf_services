@@ -18,6 +18,23 @@ public class ProjectProposalItem {
 	private TaskItem reassignmentTask;
 	private PreliminaryAppraisalItem preAppraisal;
 	private ExtendedAppraisalItem extendedAppraisal;
+	private List<GeneralCommentItem> commentsMatrix;
+
+	public List<GeneralCommentItem> getCommentsMatrix() {
+		return commentsMatrix;
+	}
+
+	public void setCommentsMatrix(List<GeneralCommentItem> commentsMatrix) {
+		this.commentsMatrix = commentsMatrix;
+	}
+	
+	public void addComment(GeneralCommentItem comment) {
+		if(this.commentsMatrix == null) {
+			this.commentsMatrix = new ArrayList<>();
+		}
+		
+		this.commentsMatrix.add(comment);
+	}
 
 	public UserLookupItem getInitiatedBy() {
 		return initiatedBy;

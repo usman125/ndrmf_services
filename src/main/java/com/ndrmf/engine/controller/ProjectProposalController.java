@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AddProposalGeneralCommentRequest;
 import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
@@ -146,6 +147,16 @@ public class ProjectProposalController {
 		commentService.addProjectProposalSectionReview(principal.getUserId(), sectionId, body);
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
+	}
+	
+	@PostMapping("/{id}/comment/add")
+	public ResponseEntity<ApiResponse> addGeneralComments(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "id", required = true) UUID proposalId,
+			@RequestBody @Valid AddProposalGeneralCommentRequest body){
+		
+		commentService.addProjectProposalGeneralComment(proposalId, principal, body);
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Comment added successfully."), HttpStatus.CREATED);
 	}
 	
 	@PutMapping("/{id}")

@@ -17,10 +17,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+
 import com.ndrmf.config.audit.Auditable;
 import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.user.model.User;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
 @Table(name = "project_proposals")
 public class ProjectProposal extends Auditable<String> {
@@ -33,6 +39,7 @@ public class ProjectProposal extends Auditable<String> {
 	private List<ProjectProposalSection> sections;
 	private PreliminaryAppraisal preAppraisal;
 	private ExtendedAppraisal extendedAppraisal;
+	private String generalComments;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -118,5 +125,14 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setExtendedAppraisal(ExtendedAppraisal extendedAppraisal) {
 		this.extendedAppraisal = extendedAppraisal;
+	}
+	
+	@Type(type = "jsonb")
+	@Column(columnDefinition = "jsonb")
+	public String getGeneralComments() {
+		return generalComments;
+	}
+	public void setGeneralComments(String generalComments) {
+		this.generalComments = generalComments;
 	}
 }

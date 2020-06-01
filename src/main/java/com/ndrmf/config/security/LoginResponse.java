@@ -56,6 +56,14 @@ public class LoginResponse {
 		public void setLastName(String lastName) {
 			this.lastName = lastName;
 		}
+		
+	    public String getFullName() {
+	    	if(this.lastName == null)
+	    		return this.firstName;
+	    	else
+	    		return this.firstName + " " + this.lastName;
+	    }
+		
 		public int getOrgId() {
 			return orgId;
 		}

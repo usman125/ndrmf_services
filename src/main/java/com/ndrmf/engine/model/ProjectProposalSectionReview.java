@@ -13,15 +13,18 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.ndrmf.config.audit.Auditable;
+import com.ndrmf.user.model.User;
+
 @Entity
 @Table(name = "project_proposal_reviews")
-public class ProjectProposalSectionReview {
-
+public class ProjectProposalSectionReview extends Auditable<String> {
 	private long id;
 	private String status;
 	private String comments;
 	private ProjectProposalSection sectionRef;
 	private Date createdDate;
+	private User reviewAddedBy;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -65,5 +68,14 @@ public class ProjectProposalSectionReview {
 	@PrePersist
 	public void prePersist() {
 		this.createdDate = new Date();
+	}
+	
+	@ManyToOne
+	@JoinColumn(name = "reviewer_user_id")
+	public User getReviewAddedBy() {
+		return reviewAddedBy;
+	}
+	public void setReviewAddedBy(User reviewAddedBy) {
+		this.reviewAddedBy = reviewAddedBy;
 	}
 }

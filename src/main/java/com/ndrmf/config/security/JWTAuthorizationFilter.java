@@ -60,6 +60,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         
         String username = jwtToken.getSubject();
         String userId = jwtToken.getClaim("userId").asString();
+        String fullName = jwtToken.getClaim("fullName").asString();
         String[] roleClaims = jwtToken.getClaim("roles").asArray(String.class);
         
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
@@ -69,6 +70,6 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             }	
         }
 
-        return new UsernamePasswordAuthenticationToken(new AuthPrincipal(userId, username), null, grantedAuthorities);
+        return new UsernamePasswordAuthenticationToken(new AuthPrincipal(userId, username, fullName), null, grantedAuthorities);
     }
 }
