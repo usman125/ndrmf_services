@@ -13,23 +13,29 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 	@Query(value = "SELECT DISTINCT p FROM ProjectProposal p "
 			+ "JOIN p.processOwner po "
 			+ "JOIN p.initiatedBy ib "
+			+ "JOIN p.sections ps "
+			+ "JOIN ps.sme pssme "
 			+ "LEFT JOIN p.preAppraisal pa "
 			+ "LEFT JOIN pa.assignee assig "
 			+ "LEFT JOIN p.extendedAppraisal ea "
 			+ "LEFT JOIN ea.sections eas "
 			+ "LEFT JOIN eas.sme eassme "
-			+ "WHERE (po.id = :userId OR ib.id = :userId OR assig.id = :userId OR eassme.id = :userId) "
+			+ "WHERE (po.id = :userId OR ib.id = :userId OR assig.id = :userId "
+			+ "OR eassme.id = :userId OR pssme.id = :userId) "
 			+ "AND p.status = :status")
 	List<ProjectProposal> findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(@Param("userId") UUID userId, @Param("status") String status);
 	
 	@Query(value = "SELECT DISTINCT p FROM ProjectProposal p "
 			+ "JOIN p.processOwner po "
 			+ "JOIN p.initiatedBy ib "
+			+ "JOIN p.sections ps "
+			+ "JOIN ps.sme pssme "
 			+ "LEFT JOIN p.preAppraisal pa "
 			+ "LEFT JOIN pa.assignee assig "
 			+ "LEFT JOIN p.extendedAppraisal ea "
 			+ "LEFT JOIN ea.sections eas "
 			+ "LEFT JOIN eas.sme eassme "
-			+ "WHERE po.id = :userId OR ib.id = :userId OR assig.id = :userId OR eassme.id = :userId")
+			+ "WHERE po.id = :userId OR ib.id = :userId "
+			+ "OR assig.id = :userId OR eassme.id = :userId OR pssme.id = :userId")
 	List<ProjectProposal> findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(@Param("userId") UUID userId);
 }

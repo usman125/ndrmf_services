@@ -118,15 +118,20 @@ public class CommentService {
 		
 		List<KeyValue> sections = new ArrayList<>();
 		
-		body.getSectionIds().forEach(sid -> {
-			ProjectProposalSection pps = p.getSections().stream()
-					.filter(ps -> ps.getId().equals(sid))
-					.findAny()
-					.orElseThrow(() -> new ValidationException("Invalid Section ID"));
-			
-			sections.add(new KeyValue(pps.getId(), pps.getName()));
-			
-		});
+		if(body.getSectionIds() != null) {
+			body.getSectionIds().forEach(sid -> {
+				ProjectProposalSection pps = p.getSections().stream()
+						.filter(ps -> ps.getId().equals(sid))
+						.findAny()
+						.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+				
+				sections.add(new KeyValue(pps.getId(), pps.getName()));
+				
+			});	
+		}
+		else {
+			sections.add(new KeyValue(null, "General"));
+		}
 		
 		newComment.setSections(sections);
 		newComment.setCreatedAt(new Date());
