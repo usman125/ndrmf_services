@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -170,11 +171,10 @@ public class ProjectProposalService {
 			section.setReviewCompletedDate(qs.getReviewCompletedOn());
 			section.setReassignmentStatus(qs.getReassignmentStatus());
 			
-			ProjectProposalTask latestTask = projPropTaskRepo.findLatestTaskForSection(qs.getId())
-					.orElse(null);
+			List<ProjectProposalTask> tasks = projPropTaskRepo.findTasksForSection(qs.getId(), PageRequest.of(0, 1));
 			
-			if(latestTask != null) {
-				section.setReviewDeadline(latestTask.getEndDate());
+			if(tasks != null && tasks.size() > 0) {
+				section.setReviewDeadline(tasks.get(0).getEndDate());	
 			}
 			
 			if(qs.getReviews() != null && qs.getReviews().size() > 0) {

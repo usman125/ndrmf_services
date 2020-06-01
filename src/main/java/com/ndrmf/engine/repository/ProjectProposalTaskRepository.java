@@ -1,9 +1,9 @@
 package com.ndrmf.engine.repository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,5 +21,5 @@ public interface ProjectProposalTaskRepository extends JpaRepository<ProjectProp
 	List<ProjectProposalTask> findTasksForSectionAndAssignee(@Param("userId") UUID userId, @Param("sectionId") UUID sectionId);
 	
 	@Query(value = "SELECT t FROM ProjectProposalTask t JOIN t.section s WHERE s.id = :sectionId ORDER BY t.createdDate DESC")
-	Optional<ProjectProposalTask> findLatestTaskForSection(@Param("sectionId") UUID sectionId);
+	List<ProjectProposalTask> findTasksForSection(@Param("sectionId") UUID sectionId, Pageable pageable);
 }
