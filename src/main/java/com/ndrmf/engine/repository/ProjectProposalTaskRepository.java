@@ -1,6 +1,7 @@
 package com.ndrmf.engine.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,7 @@ public interface ProjectProposalTaskRepository extends JpaRepository<ProjectProp
 	
 	@Query(value = "SELECT t FROM ProjectProposalTask t JOIN t.assignee u JOIN t.section s WHERE u.id = :userId AND s.id = :sectionId")
 	List<ProjectProposalTask> findTasksForSectionAndAssignee(@Param("userId") UUID userId, @Param("sectionId") UUID sectionId);
+	
+	@Query(value = "SELECT t FROM ProjectProposalTask t JOIN t.section s WHERE s.id = :sectionId ORDER BY t.createdDate DESC")
+	Optional<ProjectProposalTask> findLatestTaskForSection(@Param("sectionId") UUID sectionId);
 }

@@ -20,6 +20,7 @@ public class SectionItem {
 	private List<ReviewItem> reviewHistory;
 	private ReviewItem review;
 	private String reviewStatus;
+	private Date reviewDeadline;
 	private Date reviewCompletedDate;
 	private String reassignmentStatus;
 	
@@ -129,5 +130,12 @@ public class SectionItem {
 	}
 	public void setReviewCompletedDate(Date reviewCompletedDate) {
 		this.reviewCompletedDate = reviewCompletedDate;
+	}
+	
+	public Date getReviewDeadline() {
+		return reviewDeadline;
+	}
+	public void setReviewDeadline(Date reviewDeadline) {
+		this.reviewDeadline = reviewDeadline;
 	}
 }

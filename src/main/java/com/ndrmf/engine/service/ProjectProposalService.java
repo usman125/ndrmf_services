@@ -170,6 +170,12 @@ public class ProjectProposalService {
 			section.setReviewCompletedDate(qs.getReviewCompletedOn());
 			section.setReassignmentStatus(qs.getReassignmentStatus());
 			
+			ProjectProposalTask latestTask = projPropTaskRepo.findLatestTaskForSection(qs.getId())
+					.orElse(null);
+			
+			if(latestTask != null) {
+				section.setReviewDeadline(latestTask.getEndDate());
+			}
 			
 			if(qs.getReviews() != null && qs.getReviews().size() > 0) {
 				ProjectProposalSectionReview latestReview = 
