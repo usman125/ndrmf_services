@@ -40,6 +40,7 @@ public class ProjectProposal extends Auditable<String> {
 	private PreliminaryAppraisal preAppraisal;
 	private ExtendedAppraisal extendedAppraisal;
 	private String generalComments;
+	private List<ProjectProposalAttachment> attachments;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -134,5 +135,23 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setGeneralComments(String generalComments) {
 		this.generalComments = generalComments;
+	}
+	
+	@OneToMany(mappedBy="proposalRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+	public List<ProjectProposalAttachment> getAttachments() {
+		return attachments;
+	}
+	public void setAttachments(List<ProjectProposalAttachment> attachments) {
+		this.attachments = attachments;
+	}
+	
+	public void addAttachement(ProjectProposalAttachment a) {
+		if(this.attachments == null) {
+			this.attachments = new ArrayList<>();
+		}
+		
+		a.setProposalRef(this);
+		
+		this.attachments.add(a);
 	}
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
@@ -167,5 +168,18 @@ public class ProjectProposalController {
 		projProposalService.updateProposalStatus(proposalId, principal.getUserId(), status);
 	
 		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
+	}
+	
+	@PostMapping("/{id}/attachment/add")
+	public ResponseEntity<?> addAttachement(@PathVariable(name = "id", required = true) UUID proposalId,
+			@RequestParam(name = "stage", required = true) ProcessStatus status,
+			@RequestParam(name = "file", required = true) MultipartFile file,
+			@AuthenticationPrincipal AuthPrincipal principal){
+		
+		UUID id = projProposalService.addProposalAttachment(proposalId, principal.getUserId(), status, file);
+		Map<String, UUID> dto = new HashMap<>();
+		dto.put("id", id);
+		
+		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	}
 }

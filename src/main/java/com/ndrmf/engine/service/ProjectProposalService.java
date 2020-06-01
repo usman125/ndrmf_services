@@ -12,9 +12,11 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.common.File;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
@@ -34,6 +36,7 @@ import com.ndrmf.engine.model.ExtendedAppraisal;
 import com.ndrmf.engine.model.ExtendedAppraisalSection;
 import com.ndrmf.engine.model.PreliminaryAppraisal;
 import com.ndrmf.engine.model.ProjectProposal;
+import com.ndrmf.engine.model.ProjectProposalAttachment;
 import com.ndrmf.engine.model.ProjectProposalGeneralCommentModel;
 import com.ndrmf.engine.model.ProjectProposalSection;
 import com.ndrmf.engine.model.ProjectProposalSectionReview;
@@ -74,6 +77,7 @@ public class ProjectProposalService {
 	@Autowired private ProjectProposalTaskRepository projPropTaskRepo;
 	@Autowired private ProjectProposalSectionRepository projPropSectionRepo;
 	@Autowired private ObjectMapper objectMapper;
+	@Autowired private FileStoreService fileStoreService;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -566,5 +570,21 @@ public class ProjectProposalService {
 		}
 		
 		p.setStatus(status.getPersistenceValue());
+	}
+	
+	@Transactional
+	public UUID addProposalAttachment(UUID proposalId, UUID userId, ProcessStatus stage, MultipartFile file) {
+		ProjectProposal p = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
+		
+		File persistedFile = fileStoreService.saveFile(file, userId);
+		
+		ProjectProposalAttachment attachment = new ProjectProposalAttachment();
+		attachment.setFileRef(persistedFile);
+		attachment.setStage(stage.getPersistenceValue());
+		
+		p.addAttachement(attachment);
+		
+		return persistedFile.getId();
 	}
 }
