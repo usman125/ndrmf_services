@@ -15,7 +15,9 @@ public enum ProcessStatus {
 	TAC_MEETING("TAC Meeting"),
 	RMC_MEETING("RMC Meeting"),
 	BOD_MEETING("BOD Meeting"),
-	OFFER_LETTER("Offer Letter");
+	OFFER_LETTER("Offer Letter"),
+	MARKED_TO_GM("Marked to GM"),
+	MARKED_TO_CEO("Marked to CEO");
 	
 	private final String persistenceValue;
 	
