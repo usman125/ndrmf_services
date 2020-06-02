@@ -565,9 +565,11 @@ public class ProjectProposalService {
 		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
-		if(!p.getProcessOwner().getId().equals(proposalId)) {
-			throw new ValidationException("Only Process Owner for this process can update the status. Authorized user is: "+ p.getProcessOwner().getFullName());
-		}
+		/*
+		 * if(!p.getProcessOwner().getId().equals(proposalId)) { throw new
+		 * ValidationException("Only Process Owner for this process can update the status. Authorized user is: "
+		 * + p.getProcessOwner().getFullName()); }
+		 */
 		
 		p.setStatus(status.getPersistenceValue());
 	}
