@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AddImplementationPlanRequest;
 import com.ndrmf.engine.dto.AddProposalGeneralCommentRequest;
 import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
@@ -68,10 +69,11 @@ public class ProjectProposalController {
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	}
 	
-	@GetMapping("/{id}")
+	@GetMapping(path = "/{id}", produces = "application/json")
 	public ResponseEntity<ProjectProposalItem> getProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "id", required = true) UUID id){
-		return new ResponseEntity<>(projProposalService.getProjectProposalRequest(id, principal.getUserId()), HttpStatus.OK);
+		ProjectProposalItem dto = projProposalService.getProjectProposalRequest(id, principal.getUserId());
+		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
@@ -181,5 +183,13 @@ public class ProjectProposalController {
 		dto.put("id", id);
 		
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/{proposalId}/pip/submit")
+	public ResponseEntity<ApiResponse> addProjectImplementationPlan(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody AddImplementationPlanRequest body){
+		projProposalService.submitImplementationPlan(principal.getUserId(), proposalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "Implementation Plan added successfully"), HttpStatus.CREATED);
 	}
 }

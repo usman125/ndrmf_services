@@ -14,9 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.common.File;
+import com.ndrmf.engine.dto.AddImplementationPlanRequest;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
 import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
@@ -35,6 +38,7 @@ import com.ndrmf.engine.dto.SectionItem;
 import com.ndrmf.engine.model.ExtendedAppraisal;
 import com.ndrmf.engine.model.ExtendedAppraisalSection;
 import com.ndrmf.engine.model.PreliminaryAppraisal;
+import com.ndrmf.engine.model.ProjectImplementationPlan;
 import com.ndrmf.engine.model.ProjectProposal;
 import com.ndrmf.engine.model.ProjectProposalAttachment;
 import com.ndrmf.engine.model.ProjectProposalGeneralCommentModel;
@@ -275,6 +279,10 @@ public class ProjectProposalService {
 				
 				dto.addComment(gci);
 			});
+		}
+		
+		if(p.getPip() != null) {
+			dto.setImplementationPlan(p.getPip().getImplementationPlan());
 		}
 		
 		return dto;
@@ -532,6 +540,17 @@ public class ProjectProposalService {
 	}
 	
 	@Transactional
+	public void submitImplementationPlan(UUID userId, UUID proposalId, AddImplementationPlanRequest body) {
+		ProjectImplementationPlan pip = new ProjectImplementationPlan();
+		pip.setImplementationPlan(body.getImplementationPlan());
+		
+		ProjectProposal proposal = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
+		
+		proposal.setPip(pip);
+	}
+	
+	@Transactional
 	public void addProjectProposalTask(UUID sectionId, UUID currentUserId, AddProposalTaskRequest body) {
 		ProjectProposalSection section = projPropSectionRepo.findById(sectionId)
 				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
@@ -564,12 +583,6 @@ public class ProjectProposalService {
 	public void updateProposalStatus(UUID proposalId, UUID userId, ProcessStatus status) {
 		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
-		
-		/*
-		 * if(!p.getProcessOwner().getId().equals(proposalId)) { throw new
-		 * ValidationException("Only Process Owner for this process can update the status. Authorized user is: "
-		 * + p.getProcessOwner().getFullName()); }
-		 */
 		
 		p.setStatus(status.getPersistenceValue());
 	}

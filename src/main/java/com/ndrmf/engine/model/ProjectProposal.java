@@ -41,6 +41,7 @@ public class ProjectProposal extends Auditable<String> {
 	private ExtendedAppraisal extendedAppraisal;
 	private String generalComments;
 	private List<ProjectProposalAttachment> attachments;
+	private ProjectImplementationPlan pip;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -153,5 +154,14 @@ public class ProjectProposal extends Auditable<String> {
 		a.setProposalRef(this);
 		
 		this.attachments.add(a);
+	}
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "pip_id")
+	public ProjectImplementationPlan getPip() {
+		return pip;
+	}
+	public void setPip(ProjectImplementationPlan pip) {
+		this.pip = pip;
 	}
 }

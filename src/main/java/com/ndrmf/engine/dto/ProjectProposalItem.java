@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.user.dto.UserLookupItem;
 
@@ -19,6 +22,7 @@ public class ProjectProposalItem {
 	private PreliminaryAppraisalItem preAppraisal;
 	private ExtendedAppraisalItem extendedAppraisal;
 	private List<GeneralCommentItem> commentsMatrix;
+	private String implementationPlan;
 
 	public List<GeneralCommentItem> getCommentsMatrix() {
 		return commentsMatrix;
@@ -122,5 +126,13 @@ public class ProjectProposalItem {
 
 	public void setSubStatus(String subStatus) {
 		this.subStatus = subStatus;
+	}
+	
+	public String getImplementationPlan() {
+		return implementationPlan;
+	}
+
+	public void setImplementationPlan(String rawJson) {
+		this.implementationPlan = rawJson.toString();
 	}
 }
