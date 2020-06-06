@@ -1,5 +1,6 @@
 package com.ndrmf.setting.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -7,16 +8,20 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.AddCostHeadRequest;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.dto.AddDepartmentRequest;
 import com.ndrmf.setting.dto.AddDesignationRequest;
 import com.ndrmf.setting.dto.AddThematicAreaRequest;
+import com.ndrmf.setting.dto.CostHeadItem;
 import com.ndrmf.setting.dto.DepartmentItem;
 import com.ndrmf.setting.dto.DesignationItem;
 import com.ndrmf.setting.dto.ThematicAreaItem;
+import com.ndrmf.setting.model.CostHead;
 import com.ndrmf.setting.model.Department;
 import com.ndrmf.setting.model.Designation;
 import com.ndrmf.setting.model.ThematicArea;
+import com.ndrmf.setting.repository.CostHeadRepository;
 import com.ndrmf.setting.repository.DepartmentRepository;
 import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.setting.repository.ThematicAreaRepository;
@@ -29,6 +34,7 @@ public class SettingService {
 	@Autowired private DesignationRepository desigRepo;
 	@Autowired private ThematicAreaRepository thematicAreaRepo;
 	@Autowired private UserRepository userRepo;
+	@Autowired private CostHeadRepository costHeadRepo;
 	
 	public void addDepartment(AddDepartmentRequest body) {
 		Department d = new Department();
@@ -108,5 +114,31 @@ public class SettingService {
 		}
 		
 		thematicAreaRepo.save(ta);
+	}
+	
+	public void addCostHead(AddCostHeadRequest body) {
+		CostHead head = new CostHead();
+		head.setName(body.getName());
+		head.setGlCode(body.getGlCode());
+		head.setEnabled(true);
+		
+		costHeadRepo.save(head);
+	}
+	
+	public List<CostHeadItem> findAllCostHeads(boolean enabled) {
+		List<CostHead> heads = costHeadRepo.findAllByEnabled(enabled);
+		List<CostHeadItem> dtos = new ArrayList<>();
+		
+		heads.forEach(h -> {
+			CostHeadItem item = new CostHeadItem();
+			item.setId(h.getId());
+			item.setName(h.getName());
+			item.setGlCode(h.getGlCode());
+			item.setEnabled(h.isEnabled());
+			
+			dtos.add(item);
+		});
+		
+		return dtos;
 	}
 }

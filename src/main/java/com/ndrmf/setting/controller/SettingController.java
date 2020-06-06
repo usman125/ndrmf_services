@@ -15,12 +15,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
+import com.ndrmf.engine.dto.AddCostHeadRequest;
 import com.ndrmf.setting.dto.AddDepartmentRequest;
 import com.ndrmf.setting.dto.AddDesignationRequest;
 import com.ndrmf.setting.dto.AddThematicAreaRequest;
+import com.ndrmf.setting.dto.CostHeadItem;
 import com.ndrmf.setting.dto.DepartmentItem;
 import com.ndrmf.setting.dto.DesignationItem;
 import com.ndrmf.setting.dto.ThematicAreaItem;
@@ -79,5 +82,20 @@ public class SettingController {
 		settingService.udpateThematicArea(id, body);
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Thematic Area updated"), HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/cost-head")
+	public ResponseEntity<List<CostHeadItem>> getCostHeads(@RequestParam(name = "enabled", required = false) Boolean enabled){
+		List<CostHeadItem> dtos = settingService.findAllCostHeads(enabled == null? true : enabled);
+		
+		return new ResponseEntity<>(dtos, HttpStatus.OK);
+	}
+	
+	@RolesAllowed(SystemRoles.ADMIN)
+	@PostMapping("/cost-head/add")
+	public ResponseEntity<ApiResponse> addCostHead(@RequestBody @Valid AddCostHeadRequest body){
+		settingService.addCostHead(body);
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Cost head addedd successfully"), HttpStatus.CREATED);
 	}
 }
