@@ -3,7 +3,6 @@ package com.ndrmf.setting.dto;
 import java.util.List;
 import java.util.UUID;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class UpdateProcessMetaRequest {
@@ -18,7 +17,6 @@ public class UpdateProcessMetaRequest {
 		this.processOwnerId = processOwnerId;
 	}
 
-	@NotEmpty
 	public List<SectionMeta> getSections() {
 		return sections;
 	}
