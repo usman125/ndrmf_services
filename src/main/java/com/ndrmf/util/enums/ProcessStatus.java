@@ -17,7 +17,8 @@ public enum ProcessStatus {
 	BOD_MEETING("BOD Meeting"),
 	OFFER_LETTER("Offer Letter"),
 	MARKED_TO_GM("Marked to GM"),
-	MARKED_TO_CEO("Marked to CEO");
+	MARKED_TO_CEO("Marked to CEO"),
+	GIA("GIA");
 	
 	private final String persistenceValue;
 	

@@ -42,6 +42,7 @@ public class ProjectProposal extends Auditable<String> {
 	private String generalComments;
 	private List<ProjectProposalAttachment> attachments;
 	private ProjectImplementationPlan pip;
+	private GrantImplementationAgreement gia;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -163,5 +164,14 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setPip(ProjectImplementationPlan pip) {
 		this.pip = pip;
+	}
+	
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "gia_id")
+	public GrantImplementationAgreement getGia() {
+		return gia;
+	}
+	public void setGia(GrantImplementationAgreement gia) {
+		this.gia = gia;
 	}
 }

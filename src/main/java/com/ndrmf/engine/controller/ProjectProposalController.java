@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AddGrantImplementationAgreementRequest;
 import com.ndrmf.engine.dto.AddImplementationPlanRequest;
 import com.ndrmf.engine.dto.AddProposalGeneralCommentRequest;
 import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
@@ -191,5 +192,13 @@ public class ProjectProposalController {
 			@RequestBody AddImplementationPlanRequest body){
 		projProposalService.submitImplementationPlan(principal.getUserId(), proposalId, body);
 		return new ResponseEntity<>(new ApiResponse(true, "Implementation Plan added successfully"), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/{proposalId}/gia/submit")
+	public ResponseEntity<ApiResponse> addGrantImplementationAgreement(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody AddGrantImplementationAgreementRequest body){
+		projProposalService.submitGrantImplementationAgreement(principal.getUserId(), proposalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "GIA added successfully"), HttpStatus.CREATED);
 	}
 }

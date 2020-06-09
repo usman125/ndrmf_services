@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.common.File;
+import com.ndrmf.engine.dto.AddGrantImplementationAgreementRequest;
 import com.ndrmf.engine.dto.AddImplementationPlanRequest;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
@@ -26,6 +27,7 @@ import com.ndrmf.engine.dto.ExtendedAppraisalItem;
 import com.ndrmf.engine.dto.ExtendedAppraisalItem.ExtendedAppraisalSectionItem;
 import com.ndrmf.engine.dto.ExtendedAppraisalSectionRequest;
 import com.ndrmf.engine.dto.GeneralCommentItem;
+import com.ndrmf.engine.dto.GrantImplmentationItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
 import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
@@ -35,6 +37,7 @@ import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
 import com.ndrmf.engine.dto.SectionItem;
 import com.ndrmf.engine.model.ExtendedAppraisal;
 import com.ndrmf.engine.model.ExtendedAppraisalSection;
+import com.ndrmf.engine.model.GrantImplementationAgreement;
 import com.ndrmf.engine.model.PreliminaryAppraisal;
 import com.ndrmf.engine.model.ProjectImplementationPlan;
 import com.ndrmf.engine.model.ProjectProposal;
@@ -52,6 +55,7 @@ import com.ndrmf.exception.ValidationException;
 import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.model.ThematicArea;
+import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.setting.repository.ThematicAreaRepository;
 import com.ndrmf.user.dto.UserLookupItem;
@@ -80,6 +84,7 @@ public class ProjectProposalService {
 	@Autowired private ProjectProposalSectionRepository projPropSectionRepo;
 	@Autowired private ObjectMapper objectMapper;
 	@Autowired private FileStoreService fileStoreService;
+	@Autowired private ProcessTypeRepository processTypeRepo;
 	
 	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
 		if(body.getThematicAreaId() == null) {
@@ -281,6 +286,23 @@ public class ProjectProposalService {
 		
 		if(p.getPip() != null) {
 			dto.setImplementationPlan(p.getPip().getImplementationPlan());
+		}
+		
+		if(p.getGia() != null) {
+			GrantImplmentationItem giaItem = new GrantImplmentationItem();
+			giaItem.setData(p.getGia().getData());
+			giaItem.setProcessOwner(new UserLookupItem(p.getGia().getAssignee().getId(), p.getGia().getAssignee().getFullName()));
+			
+			dto.setGia(giaItem);
+		}
+		else {
+			com.ndrmf.setting.model.ProcessType giaProcessType = processTypeRepo.findById(ProcessStatus.GIA.getPersistenceValue()).orElseThrow(() -> new ValidationException("GIA Process is not defined."));
+			if(giaProcessType.getOwner() != null) {
+				GrantImplmentationItem giaItem = new GrantImplmentationItem();
+				giaItem.setProcessOwner(new UserLookupItem(giaProcessType.getOwner().getId(), giaProcessType.getOwner().getFullName()));
+				
+				dto.setGia(giaItem);
+			}
 		}
 		
 		return dto;
@@ -539,13 +561,35 @@ public class ProjectProposalService {
 	
 	@Transactional
 	public void submitImplementationPlan(UUID userId, UUID proposalId, AddImplementationPlanRequest body) {
-		ProjectImplementationPlan pip = new ProjectImplementationPlan();
-		pip.setImplementationPlan(body.getImplementationPlan());
-		
 		ProjectProposal proposal = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
 		
+		ProjectImplementationPlan pip = new ProjectImplementationPlan();
+		pip.setImplementationPlan(body.getImplementationPlan());
+		
 		proposal.setPip(pip);
+	}
+	
+	@Transactional
+	public void submitGrantImplementationAgreement(UUID userId, UUID proposalId, AddGrantImplementationAgreementRequest body) {
+		ProjectProposal proposal = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
+		
+		com.ndrmf.setting.model.ProcessType giaProcessType = processTypeRepo.findById(ProcessStatus.GIA.getPersistenceValue()).orElseThrow(() -> new ValidationException("GIA Process is not defined."));
+		
+		if(giaProcessType.getOwner() == null) {
+			throw new ValidationException("Process Owner is not defined for this process. To continue, admin should define Process Owner for this process first.");
+		}
+		
+		if(!userId.equals(giaProcessType.getOwner().getId())) {
+			throw new ValidationException("Unauthorized. Authorized User is: " + giaProcessType.getOwner().getFullName());
+		}
+		
+		GrantImplementationAgreement gia = new GrantImplementationAgreement();
+		gia.setData(body.getData());
+		gia.setAssignee(giaProcessType.getOwner());
+		proposal.setGia(gia);
+		proposal.setStatus(ProcessStatus.GIA.getPersistenceValue());
 	}
 	
 	@Transactional

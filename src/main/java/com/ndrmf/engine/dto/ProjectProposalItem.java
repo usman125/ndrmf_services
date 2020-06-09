@@ -20,7 +20,8 @@ public class ProjectProposalItem {
 	private ExtendedAppraisalItem extendedAppraisal;
 	private List<GeneralCommentItem> commentsMatrix;
 	private String implementationPlan;
-
+	private GrantImplmentationItem gia;
+	
 	public List<GeneralCommentItem> getCommentsMatrix() {
 		return commentsMatrix;
 	}
@@ -131,5 +132,13 @@ public class ProjectProposalItem {
 
 	public void setImplementationPlan(String rawJson) {
 		this.implementationPlan = rawJson.toString();
+	}
+
+	public GrantImplmentationItem getGia() {
+		return gia;
+	}
+
+	public void setGia(GrantImplmentationItem gia) {
+		this.gia = gia;
 	}
 }
