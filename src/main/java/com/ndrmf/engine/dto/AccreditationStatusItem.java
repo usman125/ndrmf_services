@@ -8,6 +8,7 @@ public class AccreditationStatusItem {
 	private final String qualificationStatus;
 	private final boolean canInitiate;
 	
+	
 	public AccreditationStatusItem(boolean accredited, String eligibilityStatus, String qualificationStatus, boolean canInitiate) {
 		this.accredited = accredited;
 		this.eligibilityStatus = eligibilityStatus;
