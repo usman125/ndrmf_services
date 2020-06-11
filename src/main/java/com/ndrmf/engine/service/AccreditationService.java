@@ -320,7 +320,10 @@ public class AccreditationService {
 					.orElse(null);
 			
 			if(q != null && q.getStatus() == ProcessStatus.COMPLETED.getPersistenceValue()) {
-				return new AccreditationStatusItem(true, "Approved", "Approved");
+				return new AccreditationStatusItem(true, "Approved", "Approved", false);
+			}
+			else {
+				return new AccreditationStatusItem(false, null, null, false);
 			}
 		}
 		final String rawSql = "select er.status as eligibility, qs.status as qualification" + 
@@ -336,16 +339,16 @@ public class AccreditationService {
 					.getSingleResult();
 		}
 		catch(NoResultException ex) {
-			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue());	
+			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue(), true);	
 		}
 		
 		if(result.get("eligibility", String.class) != null && result.get("eligibility", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())
 				&& result.get("qualification", String.class) != null && result.get("qualification", String.class).equals(ProcessStatus.APPROVED.getPersistenceValue())){
 			
-			return new AccreditationStatusItem(true, result.get("eligibility", String.class), result.get("qualification", String.class));	
+			return new AccreditationStatusItem(true, result.get("eligibility", String.class), result.get("qualification", String.class), false);	
 		}
 		else {
-			return new AccreditationStatusItem(false, result.get("eligibility", String.class), result.get("qualification", String.class));
+			return new AccreditationStatusItem(false, result.get("eligibility", String.class), result.get("qualification", String.class), true);
 		}
 	}
 	

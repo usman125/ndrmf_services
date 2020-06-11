@@ -6,11 +6,13 @@ public class AccreditationStatusItem {
 	private final boolean accredited;
 	private final String eligibilityStatus;
 	private final String qualificationStatus;
+	private final boolean canInitiate;
 	
-	public AccreditationStatusItem(boolean accredited, String eligibilityStatus, String qualificationStatus) {
+	public AccreditationStatusItem(boolean accredited, String eligibilityStatus, String qualificationStatus, boolean canInitiate) {
 		this.accredited = accredited;
 		this.eligibilityStatus = eligibilityStatus;
 		this.qualificationStatus = qualificationStatus;
+		this.canInitiate = canInitiate;
 	}
 
 	public boolean isAccredited() {
@@ -24,5 +26,9 @@ public class AccreditationStatusItem {
 	public String getQualificationStatus() {
 		return qualificationStatus == null ? ProcessStatus.NOT_INITIATED.getPersistenceValue()
 				: qualificationStatus;
+	}
+
+	public boolean isCanInitiate() {
+		return canInitiate;
 	}
 }
