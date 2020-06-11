@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AccreditationQuestionairreListItem;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
 import com.ndrmf.engine.dto.AddQualificationTaskRequest;
@@ -33,6 +34,7 @@ import com.ndrmf.engine.dto.QualificationItem;
 import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.dto.ReassignQualificationRequest;
+import com.ndrmf.engine.dto.SubmitAccreditationQuestionairreRequest;
 import com.ndrmf.engine.service.AccreditationService;
 import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -49,10 +51,10 @@ public class AccreditationController {
 	@Autowired private AccreditationService accreditationService;
 	@Autowired private CommentService commentService;
 	
-	@RolesAllowed(SystemRoles.ORG_FIP)
+	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
 	@GetMapping("/status")
 	public ResponseEntity<AccreditationStatusItem> getAccreditationStatus(@AuthenticationPrincipal AuthPrincipal principal){
-		return new ResponseEntity<AccreditationStatusItem>(accreditationService.getAccreditationStatus(principal.getUserId()), HttpStatus.OK);
+		return new ResponseEntity<AccreditationStatusItem>(accreditationService.getAccreditationStatus(principal.getUserId(), principal.getRoles()), HttpStatus.OK);
 	}
 	
 	@GetMapping("/eligibility")
@@ -144,5 +146,18 @@ public class AccreditationController {
 		accreditationService.reassignQualificationRequest(id, principal.getUserId(), body);
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Qualification re-assigned successfully."), HttpStatus.OK);
+	}
+	
+	@GetMapping("questionairre/pending")
+	public ResponseEntity<List<AccreditationQuestionairreListItem>> getPendingQuestionairres(@AuthenticationPrincipal AuthPrincipal principal){
+		return new ResponseEntity<List<AccreditationQuestionairreListItem>>(accreditationService.getPendingQuestionairres(principal.getUserId()), HttpStatus.OK);
+	}
+	
+	@PostMapping("questionairre/{id}/submit")
+	public ResponseEntity<ApiResponse> submitAccreditationQuestionairre(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestBody SubmitAccreditationQuestionairreRequest body,
+			@PathVariable(name = "id", required=true) UUID id){
+		accreditationService.submitAccreditationQuestionairre(principal.getUserId(), id, body);
+		return new ResponseEntity<>(new ApiResponse(true, "Questionairre Submitted Successfully. FIP also Approved."), HttpStatus.OK);
 	}
 }

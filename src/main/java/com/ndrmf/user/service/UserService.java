@@ -4,9 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.model.AccreditationQuestionairre;
+import com.ndrmf.engine.repository.AccreditationQuestionairreRepository;
 import com.ndrmf.exception.ValidationException;
+import com.ndrmf.setting.model.ProcessType;
 import com.ndrmf.setting.repository.DepartmentRepository;
 import com.ndrmf.setting.repository.DesignationRepository;
+import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.user.dto.CreateUserRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.RoleItem;
@@ -44,7 +48,10 @@ public class UserService {
 	@Autowired private DepartmentRepository deptRepo;
 	@Autowired private DesignationRepository desigRepo;
 	@Autowired private SignupRepository signupRepo;
+	@Autowired private ProcessTypeRepository processTypeRepo;
+	@Autowired private AccreditationQuestionairreRepository questionairreRepo;
 	
+	@Transactional
     public void createUser(CreateUserRequest body) {
         User u = new User();
         u.setEmail(body.getEmail());
@@ -67,7 +74,22 @@ public class UserService {
         	u.setDesignation(desigRepo.getOne(body.getDesignationId()));
         }
         
-        userRepo.save(u);
+        u = userRepo.save(u);
+        
+        if(body.getOrgId() == SystemRoles.ORG_GOVT_ID && body.getRoleId() == SystemRoles.FIP_GOVT_ID) {
+        	ProcessType process = processTypeRepo.findById(com.ndrmf.util.enums.ProcessType.ACCREDITATION_QUESTIONNAIRE.name())
+        			.orElseThrow(() -> new RuntimeException("ACCREDITATION_QUESTIONNAIRE must be defined before creating GOVT FIP user"));
+        	
+        	if(process.getOwner() == null) {
+        		throw new ValidationException("Define Process Owner for process ACCREDITATION_QUESTIONNAIRE to create GOVT FIP user");
+        	}
+        	
+        	AccreditationQuestionairre q = new AccreditationQuestionairre();
+        	q.setAssignee(process.getOwner());
+        	q.setForUser(u);
+        	
+        	questionairreRepo.save(q);
+        }
     }
     
 	public List<OrganisationAndRoles> getOrganisations() {

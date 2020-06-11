@@ -4,6 +4,9 @@ public class SystemRoles {
 	private SystemRoles() {}
 	
 	public static final String ORG_FIP = "FIP";
+	public static final String ORG_GOVT = "GOVT";
+	public static final int ORG_GOVT_ID = 3;
+	public static final int FIP_GOVT_ID = 14;
 	public static final String FIP_DATAENTRY = "FIP DATA ENTRY";
 	public static final String FIP_ENDORSEMENT = "FIP ENDORSEMENT";
 	public static final String FIP_SIGNATORY = "FIP SIGNATORY";

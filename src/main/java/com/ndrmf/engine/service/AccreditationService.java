@@ -1,5 +1,6 @@
 package com.ndrmf.engine.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.AccreditationQuestionairreListItem;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.AddQualificationTaskRequest;
 import com.ndrmf.engine.dto.EligibilityItem;
@@ -26,11 +28,14 @@ import com.ndrmf.engine.dto.QualificationListItem;
 import com.ndrmf.engine.dto.QualificationSectionRequest;
 import com.ndrmf.engine.dto.ReassignQualificationRequest;
 import com.ndrmf.engine.dto.SectionItem;
+import com.ndrmf.engine.dto.SubmitAccreditationQuestionairreRequest;
+import com.ndrmf.engine.model.AccreditationQuestionairre;
 import com.ndrmf.engine.model.Eligibility;
 import com.ndrmf.engine.model.Qualification;
 import com.ndrmf.engine.model.QualificationSection;
 import com.ndrmf.engine.model.QualificationSectionReview;
 import com.ndrmf.engine.model.QualificationTask;
+import com.ndrmf.engine.repository.AccreditationQuestionairreRepository;
 import com.ndrmf.engine.repository.EligibilityRepository;
 import com.ndrmf.engine.repository.QualificationRepository;
 import com.ndrmf.engine.repository.QualificationSectionRepository;
@@ -45,6 +50,7 @@ import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
@@ -62,6 +68,7 @@ public class AccreditationService {
 	@Autowired private ApplicationEventPublisher eventPublisher;
 	@Autowired private QualificationTaskRepository qtaskRepo;
 	@Autowired private QualificationSectionRepository qsectionRepo;
+	@Autowired private AccreditationQuestionairreRepository questionairreRepo;
 	
 	@PersistenceContext private EntityManager em;
 	
@@ -307,7 +314,15 @@ public class AccreditationService {
 		
 	}
 	
-	public AccreditationStatusItem getAccreditationStatus(UUID userId) {
+	public AccreditationStatusItem getAccreditationStatus(UUID currentUserId, List<String> roles) {
+		if(roles.contains(SystemRoles.ORG_GOVT)) {
+			AccreditationQuestionairre q = questionairreRepo.findByForUser(currentUserId)
+					.orElse(null);
+			
+			if(q != null && q.getStatus() == ProcessStatus.COMPLETED.getPersistenceValue()) {
+				return new AccreditationStatusItem(true, "Approved", "Approved");
+			}
+		}
 		final String rawSql = "select er.status as eligibility, qs.status as qualification" + 
 				" from eligibility_requests er" + 
 				" left join qualifications qs on qs.initiator_user_id = er.initiator_user_id" + 
@@ -317,7 +332,7 @@ public class AccreditationService {
 		
 		try {
 			result = (Tuple) em.createNativeQuery(rawSql, Tuple.class)
-					.setParameter("userId", userId)
+					.setParameter("userId", currentUserId)
 					.getSingleResult();
 		}
 		catch(NoResultException ex) {
@@ -412,5 +427,35 @@ public class AccreditationService {
 		q.setStatus(ProcessStatus.REASSIGNED.getPersistenceValue());
 		
 		//TODO: Raise event, inform FIP about reassignment
+	}
+	
+	public List<AccreditationQuestionairreListItem> getPendingQuestionairres(UUID userId) {
+		List<AccreditationQuestionairre> qs = questionairreRepo.findAllByAssigneeAndStatus(userId, ProcessStatus.PENDING.getPersistenceValue());
+		List<AccreditationQuestionairreListItem> dtos = new ArrayList<>();
+		
+		qs.forEach(q -> {
+			AccreditationQuestionairreListItem item = new AccreditationQuestionairreListItem();
+			item.setAssigned(userId.equals(q.getAssignee().getId()));
+			item.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
+			item.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
+			
+			dtos.add(item);
+		});
+		
+		return dtos;
+	}
+	
+	@Transactional
+	public void submitAccreditationQuestionairre(UUID userId, UUID id, SubmitAccreditationQuestionairreRequest body) {
+		AccreditationQuestionairre q = questionairreRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid Request ID"));
+		
+		if(!userId.equals(q.getAssignee().getId())) {
+			throw new ValidationException("Unauthorized. Authorized User is: " + q.getAssignee().getFullName());
+		}
+		
+		q.setTemplate(body.getTemplate());
+		q.setData(body.getData());
+		q.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
 	}
 }

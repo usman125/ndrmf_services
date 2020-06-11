@@ -61,7 +61,7 @@ public class ProjectProposalController {
 		return new ResponseEntity<>(projProposalService.getProjectProposalRequests(principal, status), HttpStatus.OK);
 	}
 	
-	@RolesAllowed(SystemRoles.ORG_FIP)
+	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
 	@PostMapping("/commence")
 	public ResponseEntity<?> commentProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestBody CommenceProjectProposalRequest body){
@@ -77,7 +77,7 @@ public class ProjectProposalController {
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
 	
-	@RolesAllowed(SystemRoles.ORG_FIP)
+	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
 	@PostMapping("/{proposalId}/section/add")
 	public ResponseEntity<ApiResponse> submitSection(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestParam(name = "action", required = true) FormAction action,
