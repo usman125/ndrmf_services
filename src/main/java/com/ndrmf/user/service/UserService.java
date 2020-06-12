@@ -27,6 +27,7 @@ import com.ndrmf.user.repository.RoleRepository;
 import com.ndrmf.user.repository.SignupRepository;
 import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.util.constants.SystemRoles;
+import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.SignupRequestStatus;
 
 import java.util.ArrayList;
@@ -87,6 +88,7 @@ public class UserService {
         	AccreditationQuestionairre q = new AccreditationQuestionairre();
         	q.setAssignee(process.getOwner());
         	q.setForUser(u);
+        	q.setStatus(ProcessStatus.PENDING.getPersistenceValue());
         	
         	questionairreRepo.save(q);
         }
