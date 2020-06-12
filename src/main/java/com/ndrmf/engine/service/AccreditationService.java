@@ -438,6 +438,7 @@ public class AccreditationService {
 		
 		qs.forEach(q -> {
 			AccreditationQuestionairreListItem item = new AccreditationQuestionairreListItem();
+			item.setId(q.getId());
 			item.setAssigned(userId.equals(q.getAssignee().getId()));
 			item.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
 			item.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
