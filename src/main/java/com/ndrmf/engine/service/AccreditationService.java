@@ -321,7 +321,7 @@ public class AccreditationService {
 					.orElse(null);
 			
 			if(q != null) {
-				if(q.getStatus() == ProcessStatus.COMPLETED.getPersistenceValue()) {
+				if(q.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue())) {
 					return new AccreditationStatusItem(true, "Approved", "Approved", false);	
 				}
 				else {
