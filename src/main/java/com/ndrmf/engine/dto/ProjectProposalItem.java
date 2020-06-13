@@ -21,6 +21,7 @@ public class ProjectProposalItem {
 	private List<GeneralCommentItem> commentsMatrix;
 	private String implementationPlan;
 	private GrantImplmentationItem gia;
+	private GIAChecklistItem giaChecklist;
 	
 	public List<GeneralCommentItem> getCommentsMatrix() {
 		return commentsMatrix;
@@ -140,5 +141,13 @@ public class ProjectProposalItem {
 
 	public void setGia(GrantImplmentationItem gia) {
 		this.gia = gia;
+	}
+
+	public GIAChecklistItem getGiaChecklist() {
+		return giaChecklist;
+	}
+
+	public void setGiaChecklist(GIAChecklistItem giaChecklist) {
+		this.giaChecklist = giaChecklist;
 	}
 }

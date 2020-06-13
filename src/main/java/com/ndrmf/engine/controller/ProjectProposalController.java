@@ -1,5 +1,6 @@
 package com.ndrmf.engine.controller;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AddGIAChecklistRequest;
 import com.ndrmf.engine.dto.AddGrantImplementationAgreementRequest;
+import com.ndrmf.engine.dto.AddGrantImplementationAgreementReviewRequest;
 import com.ndrmf.engine.dto.AddImplementationPlanRequest;
 import com.ndrmf.engine.dto.AddProposalGeneralCommentRequest;
 import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
@@ -195,10 +199,43 @@ public class ProjectProposalController {
 	}
 	
 	@PostMapping("/{proposalId}/gia/submit")
-	public ResponseEntity<ApiResponse> addGrantImplementationAgreement(@AuthenticationPrincipal AuthPrincipal principal,
+	public ResponseEntity<ApiResponse> submitGrantImplementationAgreement(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "proposalId") UUID proposalId,
 			@RequestBody AddGrantImplementationAgreementRequest body){
 		projProposalService.submitGrantImplementationAgreement(principal.getUserId(), proposalId, body);
 		return new ResponseEntity<>(new ApiResponse(true, "GIA added successfully"), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/{proposalId}/gia-checklist/submit")
+	public ResponseEntity<ApiResponse> submitGIAChecklist(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody AddGIAChecklistRequest body){
+		projProposalService.submitGIAChecklist(proposalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "GIA checklist submitted successfully"), HttpStatus.CREATED);
+	}
+	
+	@PutMapping("/{proposalId}/gia")
+	public ResponseEntity<ApiResponse> updateGrantImplementationAgreementStatus(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId", required = true) UUID proposalId,
+			@RequestParam(name = "status", required = true) ProcessStatus status,
+			@RequestParam(name = "checklist-deadline", required = false) Date checklistDeadline){
+		if(!status.equals(ProcessStatus.APPROVED) && !status.equals(ProcessStatus.REJECTED)) {
+			throw new ValidationException("Invalid status for this phase of the Proposal");
+		}
+		
+		if(status.equals(ProcessStatus.APPROVED) && checklistDeadline == null) {
+			throw new ValidationException("Checklist deadline cannot be null");
+		}
+		
+		projProposalService.updateGrantImplementationAgreementStatus(proposalId, status, checklistDeadline);
+		return new ResponseEntity<>(new ApiResponse(true, "GIA Status added successfully"), HttpStatus.OK);
+	}
+	
+	@PostMapping("/{proposalId}/gia/review/add")
+	public ResponseEntity<ApiResponse> addGIAReview(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody AddGrantImplementationAgreementReviewRequest body){
+		projProposalService.addGrantImplementationAgreementReview(principal.getUserId(), proposalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "GIA Review added successfully"), HttpStatus.CREATED);
 	}
 }

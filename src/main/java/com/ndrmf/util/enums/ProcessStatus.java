@@ -9,6 +9,8 @@ public enum ProcessStatus {
 	NOT_INITIATED("Not Initiated"),
 	REASSIGNED("Re Assigned"),
 	PENDING("Pending"),
+	REVIEW_PENDING("Review Pending"),
+	REVIEW_COMPLETED("Review Completed"),
 	COMPLETED("Completed"),
 	PRELIMINARY_APPRAISAL("Preliminary Appraisal"),
 	EXTENDED_APPRAISAL("Extended Appraisal"),
@@ -18,7 +20,8 @@ public enum ProcessStatus {
 	OFFER_LETTER("Offer Letter"),
 	MARKED_TO_GM("Marked to GM"),
 	MARKED_TO_CEO("Marked to CEO"),
-	GIA("GIA");
+	GIA("GIA"),
+	GIA_CHECKLIST("Checklist to FIP");
 	
 	private final String persistenceValue;
 	

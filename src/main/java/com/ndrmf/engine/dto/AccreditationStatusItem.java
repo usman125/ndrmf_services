@@ -1,7 +1,5 @@
 package com.ndrmf.engine.dto;
 
-import com.ndrmf.util.enums.ProcessStatus;
-
 public class AccreditationStatusItem {
 	private final boolean accredited;
 	private final String eligibilityStatus;

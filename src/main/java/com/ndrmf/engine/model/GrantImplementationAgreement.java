@@ -1,14 +1,19 @@
 package com.ndrmf.engine.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -31,6 +36,9 @@ public class GrantImplementationAgreement extends Auditable<String>{
 	private ProjectProposal proposalRef;
 	private User assignee;
 	private String data;
+	private List<GrantImplementationAgreementReview> reviews;
+	private String status;
+	private String subStatus;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -66,5 +74,34 @@ public class GrantImplementationAgreement extends Auditable<String>{
 	}
 	public void setAssignee(User assignee) {
 		this.assignee = assignee;
+	}
+	
+	@OneToMany(mappedBy="giaRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+	public List<GrantImplementationAgreementReview> getReviews() {
+		return reviews;
+	}
+	public void setReviews(List<GrantImplementationAgreementReview> reviews) {
+		this.reviews = reviews;
+	}
+	
+	public void addReview(GrantImplementationAgreementReview review) {
+		if(this.reviews == null) {
+			this.reviews = new ArrayList<>();
+		}
+		
+		this.reviews.add(review);
+	}
+	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public String getSubStatus() {
+		return subStatus;
+	}
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 }
