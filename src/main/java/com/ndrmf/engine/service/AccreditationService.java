@@ -320,11 +320,13 @@ public class AccreditationService {
 			AccreditationQuestionairre q = questionairreRepo.findByForUser(currentUserId)
 					.orElse(null);
 			
-			if(q != null && q.getStatus() == ProcessStatus.COMPLETED.getPersistenceValue()) {
-				return new AccreditationStatusItem(true, "Approved", "Approved", false);
-			}
-			else {
-				return new AccreditationStatusItem(false, null, null, false);
+			if(q != null) {
+				if(q.getStatus() == ProcessStatus.COMPLETED.getPersistenceValue()) {
+					return new AccreditationStatusItem(true, "Approved", "Approved", false);	
+				}
+				else {
+					return new AccreditationStatusItem(false, null, null, false);
+				}
 			}
 		}
 		final String rawSql = "select er.status as eligibility, qs.status as qualification" + 
