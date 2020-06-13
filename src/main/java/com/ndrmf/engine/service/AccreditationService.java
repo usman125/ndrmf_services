@@ -432,6 +432,24 @@ public class AccreditationService {
 		//TODO: Raise event, inform FIP about reassignment
 	}
 	
+	public List<AccreditationQuestionairreListItem> getAllQuestionairreRequests(UUID userId) {
+		List<AccreditationQuestionairre> qs = questionairreRepo.findAllByAssignee(userId);
+		List<AccreditationQuestionairreListItem> dtos = new ArrayList<>();
+		
+		qs.forEach(q -> {
+			AccreditationQuestionairreListItem item = new AccreditationQuestionairreListItem();
+			item.setId(q.getId());
+			item.setAssigned(userId.equals(q.getAssignee().getId()));
+			item.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
+			item.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
+			item.setStatus(q.getStatus());
+			
+			dtos.add(item);
+		});
+		
+		return dtos;
+	}
+	
 	public List<AccreditationQuestionairreListItem> getPendingQuestionairres(UUID userId) {
 		List<AccreditationQuestionairre> qs = questionairreRepo.findAllByAssigneeAndStatus(userId, ProcessStatus.PENDING.getPersistenceValue());
 		List<AccreditationQuestionairreListItem> dtos = new ArrayList<>();

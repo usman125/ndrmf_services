@@ -148,6 +148,11 @@ public class AccreditationController {
 		return new ResponseEntity<>(new ApiResponse(true, "Qualification re-assigned successfully."), HttpStatus.OK);
 	}
 	
+	@GetMapping("questionairre")
+	public ResponseEntity<List<AccreditationQuestionairreListItem>> getAllQuestionairreRequests(@AuthenticationPrincipal AuthPrincipal principal){
+		return new ResponseEntity<List<AccreditationQuestionairreListItem>>(accreditationService.getPendingQuestionairres(principal.getUserId()), HttpStatus.OK);
+	}
+	
 	@GetMapping("questionairre/pending")
 	public ResponseEntity<List<AccreditationQuestionairreListItem>> getPendingQuestionairres(@AuthenticationPrincipal AuthPrincipal principal){
 		return new ResponseEntity<List<AccreditationQuestionairreListItem>>(accreditationService.getPendingQuestionairres(principal.getUserId()), HttpStatus.OK);

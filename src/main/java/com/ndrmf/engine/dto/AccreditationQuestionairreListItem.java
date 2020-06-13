@@ -9,6 +9,7 @@ public class AccreditationQuestionairreListItem {
 	private UserLookupItem forUser;
 	private UserLookupItem assignee;
 	private boolean assigned;
+	private String status;
 	
 	public UUID getId() {
 		return id;
@@ -33,5 +34,11 @@ public class AccreditationQuestionairreListItem {
 	}
 	public void setAssigned(boolean assigned) {
 		this.assigned = assigned;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 }

@@ -16,4 +16,7 @@ public interface AccreditationQuestionairreRepository extends JpaRepository<Accr
 	
 	@Query(value = "SELECT q FROM AccreditationQuestionairre q JOIN q.forUser a WHERE a.id = :userId")
 	Optional<AccreditationQuestionairre> findByForUser(@Param("userId") UUID userId);
+	
+	@Query(value = "SELECT q FROM AccreditationQuestionairre q JOIN q.assignee a WHERE a.id = :userId")
+	List<AccreditationQuestionairre> findAllByAssignee(@Param("userId") UUID userId);
 }
