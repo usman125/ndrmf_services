@@ -25,8 +25,7 @@ public class AccreditationStatusItem {
 	}
 
 	public String getQualificationStatus() {
-		return qualificationStatus == null ? ProcessStatus.NOT_INITIATED.getPersistenceValue()
-				: qualificationStatus;
+		return qualificationStatus;
 	}
 
 	public boolean isCanInitiate() {
