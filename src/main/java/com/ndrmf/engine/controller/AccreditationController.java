@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.AccreditationQuestionairreItem;
 import com.ndrmf.engine.dto.AccreditationQuestionairreListItem;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
@@ -150,7 +151,13 @@ public class AccreditationController {
 	
 	@GetMapping("questionairre")
 	public ResponseEntity<List<AccreditationQuestionairreListItem>> getAllQuestionairreRequests(@AuthenticationPrincipal AuthPrincipal principal){
-		return new ResponseEntity<List<AccreditationQuestionairreListItem>>(accreditationService.getPendingQuestionairres(principal.getUserId()), HttpStatus.OK);
+		return new ResponseEntity<List<AccreditationQuestionairreListItem>>(accreditationService.getAllQuestionairreRequests(principal.getUserId()), HttpStatus.OK);
+	}
+	
+	@GetMapping("questionairre/{id}")
+	public ResponseEntity<AccreditationQuestionairreItem> getQuestionairreRequest(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "id", required = true) UUID id){
+		return new ResponseEntity<AccreditationQuestionairreItem>(accreditationService.getQuestionairreRequest(principal.getUserId(), id), HttpStatus.OK);
 	}
 	
 	@GetMapping("questionairre/pending")

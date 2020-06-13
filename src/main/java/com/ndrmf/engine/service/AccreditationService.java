@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.engine.dto.AccreditationQuestionairreItem;
 import com.ndrmf.engine.dto.AccreditationQuestionairreListItem;
 import com.ndrmf.engine.dto.AccreditationStatusItem;
 import com.ndrmf.engine.dto.AddQualificationTaskRequest;
@@ -448,6 +449,22 @@ public class AccreditationService {
 		});
 		
 		return dtos;
+	}
+	
+	public AccreditationQuestionairreItem getQuestionairreRequest(UUID userId, UUID id) {
+		AccreditationQuestionairre q = questionairreRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid Request ID"));
+		
+		AccreditationQuestionairreItem dto = new AccreditationQuestionairreItem();
+		dto.setAssigned(userId.equals(q.getAssignee().getId()));
+		dto.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
+		dto.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
+		
+		dto.setStatus(q.getStatus());
+		dto.setTemplate(q.getTemplate());
+		dto.setData(q.getData());
+		
+		return dto;
 	}
 	
 	public List<AccreditationQuestionairreListItem> getPendingQuestionairres(UUID userId) {
