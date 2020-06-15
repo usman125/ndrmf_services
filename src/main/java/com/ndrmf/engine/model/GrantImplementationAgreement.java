@@ -89,6 +89,7 @@ public class GrantImplementationAgreement extends Auditable<String>{
 			this.reviews = new ArrayList<>();
 		}
 		
+		review.setGiaRef(this);
 		this.reviews.add(review);
 	}
 	
