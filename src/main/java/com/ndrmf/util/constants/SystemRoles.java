@@ -11,6 +11,7 @@ public class SystemRoles {
 	public static final String FIP_ENDORSEMENT = "FIP ENDORSEMENT";
 	public static final String FIP_SIGNATORY = "FIP SIGNATORY";
 	
+	public static final int ORG_NDRMF_ID = 1;
 	public static final String NDRMF = "NDRMF";
 	public static final String ADMIN = "ADMIN";
 	public static final String SME = "SME";

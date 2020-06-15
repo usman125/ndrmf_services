@@ -21,6 +21,7 @@ import com.ndrmf.util.constants.SystemRoles;
 import io.swagger.annotations.Api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
@@ -104,6 +105,11 @@ public class UserController {
     @GetMapping("/withRoleDMPAM")
     public ResponseEntity<List<UserLookupItem>> getUserHavingRoleDMPAM(){
         return new ResponseEntity<List<UserLookupItem>>(userService.getActiveUsersForLookupByRole(SystemRoles.DM_PAM), HttpStatus.OK);
+    }
+    
+    @GetMapping("/grouped-by-department")
+    public ResponseEntity<Map<String, List<UserLookupItem>>> getUsersGroupedByDepartment(){
+        return new ResponseEntity<>(userService.getActiveUsersGroupedByDepartment(), HttpStatus.OK);
     }
 
     @RolesAllowed("ADMIN")

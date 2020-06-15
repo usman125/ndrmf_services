@@ -179,6 +179,25 @@ public class UserService {
 		return dtos;
 	}
 	
+	public Map<String, List<UserLookupItem>> getActiveUsersGroupedByDepartment(){
+		List<User> users = userRepo.findActiveUsersByOrganisation(SystemRoles.ORG_NDRMF_ID);
+		users = users.stream().filter(u -> u.getDepartment() != null).collect(Collectors.toList());
+		
+		Map<String, List<User>> groupedUsers = users.stream().collect(Collectors.groupingBy(u -> u.getDepartment().getName()));
+		
+		Map<String, List<UserLookupItem>> dtos = new HashMap<>();
+		
+		groupedUsers.entrySet().forEach(es -> {
+			List<UserLookupItem> usersInGroup = es.getValue().stream()
+					.map(u -> new UserLookupItem(u.getId(), u.getFullName()))
+					.collect(Collectors.toList());
+			
+			dtos.put(es.getKey(), usersInGroup);
+		});
+		
+		return dtos;
+	}
+	
 	public List<UserItem> getAllUsers() {
 		List<User> users = userRepo.findAll();
 		
