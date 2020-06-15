@@ -20,8 +20,12 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 			+ "LEFT JOIN p.extendedAppraisal ea "
 			+ "LEFT JOIN ea.sections eas "
 			+ "LEFT JOIN eas.sme eassme "
+			+ "LEFT JOIN p.gia pgia "
+			+ "LEFT JOIN pgia.reviews giareveiws "
+			+ "LEFT JOIN giareveiws.assignee giareviewassignee "
 			+ "WHERE (po.id = :userId OR ib.id = :userId OR assig.id = :userId "
-			+ "OR eassme.id = :userId OR pssme.id = :userId) "
+			+ "OR eassme.id = :userId OR pssme.id = :userId "
+			+ "OR giareviewassignee.id = :userId) "
 			+ "AND p.status = :status")
 	List<ProjectProposal> findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(@Param("userId") UUID userId, @Param("status") String status);
 	
@@ -35,8 +39,12 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 			+ "LEFT JOIN p.extendedAppraisal ea "
 			+ "LEFT JOIN ea.sections eas "
 			+ "LEFT JOIN eas.sme eassme "
+			+ "LEFT JOIN p.gia pgia "
+			+ "LEFT JOIN pgia.reviews giareveiws "
+			+ "LEFT JOIN giareveiws.assignee giareviewassignee "
 			+ "WHERE po.id = :userId OR ib.id = :userId "
-			+ "OR assig.id = :userId OR eassme.id = :userId OR pssme.id = :userId")
+			+ "OR assig.id = :userId OR eassme.id = :userId OR pssme.id = :userId "
+			+ "OR giareviewassignee.id = :userId")
 	List<ProjectProposal> findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(@Param("userId") UUID userId);
 	
 	@Query(value = "SELECT p FROM ProjectProposal p WHERE p.status = :status")
