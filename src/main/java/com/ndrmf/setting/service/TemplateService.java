@@ -105,11 +105,13 @@ public class TemplateService {
 		
 		List<String> invalidSections = new ArrayList<>();
 		
-		sts.forEach(st -> {	
-			if(st.getSection().getSme() == null) {
-				invalidSections.add(st.getSection().getName());
-			}
-		});
+		if(!processType.equals(com.ndrmf.util.enums.ProcessType.GIA_CHECKLIST.toString())) {
+			sts.forEach(st -> {	
+				if(st.getSection().getSme() == null) {
+					invalidSections.add(st.getSection().getName());
+				}
+			});	
+		}
 		
 		if(invalidSections.size() > 0) {
 			throw new ValidationException(String.format("Incomplete Process Meta. Missing SME for section(s): %s", invalidSections.stream().collect(Collectors.joining(" , "))));
