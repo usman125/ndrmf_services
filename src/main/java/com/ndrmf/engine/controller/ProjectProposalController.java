@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -218,7 +219,8 @@ public class ProjectProposalController {
 	public ResponseEntity<ApiResponse> updateGrantImplementationAgreementStatus(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "proposalId", required = true) UUID proposalId,
 			@RequestParam(name = "status", required = true) ProcessStatus status,
-			@RequestParam(name = "checklist-deadline", required = false) Date checklistDeadline){
+			@RequestParam(name = "checklist-deadline", required = false)
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date checklistDeadline){
 		if(!status.equals(ProcessStatus.APPROVED) && !status.equals(ProcessStatus.REJECTED)) {
 			throw new ValidationException("Invalid status for this phase of the Proposal");
 		}
