@@ -44,6 +44,7 @@ public class ProjectProposal extends Auditable<String> {
 	private ProjectImplementationPlan pip;
 	private GrantImplementationAgreement gia;
 	private GIAChecklist giaChecklist;
+	private List<SubProjectDocument> subProjectDocuments;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -183,5 +184,23 @@ public class ProjectProposal extends Auditable<String> {
 	}
 	public void setGiaChecklist(GIAChecklist giaChecklist) {
 		this.giaChecklist = giaChecklist;
+	}
+	
+	@OneToMany(mappedBy="proposalRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+	public List<SubProjectDocument> getSubProjectDocuments() {
+		return subProjectDocuments;
+	}
+	public void setSubProjectDocuments(List<SubProjectDocument> subProjectDocuments) {
+		this.subProjectDocuments = subProjectDocuments;
+	}
+	
+	public void addSubProjectDocument(SubProjectDocument doc) {
+		if(this.subProjectDocuments == null) {
+			this.subProjectDocuments = new ArrayList<>();
+		}
+		
+		doc.setProposalRef(this);
+		
+		this.subProjectDocuments.add(doc);
 	}
 }
