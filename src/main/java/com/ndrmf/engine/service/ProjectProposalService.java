@@ -354,7 +354,7 @@ public class ProjectProposalService {
 		List<ProjectProposal> props;
 
 		if (currentUser.getRoles() != null && (currentUser.getRoles().contains(SystemRoles.GM)
-				|| currentUser.getRoles().contains(SystemRoles.GM))) {
+				|| currentUser.getRoles().contains(SystemRoles.CEO))) {
 			if (status == null) {
 				props = projProposalRepo.findAll();
 			} else {
