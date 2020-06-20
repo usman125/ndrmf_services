@@ -56,7 +56,7 @@ public class ImplementationController {
 		return new ResponseEntity<>(implService.getSubProjectDocuments(principal.getUserId()), HttpStatus.OK);
 	}
 	
-	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
+	
 	@GetMapping("/sub-proj-doc/{id}")
 	public ResponseEntity<SubProjectDocumentItem> getSubProjectDocument(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "id", required = true) UUID id){
