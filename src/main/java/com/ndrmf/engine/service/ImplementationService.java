@@ -50,7 +50,6 @@ public class ImplementationService {
 	 * for proposals wherever applicable
 	 */
 	//@Scheduled(cron = "0 0 1 * * ?")
-	@Transactional
 	public void commenceSubProjectDocument(UUID proposalId) {
 		
 		ProjectProposal p = projProposalRepo.findById(proposalId)
@@ -82,6 +81,8 @@ public class ImplementationService {
 
 			doc.addSection(s);
 		}
+		
+		subProjectRepo.save(doc);
 	}
 	
 	public List<SubProjectDocumentListItem> getPendingSubProjectDocuments(UUID userId) {
