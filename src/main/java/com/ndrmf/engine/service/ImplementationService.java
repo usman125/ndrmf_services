@@ -70,6 +70,7 @@ public class ImplementationService {
 		doc.setStartDate(LocalDate.now());
 		doc.setEndDate(LocalDate.now().plusDays(30));
 		doc.setStatus(ProcessStatus.PENDING.getPersistenceValue());
+		doc.setProposalRef(p);
 		
 		for (SectionTemplate t : sts) {
 			SubProjectDocumentSection s = new SubProjectDocumentSection();
