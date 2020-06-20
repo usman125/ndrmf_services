@@ -2,6 +2,7 @@ package com.ndrmf.engine.dto;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,6 +63,8 @@ public class SubProjectDocumentItem {
 		private boolean assigned;
 		private String status;
 		private String comments;
+		private String reviewStatus;
+		private Date reviewCompletedOn;
 		
 		public UUID getId() {
 			return id;
@@ -110,6 +113,18 @@ public class SubProjectDocumentItem {
 		}
 		public void setComments(String comments) {
 			this.comments = comments;
+		}
+		public String getReviewStatus() {
+			return reviewStatus;
+		}
+		public void setReviewStatus(String reviewStatus) {
+			this.reviewStatus = reviewStatus;
+		}
+		public Date getReviewCompletedOn() {
+			return reviewCompletedOn;
+		}
+		public void setReviewCompletedOn(Date reviewCompletedOn) {
+			this.reviewCompletedOn = reviewCompletedOn;
 		}
 	}
 }

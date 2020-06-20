@@ -142,6 +142,9 @@ public class ImplementationService {
 			item.setStatus(s.getStatus());
 			item.setTemplate(s.getTemplate());
 			item.setTemplateType(s.getTemplateType());
+			item.setReviewStatus(s.getReviewStatus());
+			item.setReviewCompletedOn(s.getReviewCompletedOn());
+			
 			
 			dto.addSection(item);
 		});
