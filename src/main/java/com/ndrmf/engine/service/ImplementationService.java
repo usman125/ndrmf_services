@@ -2,6 +2,7 @@ package com.ndrmf.engine.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -85,6 +86,24 @@ public class ImplementationService {
 	
 	public List<SubProjectDocumentListItem> getPendingSubProjectDocuments(UUID userId) {
 		List<SubProjectDocument> docs = subProjectRepo.getSubProjectsForFIPByStatus(userId, ProcessStatus.PENDING.getPersistenceValue());
+		
+		List<SubProjectDocumentListItem> dtos = new ArrayList<>();
+		docs.forEach(d -> {
+			SubProjectDocumentListItem item = new SubProjectDocumentListItem();
+			item.setId(d.getId());
+			item.setProposalName(d.getProposalRef().getName());
+			item.setStartDate(d.getStartDate());
+			item.setEndDate(d.getEndDate());
+			item.setStatus(d.getStatus());
+			
+			dtos.add(item);
+		});
+		
+		return dtos;
+	}
+	
+	public List<SubProjectDocumentListItem> getSubProjectDocuments(UUID userId) {
+		List<SubProjectDocument> docs = subProjectRepo.getSubProjectsForPOOrReviewer(userId, Arrays.asList(ProcessStatus.DRAFT.getPersistenceValue()));
 		
 		List<SubProjectDocumentListItem> dtos = new ArrayList<>();
 		docs.forEach(d -> {
