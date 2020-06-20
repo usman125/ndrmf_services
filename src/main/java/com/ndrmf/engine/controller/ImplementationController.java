@@ -67,7 +67,7 @@ public class ImplementationController {
 	@PostMapping("/sub-proj-doc/{subProjectDocumentId}/section/submit")
 	public ResponseEntity<ApiResponse> submitSubProjectDocumentSection(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "subProjectDocumentId", required = true) UUID id,
-			SubProjectDocumentSectionRequest body){
+			@RequestBody SubProjectDocumentSectionRequest body){
 		implService.submitSubProjectDocumentSection(id, principal.getUserId(), body);
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section submitted Successfully."), HttpStatus.CREATED);
