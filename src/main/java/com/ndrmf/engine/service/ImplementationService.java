@@ -134,6 +134,7 @@ public class ImplementationService {
 		
 		doc.getSections().forEach(s -> {
 			SubProjectDocumentSectionItem item = new SubProjectDocumentSectionItem();
+			item.setId(s.getId());
 			item.setAssigned(userId.equals(s.getSme().getId()));
 			item.setComments(s.getComments());
 			item.setData(s.getData());
