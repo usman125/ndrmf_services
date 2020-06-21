@@ -172,7 +172,7 @@ public class ImplementationService {
 		SubProjectDocumentSection section = subProjectSectionRepo.findById(sectionId)
 				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
 		
-		section.setReviewStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+		section.setReviewStatus(ProcessStatus.PENDING.getPersistenceValue());
 		section.getSubProjectDocumentRef().setStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
 	}
 	
