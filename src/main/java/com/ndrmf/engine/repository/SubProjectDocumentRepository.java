@@ -18,7 +18,9 @@ public interface SubProjectDocumentRepository extends JpaRepository<SubProjectDo
 	
 	@Query(value = "SELECT spd FROM SubProjectDocument spd "
 			+ "JOIN spd.processOwner u "
-			+ "WHERE u.id = :userId "
+			+ "LEFT JOIN spd.sections s "
+			+ "LEFT JOIN s.sme ssme "
+			+ "WHERE (u.id = :userId OR (ssme.id = :userId AND s.reviewStatus = 'Pending')) "
 			+ "AND spd.status NOT IN (:excludedStatuses)")
 	List<SubProjectDocument> getSubProjectsForPOOrReviewer(@Param("userId") UUID userId,
 			@Param("excludedStatuses") List<String> excludedStatuses);
