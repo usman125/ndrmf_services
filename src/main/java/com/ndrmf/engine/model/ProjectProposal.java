@@ -36,6 +36,7 @@ public class ProjectProposal extends Auditable<String> {
 	private User initiatedBy;
 	private User processOwner;
 	private String status;
+	private String subStatus;
 	private List<ProjectProposalSection> sections;
 	private PreliminaryAppraisal preAppraisal;
 	private ExtendedAppraisal extendedAppraisal;
@@ -202,5 +203,11 @@ public class ProjectProposal extends Auditable<String> {
 		doc.setProposalRef(this);
 		
 		this.subProjectDocuments.add(doc);
+	}
+	public String getSubStatus() {
+		return subStatus;
+	}
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 }

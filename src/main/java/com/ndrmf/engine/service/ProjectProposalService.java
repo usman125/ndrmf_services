@@ -164,6 +164,7 @@ public class ProjectProposalService {
 		dto.setOwner(p.getProcessOwner().getId().equals(userId));
 		dto.setProcessOwner(new UserLookupItem(p.getProcessOwner().getId(), p.getProcessOwner().getFullName()));
 		dto.setStatus(p.getStatus());
+		dto.setSubStatus(p.getSubStatus());
 		dto.setSubmittedAt(p.getCreatedDate());
 
 		if (p.getInitiatedBy().getId().equals(userId)) {
@@ -242,7 +243,6 @@ public class ProjectProposalService {
 			preAppItem.setCompletedDate(p.getPreAppraisal().getCompletedOn());
 
 			dto.setPreAppraisal(preAppItem);
-			dto.setSubStatus(p.getPreAppraisal().getStatus());
 		}
 
 		if (p.getExtendedAppraisal() != null) {
@@ -271,7 +271,6 @@ public class ProjectProposalService {
 			});
 
 			dto.setExtendedAppraisal(eaItem);
-			dto.setSubStatus(e.getStatus());
 		}
 
 		String generalCommentsJSON = p.getGeneralComments();
@@ -746,8 +745,13 @@ public class ProjectProposalService {
 	public void updateProposalStatus(UUID proposalId, UUID userId, ProcessStatus status) {
 		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
-
-		p.setStatus(status.getPersistenceValue());
+		
+		if(status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
+			p.setSubStatus(status.getPersistenceValue());
+		}
+		else {
+			p.setStatus(status.getPersistenceValue());	
+		}
 	}
 
 	@Transactional
