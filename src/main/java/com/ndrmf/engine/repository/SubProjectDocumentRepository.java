@@ -16,7 +16,7 @@ public interface SubProjectDocumentRepository extends JpaRepository<SubProjectDo
 			+ "WHERE u.id = :userId AND spd.status = :status")
 	List<SubProjectDocument> getSubProjectsForFIPByStatus(@Param("userId") UUID userId, @Param("status") String status);
 	
-	@Query(value = "SELECT spd FROM SubProjectDocument spd "
+	@Query(value = "SELECT DISTINCT spd FROM SubProjectDocument spd "
 			+ "JOIN spd.processOwner u "
 			+ "LEFT JOIN spd.sections s "
 			+ "LEFT JOIN s.sme ssme "
