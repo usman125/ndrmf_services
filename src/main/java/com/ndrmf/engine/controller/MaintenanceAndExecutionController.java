@@ -1,6 +1,7 @@
 package com.ndrmf.engine.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -8,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportListItem;
 import com.ndrmf.engine.service.QPRService;
 
 import io.swagger.annotations.Api;
@@ -29,5 +32,11 @@ public class MaintenanceAndExecutionController {
 		dto.put("id", qprService.commenceQPR(proposalId));
 	
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/qpr/{id}")
+	public ResponseEntity<List<QuarterlyProgressReportListItem>> getQPRRequests(@AuthenticationPrincipal AuthPrincipal principal){
+	
+		return new ResponseEntity<>(qprService.getQPRRequests(principal), HttpStatus.CREATED);
 	}
 }

@@ -1,12 +1,15 @@
 package com.ndrmf.engine.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportListItem;
 import com.ndrmf.engine.model.QuarterlyProgressReport;
 import com.ndrmf.engine.model.QuarterlyProgressReportSection;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
@@ -15,6 +18,7 @@ import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
+import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
 
@@ -60,5 +64,29 @@ public class QPRService {
 		}
 		
 		return qprRepo.save(qpr).getId();
+	}
+	
+	public List<QuarterlyProgressReportListItem> getQPRRequests(AuthPrincipal principal){
+		List<QuarterlyProgressReport> qprs = new ArrayList<>();
+		
+		if(principal.getRoles().contains(SystemRoles.ORG_FIP)) {
+			qprs = qprRepo.getQuarterlyProgressReportsForFIP(principal.getUserId());
+		}
+		
+		List<QuarterlyProgressReportListItem> dtos = new ArrayList<>();
+		qprs.forEach(r -> {
+			QuarterlyProgressReportListItem item = new QuarterlyProgressReportListItem();
+			
+			item.setId(r.getId());
+			item.setDueDate(r.getDueDate());
+			item.setFipName(r.getProposalRef().getInitiatedBy().getFullName());
+			item.setProposalName(r.getProposalRef().getName());
+			item.setQuarter(r.getQuarter());
+			item.setStatus(r.getStatus());
+			
+			dtos.add(item);
+		});
+		
+		return dtos;
 	}
 }
