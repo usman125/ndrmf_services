@@ -13,6 +13,7 @@ public class PreliminaryAppraisalItem {
 	private Date completedDate;
 	private boolean assigned;
 	private String status;
+	private String subStatus;
 	
 	public UUID getId() {
 		return id;
@@ -68,5 +69,11 @@ public class PreliminaryAppraisalItem {
 	}
 	public void setCompletedDate(Date completedDate) {
 		this.completedDate = completedDate;
+	}
+	public String getSubStatus() {
+		return subStatus;
+	}
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 }

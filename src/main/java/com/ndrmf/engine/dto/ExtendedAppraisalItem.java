@@ -16,6 +16,7 @@ public class ExtendedAppraisalItem {
 	private String comments;
 	private boolean assigned;
 	private String status;
+	private String subStatus;
 	private List<ExtendedAppraisalSectionItem> sections;
 	
 	public UUID getId() {
@@ -95,6 +96,14 @@ public class ExtendedAppraisalItem {
 	}
 	public void setCompletedDate(Date completedDate) {
 		this.completedDate = completedDate;
+	}
+
+	public String getSubStatus() {
+		return subStatus;
+	}
+
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 
 	public static class ExtendedAppraisalSectionItem {
