@@ -58,7 +58,7 @@ public class MaintenanceAndExecutionController {
 	}
 	
 	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
-	@PostMapping("/qpr/{id}/section/add")
+	@PostMapping("/qpr/{id}/section/submit")
 	public ResponseEntity<ApiResponse> submitSection(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestParam(name = "action", required = true) FormAction action,
 			@PathVariable(name = "id", required = true) UUID id,
