@@ -1,7 +1,7 @@
 package com.ndrmf.engine.model;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +38,7 @@ public class QuarterlyProgressReportSection {
 	private User sme;
 	private String status;
 	private String reviewStatus;
-	private LocalDate reviewCompletedOn;
+	private Date reviewCompletedOn;
 	private String reassignmentStatus;
 	
 	List<QuarterlyProgressReportSectionReview> reviews;
@@ -144,11 +144,11 @@ public class QuarterlyProgressReportSection {
 		this.reviewStatus = reviewStatus;
 	}
 
-	public LocalDate getReviewCompletedOn() {
+	public Date getReviewCompletedOn() {
 		return reviewCompletedOn;
 	}
 
-	public void setReviewCompletedOn(LocalDate reviewCompletedOn) {
+	public void setReviewCompletedOn(Date reviewCompletedOn) {
 		this.reviewCompletedOn = reviewCompletedOn;
 	}
 

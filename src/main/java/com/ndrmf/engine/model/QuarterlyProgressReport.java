@@ -27,6 +27,7 @@ public class QuarterlyProgressReport extends Auditable<String> {
 	private UUID id;
 	private int quarter;
 	private LocalDate dueDate;
+	private LocalDate submittedAt;
 	private User processOwner;
 	private String status;
 	private ProjectProposal proposalRef;
@@ -96,5 +97,11 @@ public class QuarterlyProgressReport extends Auditable<String> {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public LocalDate getSubmittedAt() {
+		return submittedAt;
+	}
+	public void setSubmittedAt(LocalDate submittedAt) {
+		this.submittedAt = submittedAt;
 	}
 }

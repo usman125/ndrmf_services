@@ -6,18 +6,26 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.SectionItem;
+import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportItem;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportListItem;
 import com.ndrmf.engine.model.QuarterlyProgressReport;
 import com.ndrmf.engine.model.QuarterlyProgressReportSection;
+import com.ndrmf.engine.model.QuarterlyProgressReportSectionReview;
+import com.ndrmf.engine.model.QuarterlyProgressReportTask;
 import com.ndrmf.engine.repository.ProjectProposalRepository;
 import com.ndrmf.engine.repository.QuarterlyProgressReportRepository;
+import com.ndrmf.engine.repository.qpr.QPRTaskRepository;
 import com.ndrmf.exception.ValidationException;
+import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
+import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
@@ -28,6 +36,7 @@ public class QPRService {
 	@Autowired private SectionTemplateRepository sectionTemplateRepo;
 	@Autowired private ProcessTypeRepository processTypeRepo;
 	@Autowired private QuarterlyProgressReportRepository qprRepo;
+	@Autowired private QPRTaskRepository qprTasksRepo;
 	
 	public UUID commenceQPR(UUID proposalId) {
 		com.ndrmf.setting.model.ProcessType  processType = processTypeRepo.findById(ProcessType.QPR.toString())
@@ -88,5 +97,70 @@ public class QPRService {
 		});
 		
 		return dtos;
+	}
+	
+	public QuarterlyProgressReportItem getQPRRequest(UUID id, AuthPrincipal principal) {
+		QuarterlyProgressReport qpr = qprRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid ID"));
+		
+		QuarterlyProgressReportItem dto = new QuarterlyProgressReportItem();
+		dto.setDueDate(qpr.getDueDate());
+		dto.setFipName(qpr.getProposalRef().getInitiatedBy().getFullName());
+		dto.setProcessOwnerName(qpr.getProcessOwner().getFullName());
+		dto.setQuarter(qpr.getQuarter());
+		dto.setStatus(qpr.getStatus());
+		dto.setSubmittedAt(qpr.getSubmittedAt());
+		
+		if(qpr.getProposalRef().getInitiatedBy().getId().equals(principal.getUserId())) {
+			List<QuarterlyProgressReportTask> reassignmentComments = 
+					qprTasksRepo.findAllTasksForAssigneeAndRequest(principal.getUserId(), id);
+			
+			if (reassignmentComments != null && reassignmentComments.size() > 0) {
+				QuarterlyProgressReportTask lastTask = reassignmentComments.get(reassignmentComments.size() - 1);
+				
+				TaskItem ti = new TaskItem();
+				ti.setComments(lastTask.getComments());
+				ti.setEndDate(lastTask.getEndDate());
+				ti.setStartDate(lastTask.getStartDate());
+				ti.setStatus(lastTask.getStatus());
+
+				dto.setReassignmentTask(ti);
+			}
+		}
+		
+		qpr.getSections().forEach(qs -> {
+			SectionItem section = new SectionItem();
+			section.setAssigned(qs.getSme().getId().equals(principal.getUserId()));
+			section.setData(qs.getData());
+			section.setId(qs.getId());
+			section.setName(qs.getName());
+			section.setSme(new UserLookupItem(qs.getSme().getId(), qs.getSme().getFullName()));
+			section.setTemplate(qs.getTemplate());
+			section.setTemplateType(qs.getTemplateType());
+			section.setReviewStatus(qs.getReviewStatus());
+			section.setReviewCompletedDate(qs.getReviewCompletedOn());
+			section.setReassignmentStatus(qs.getReassignmentStatus());
+			
+			List<QuarterlyProgressReportTask> tasks = qprTasksRepo.findTasksForSection(qs.getId(), PageRequest.of(0, 1));
+
+			if (tasks != null && tasks.size() > 0) {
+				section.setReviewDeadline(tasks.get(0).getEndDate());
+			}
+			
+			if (qs.getReviews() != null && qs.getReviews().size() > 0) {
+				QuarterlyProgressReportSectionReview latestReview = qs.getReviews().get(qs.getReviews().size() - 1);
+
+				section.setReview(latestReview.getCreatedDate(), null, null, latestReview.getStatus(),
+						latestReview.getComments());
+
+				qs.getReviews().forEach(r -> {
+					section.addReviewHistory(r.getCreatedDate(), null, null, r.getStatus(), r.getComments());
+				});
+			}
+			
+			dto.addSection(section);
+		});
+		
+		return dto;
 	}
 }
