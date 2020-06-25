@@ -20,7 +20,7 @@ import com.ndrmf.engine.service.QPRService;
 
 import io.swagger.annotations.Api;
 
-@Api(tags = "M&E Process")
+@Api(tags = "M & E Process")
 @RestController
 public class MaintenanceAndExecutionController {
 	@Autowired private QPRService qprService;
@@ -34,7 +34,7 @@ public class MaintenanceAndExecutionController {
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	}
 	
-	@GetMapping("/qpr/{id}")
+	@GetMapping("/qpr")
 	public ResponseEntity<List<QuarterlyProgressReportListItem>> getQPRRequests(@AuthenticationPrincipal AuthPrincipal principal){
 	
 		return new ResponseEntity<>(qprService.getQPRRequests(principal), HttpStatus.CREATED);
