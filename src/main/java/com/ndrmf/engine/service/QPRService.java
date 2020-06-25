@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.SectionItem;
+import com.ndrmf.engine.dto.qpr.QPRSectionRequest;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportItem;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportListItem;
 import com.ndrmf.engine.model.QuarterlyProgressReport;
@@ -27,8 +28,10 @@ import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.util.constants.SystemRoles;
+import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.ProcessType;
+import com.ndrmf.util.enums.ReassignmentStatus;
 
 @Service
 public class QPRService {
@@ -162,5 +165,38 @@ public class QPRService {
 		});
 		
 		return dto;
+	}
+	
+	public void submitQPRSection(UUID id, UUID userId, QPRSectionRequest body,
+			FormAction action) {
+		
+		QuarterlyProgressReport qpr = qprRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid QPR ID"));
+		
+		if (!qpr.getStatus().equals(ProcessStatus.DRAFT.getPersistenceValue())
+				&& !qpr.getStatus().equals(ProcessStatus.REASSIGNED.getPersistenceValue())) {
+			throw new ValidationException("Request is already: " + qpr.getStatus());
+		}
+		
+		QuarterlyProgressReportSection section = qpr.getSections().stream().filter(s -> s.getId().equals(body.getId())).findAny()
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+
+		section.setData(body.getData());
+
+		if (action == FormAction.SUBMIT) {
+			qpr.setStatus(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
+		}
+
+		if (section.getReassignmentStatus() != null
+				&& section.getReassignmentStatus().equals(ReassignmentStatus.PENDING.getPersistenceValue())) {
+			section.setReassignmentStatus(ReassignmentStatus.COMPLETED.getPersistenceValue());
+		}
+
+		qprRepo.save(qpr);
+
+		if (action == FormAction.SUBMIT) {
+			// TODO raise event
+			// eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));
+		}
 	}
 }
