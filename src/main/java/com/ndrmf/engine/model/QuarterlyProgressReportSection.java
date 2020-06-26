@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
@@ -177,5 +178,14 @@ public class QuarterlyProgressReportSection {
 		review.setSectionRef(this);
 		
 		this.reviews.add(review);
+	}
+	
+	@PrePersist
+	public void prePersist() {
+		if(this.id == null) {
+			this.id = UUID.randomUUID();
+		}
+		
+		this.revisionNo = 1;
 	}
 }
