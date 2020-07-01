@@ -2,8 +2,10 @@ package com.ndrmf.user.dto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class UserItem {
+	private UUID id;
 	private String username;
 	private String email;
 	private String firstName;
@@ -60,5 +62,11 @@ public class UserItem {
 	}
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+	public UUID getId() {
+		return id;
+	}
+	public void setId(UUID id) {
+		this.id = id;
 	}
 }

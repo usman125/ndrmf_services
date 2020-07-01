@@ -13,6 +13,7 @@ import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.RoleItem;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UpdateUserRequest;
 import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.service.UserService;
@@ -50,6 +51,15 @@ public class UserController {
     	userService.createUser(body);
     	
         return new ResponseEntity<ApiResponse>(new ApiResponse(true, "User created successfully."), HttpStatus.CREATED);
+    }
+	
+	@RolesAllowed("ADMIN")
+	@PutMapping("/{id}")
+	public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UpdateUserRequest body,
+			@PathVariable(name = "id", required = true) UUID id){
+    	userService.updateUser(id, body);
+    	
+        return new ResponseEntity<ApiResponse>(new ApiResponse(true, "User updated successfully."), HttpStatus.ACCEPTED);
     }
 	
     @PostMapping("/signup")

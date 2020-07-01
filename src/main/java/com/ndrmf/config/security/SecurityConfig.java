@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,15 +30,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private UserDetailsServiceImpl userDetailsService;
 	@Autowired
-	private BCryptPasswordEncoder bCryptPasswordEncoder;
-	@Autowired
 	private ObjectMapper objectMapper;
-
 	@Autowired
 	private AuthenticationManager authManager;
+	@Autowired
+	private CustomAuthenticationProvider customAuthProvider;
 
 	private JWTAuthenticationFilter authenticationFilter() {
 		JWTAuthenticationFilter filter = new JWTAuthenticationFilter(authManager, userDetailsService, objectMapper);
+		
 		filter.setAuthenticationManager(authManager);
 
 		return filter;
@@ -73,7 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+		auth.authenticationProvider(customAuthProvider);
 	}
 
 	@Override

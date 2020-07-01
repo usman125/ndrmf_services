@@ -28,6 +28,15 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), user.getRoles());
     }
 	
+	public User findByUsername(String username) throws UsernameNotFoundException {
+		User user = userRepo.findByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        
+        return user;
+	}
+	
 	public LoginResponse getUserDetailsForJWTToken(String username) {
 		User user = userRepo.findByUsername(username);
 		

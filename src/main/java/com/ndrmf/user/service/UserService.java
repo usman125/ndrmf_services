@@ -16,6 +16,7 @@ import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.RoleItem;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UpdateUserRequest;
 import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.Organisation;
@@ -93,6 +94,14 @@ public class UserService {
         	questionairreRepo.save(q);
         }
     }
+	
+	@Transactional
+	public void updateUser(UUID id, UpdateUserRequest body) {
+		User u = userRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid User ID"));
+		
+		u.setEnabled(body.isEnabled());
+	}
     
 	public List<OrganisationAndRoles> getOrganisations() {
 		List<Organisation> orgs = orgRepo.findAll();
@@ -205,7 +214,7 @@ public class UserService {
 		
 		users.forEach(u -> {
 			UserItem dto = new UserItem();
-			
+			dto.setId(u.getId());
 			dto.setUsername(u.getUsername());
 			dto.setEmail(u.getEmail());
 			dto.setFirstName(u.getFirstName());
