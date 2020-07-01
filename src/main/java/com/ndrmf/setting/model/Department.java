@@ -16,6 +16,7 @@ import com.ndrmf.config.audit.Auditable;
 public class Department extends Auditable<String> {
 	private int id;
 	private String name;
+	private boolean enabled;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,5 +35,12 @@ public class Department extends Auditable<String> {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

@@ -27,6 +27,7 @@ import com.ndrmf.setting.dto.CostHeadItem;
 import com.ndrmf.setting.dto.DepartmentItem;
 import com.ndrmf.setting.dto.DesignationItem;
 import com.ndrmf.setting.dto.ThematicAreaItem;
+import com.ndrmf.setting.dto.UpdateDepartmentRequest;
 import com.ndrmf.setting.service.SettingService;
 import com.ndrmf.util.constants.SystemRoles;
 
@@ -40,13 +41,20 @@ public class SettingController {
 	@Autowired private SettingService settingService;
 	
 	@GetMapping("/department")
-	public ResponseEntity<List<DepartmentItem>> getAllDepartments(){
-		return new ResponseEntity<List<DepartmentItem>>(settingService.getAllDepartments(), HttpStatus.OK);
+	public ResponseEntity<List<DepartmentItem>> getAllDepartments(@RequestParam(name = "enabled", required = false) Boolean enabled){
+		return new ResponseEntity<List<DepartmentItem>>(settingService.getAllDepartments(enabled), HttpStatus.OK);
 	}
 	
 	@PostMapping("/department/add")
 	public ResponseEntity<ApiResponse> addDepartment(@RequestBody AddDepartmentRequest body){
 		settingService.addDepartment(body);
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Department added"), HttpStatus.OK);
+	}
+	
+	@PutMapping("/department/{id}")
+	public ResponseEntity<ApiResponse> updateDepartment(@RequestBody UpdateDepartmentRequest body,
+			@PathVariable(name = "id", required = true) int id){
+		settingService.updateDepartment(id, body);
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Department added"), HttpStatus.OK);
 	}
 	

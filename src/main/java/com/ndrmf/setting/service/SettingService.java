@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import com.ndrmf.setting.dto.CostHeadItem;
 import com.ndrmf.setting.dto.DepartmentItem;
 import com.ndrmf.setting.dto.DesignationItem;
 import com.ndrmf.setting.dto.ThematicAreaItem;
+import com.ndrmf.setting.dto.UpdateDepartmentRequest;
 import com.ndrmf.setting.model.CostHead;
 import com.ndrmf.setting.model.Department;
 import com.ndrmf.setting.model.Designation;
@@ -39,14 +42,31 @@ public class SettingService {
 	public void addDepartment(AddDepartmentRequest body) {
 		Department d = new Department();
 		d.setName(body.getName());
+		d.setEnabled(true);
 		
 		deptRepo.save(d);
 	}
 	
-	public List<DepartmentItem> getAllDepartments(){
-		List<Department> ds = deptRepo.findAll();
+	@Transactional
+	public void updateDepartment(int id, UpdateDepartmentRequest body) {
+		Department d = deptRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid ID"));
 		
-		List<DepartmentItem> dtos = ds.stream().map(d -> new DepartmentItem(d.getId(), d.getName())).collect(Collectors.toList());
+		d.setName(body.getName());
+		d.setEnabled(body.isEnabled());
+	}
+	
+	public List<DepartmentItem> getAllDepartments(Boolean enabled){
+		List<Department> ds;
+		
+		if(enabled != null) {
+			ds = deptRepo.findAllByEnabled(enabled);	
+		}
+		else {
+			ds = deptRepo.findAll();
+		}
+		
+		List<DepartmentItem> dtos = ds.stream().map(d -> new DepartmentItem(d.getId(), d.getName(), d.isEnabled())).collect(Collectors.toList());
 		
 		return dtos;
 	}
