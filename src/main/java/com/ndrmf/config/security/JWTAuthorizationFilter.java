@@ -4,8 +4,10 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.user.service.UserDetailsServiceImpl;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,9 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+	private final UserDetailsServiceImpl userDetailsService;
 	
-	public JWTAuthorizationFilter(AuthenticationManager authenticationManager) {
+	public JWTAuthorizationFilter(AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsService) {
 		super(authenticationManager);
+		
+		this.userDetailsService = userDetailsService;
 	}
 	
 	@Override
@@ -59,6 +64,12 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         }
         
         String username = jwtToken.getSubject();
+        
+        
+        if(!this.userDetailsService.isUserEnabled(username)) {
+        	throw new DisabledException("User has been disabled");
+        }
+        
         String userId = jwtToken.getClaim("userId").asString();
         String fullName = jwtToken.getClaim("fullName").asString();
         List<String> roleClaims = jwtToken.getClaim("roles").asList(String.class);

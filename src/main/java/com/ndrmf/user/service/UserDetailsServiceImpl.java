@@ -63,4 +63,8 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 		
 		return dto;
 	}
+	
+	public boolean isUserEnabled(String username) {
+		return userRepo.isEnabled(username);
+	}
 }

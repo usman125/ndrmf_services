@@ -58,13 +58,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.authorizeRequests()
 				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
 				.anyRequest().authenticated()
-				.and().addFilter(authenticationFilter()).addFilter(new JWTAuthorizationFilter(authManager))
+				.and().addFilter(authenticationFilter()).addFilter(new JWTAuthorizationFilter(authManager, userDetailsService))
 				.exceptionHandling()
-				.authenticationEntryPoint((request, response, e)-> {
-					response.setStatus(HttpStatus.UNAUTHORIZED.value());
-					response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-					objectMapper.writeValue(response.getWriter(), new ApiResponse(false, e.getMessage()));
-				})
+				  .authenticationEntryPoint((request, response, e)-> {
+				  response.setStatus(HttpStatus.UNAUTHORIZED.value());
+				  response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+				  objectMapper.writeValue(response.getWriter(), new ApiResponse(false,
+				  e.getMessage())); })
+				 
 				.and()
 				// this disables session creation on Spring Security
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
