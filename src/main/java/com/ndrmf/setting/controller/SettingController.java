@@ -55,7 +55,7 @@ public class SettingController {
 	public ResponseEntity<ApiResponse> updateDepartment(@RequestBody UpdateDepartmentRequest body,
 			@PathVariable(name = "id", required = true) int id){
 		settingService.updateDepartment(id, body);
-		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Department added"), HttpStatus.OK);
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Department updated"), HttpStatus.OK);
 	}
 	
 	@GetMapping("/designation")
