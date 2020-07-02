@@ -71,7 +71,7 @@ public class ProjectProposalController {
 	public ResponseEntity<?> commentProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestBody CommenceProjectProposalRequest body){
 		Map<String, UUID> dto = new HashMap<>();
-		dto.put("id", projProposalService.commenceProjectProposal(principal.getUserId(), body));
+		dto.put("id", projProposalService.commenceProjectProposal(principal, body));
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	}
 	

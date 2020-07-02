@@ -21,7 +21,9 @@ public enum ProcessStatus {
 	MARKED_TO_GM("Marked to GM"),
 	MARKED_TO_CEO("Marked to CEO"),
 	GIA("GIA"),
-	GIA_CHECKLIST("Checklist to FIP");
+	GIA_CHECKLIST("Checklist to FIP"),
+	UPLOAD_PC1("Upload PC1"),
+	UPLOAD_PDRMC("Upload PDRMC Mins");
 	
 	private final String persistenceValue;
 	

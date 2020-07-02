@@ -105,7 +105,9 @@ public class ProjectProposalService {
 	@Autowired
 	private ProcessTypeRepository processTypeRepo;
 
-	public UUID commenceProjectProposal(UUID initiatorUserId, CommenceProjectProposalRequest body) {
+	public UUID commenceProjectProposal(AuthPrincipal initiatorPrincipal, CommenceProjectProposalRequest body) {
+		final UUID initiatorUserId = initiatorPrincipal.getUserId();
+		
 		if (body.getThematicAreaId() == null) {
 			throw new ValidationException("Thematic area cannot be null");
 		}
@@ -116,7 +118,7 @@ public class ProjectProposalService {
 		p.setProcessOwner(this.getProcessOwnerForThematicArea(body.getThematicAreaId()));
 		p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
 		p.setThematicArea(thematicAreaRepo.getOne(body.getThematicAreaId()));
-
+		
 		List<SectionTemplate> sts = sectionTemplateRepo
 				.findTemplatesForProcessType(ProcessType.PROJECT_PROPOSAL.toString());
 
@@ -136,11 +138,15 @@ public class ProjectProposalService {
 
 			p.addSection(ps);
 		}
+		
+		if(initiatorPrincipal.getRoles().contains(SystemRoles.ORG_GOVT)) {
+			p.setStatus(ProcessStatus.UPLOAD_PC1.getPersistenceValue());
+		}
+		
 
 		p = projProposalRepo.save(p);
 
 		return p.getId();
-
 	}
 
 	private User getProcessOwnerForThematicArea(UUID id) {
@@ -773,6 +779,13 @@ public class ProjectProposalService {
 		attachment.setStage(stage.getPersistenceValue());
 
 		p.addAttachement(attachment);
+		
+		if(stage == ProcessStatus.UPLOAD_PC1) {
+			p.setStatus(ProcessStatus.UPLOAD_PDRMC.getPersistenceValue());
+		}
+		else if(stage == ProcessStatus.UPLOAD_PDRMC) {
+			p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
+		}
 
 		return persistedFile.getId();
 	}
