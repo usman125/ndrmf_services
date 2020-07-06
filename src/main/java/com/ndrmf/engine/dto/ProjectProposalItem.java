@@ -22,6 +22,7 @@ public class ProjectProposalItem {
 	private String implementationPlan;
 	private GrantImplmentationItem gia;
 	private GIAChecklistItem giaChecklist;
+	private boolean isGovFip;
 	
 	public List<GeneralCommentItem> getCommentsMatrix() {
 		return commentsMatrix;
@@ -149,5 +150,13 @@ public class ProjectProposalItem {
 
 	public void setGiaChecklist(GIAChecklistItem giaChecklist) {
 		this.giaChecklist = giaChecklist;
+	}
+
+	public boolean isGovFip() {
+		return isGovFip;
+	}
+
+	public void setGovFip(boolean isGovFip) {
+		this.isGovFip = isGovFip;
 	}
 }

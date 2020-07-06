@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public class AddProposalGeneralCommentRequest {
 	private Set<UUID> sectionIds;
+	private String stage;
 	private String comment;
 	public Set<UUID> getSectionIds() {
 		return sectionIds;
@@ -17,5 +18,11 @@ public class AddProposalGeneralCommentRequest {
 	}
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	public String getStage() {
+		return stage;
+	}
+	public void setStage(String stage) {
+		this.stage = stage;
 	}
 }

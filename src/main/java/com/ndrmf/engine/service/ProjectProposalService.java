@@ -160,7 +160,9 @@ public class ProjectProposalService {
 		return area.getProcessOwner();
 	}
 
-	public ProjectProposalItem getProjectProposalRequest(UUID id, UUID userId) {
+	public ProjectProposalItem getProjectProposalRequest(UUID id, AuthPrincipal principal) {
+		final UUID userId = principal.getUserId();
+		
 		ProjectProposal p = projProposalRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 
@@ -171,6 +173,10 @@ public class ProjectProposalService {
 		dto.setProcessOwner(new UserLookupItem(p.getProcessOwner().getId(), p.getProcessOwner().getFullName()));
 		dto.setStatus(p.getStatus());
 		dto.setSubmittedAt(p.getCreatedDate());
+		
+		if(principal.getRoles().contains(SystemRoles.ORG_GOVT)) {
+			dto.setGovFip(true);
+		}
 
 		if (p.getInitiatedBy().getId().equals(userId)) {
 			List<ProjectProposalTask> reassignmentComments = ptaskRepo.findAllTasksForAssigneeAndRequest(userId, id);

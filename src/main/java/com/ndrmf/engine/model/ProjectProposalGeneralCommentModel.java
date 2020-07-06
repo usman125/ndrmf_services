@@ -7,6 +7,7 @@ import com.ndrmf.util.KeyValue;
 
 public class ProjectProposalGeneralCommentModel {
 	private List<KeyValue> sections;
+	private String stage;
 	private KeyValue addedBy;
 	private String comment;
 	private Date createdAt;
@@ -34,5 +35,11 @@ public class ProjectProposalGeneralCommentModel {
 	}
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
+	}
+	public String getStage() {
+		return stage;
+	}
+	public void setStage(String stage) {
+		this.stage = stage;
 	}
 }

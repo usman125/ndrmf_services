@@ -78,7 +78,7 @@ public class ProjectProposalController {
 	@GetMapping(path = "/{id}", produces = "application/json")
 	public ResponseEntity<ProjectProposalItem> getProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "id", required = true) UUID id){
-		ProjectProposalItem dto = projProposalService.getProjectProposalRequest(id, principal.getUserId());
+		ProjectProposalItem dto = projProposalService.getProjectProposalRequest(id, principal);
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
 	

@@ -137,6 +137,7 @@ public class CommentService {
 		newComment.setCreatedAt(new Date());
 		newComment.setAddedBy(new KeyValue(byUser.getUserId(), byUser.getFullName()));
 		newComment.setComment(body.getComment());
+		newComment.setStage(body.getStage());
 		
 		generalComments.add(newComment);
 		
