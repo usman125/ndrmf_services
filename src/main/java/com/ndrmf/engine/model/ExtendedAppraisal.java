@@ -33,6 +33,7 @@ public class ExtendedAppraisal extends Auditable<String> {
 	private Date endDate;
 	private Date completedOn;
 	private String comments;
+	private String subStatus;
 	
 	private ProjectProposal proposalRef;
 	private List<ExtendedAppraisalSection> sections;
@@ -126,5 +127,13 @@ public class ExtendedAppraisal extends Auditable<String> {
 	}
 	public void setCompletedOn(Date completedOn) {
 		this.completedOn = completedOn;
+	}
+
+	public String getSubStatus() {
+		return subStatus;
+	}
+
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 }

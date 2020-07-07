@@ -107,7 +107,7 @@ public class ProjectProposalService {
 
 	public UUID commenceProjectProposal(AuthPrincipal initiatorPrincipal, CommenceProjectProposalRequest body) {
 		final UUID initiatorUserId = initiatorPrincipal.getUserId();
-		
+
 		if (body.getThematicAreaId() == null) {
 			throw new ValidationException("Thematic area cannot be null");
 		}
@@ -118,7 +118,7 @@ public class ProjectProposalService {
 		p.setProcessOwner(this.getProcessOwnerForThematicArea(body.getThematicAreaId()));
 		p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
 		p.setThematicArea(thematicAreaRepo.getOne(body.getThematicAreaId()));
-		
+
 		List<SectionTemplate> sts = sectionTemplateRepo
 				.findTemplatesForProcessType(ProcessType.PROJECT_PROPOSAL.toString());
 
@@ -138,11 +138,10 @@ public class ProjectProposalService {
 
 			p.addSection(ps);
 		}
-		
-		if(initiatorPrincipal.getRoles().contains(SystemRoles.ORG_GOVT)) {
+
+		if (initiatorPrincipal.getRoles().contains(SystemRoles.ORG_GOVT)) {
 			p.setStatus(ProcessStatus.UPLOAD_PC1.getPersistenceValue());
 		}
-		
 
 		p = projProposalRepo.save(p);
 
@@ -162,7 +161,7 @@ public class ProjectProposalService {
 
 	public ProjectProposalItem getProjectProposalRequest(UUID id, AuthPrincipal principal) {
 		final UUID userId = principal.getUserId();
-		
+
 		ProjectProposal p = projProposalRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 
@@ -173,8 +172,8 @@ public class ProjectProposalService {
 		dto.setProcessOwner(new UserLookupItem(p.getProcessOwner().getId(), p.getProcessOwner().getFullName()));
 		dto.setStatus(p.getStatus());
 		dto.setSubmittedAt(p.getCreatedDate());
-		
-		if(principal.getRoles().contains(SystemRoles.ORG_GOVT)) {
+
+		if (principal.getRoles().contains(SystemRoles.ORG_GOVT)) {
 			dto.setGovFip(true);
 		}
 
@@ -317,19 +316,19 @@ public class ProjectProposalService {
 			giaItem.setData(p.getGia().getData());
 			giaItem.setProcessOwner(
 					new UserLookupItem(p.getGia().getAssignee().getId(), p.getGia().getAssignee().getFullName()));
-			
-			if(p.getGia().getReviews() != null) {
+
+			if (p.getGia().getReviews() != null) {
 				p.getGia().getReviews().forEach(r -> {
 					GiaReviewItem review = new GiaReviewItem();
 					review.setAssigned(r.getAssignee().getId().equals(userId));
 					review.setAssignee(new UserLookupItem(r.getAssignee().getId(), r.getAssignee().getFullName()));
 					review.setComments(r.getComments());
 					review.setId(r.getId());
-					
+
 					giaItem.addReview(review);
 				});
 			}
-			
+
 			giaItem.setStatus(p.getGia().getStatus());
 			giaItem.setSubStatus(p.getGia().getSubStatus());
 
@@ -347,15 +346,15 @@ public class ProjectProposalService {
 				dto.setGia(giaItem);
 			}
 		}
-		
-		if(p.getGiaChecklist() != null) {
+
+		if (p.getGiaChecklist() != null) {
 			GIAChecklistItem checklistItem = new GIAChecklistItem();
 			checklistItem.setAssigned(userId.equals(p.getInitiatedBy().getId()));
 			checklistItem.setAssignee(new UserLookupItem(p.getInitiatedBy().getId(), p.getInitiatedBy().getFullName()));
 			checklistItem.setData(p.getGiaChecklist().getData());
 			checklistItem.setTemplate(p.getGiaChecklist().getTemplate());
 			checklistItem.setDeadline(p.getGiaChecklist().getDeadline());
-			
+
 			dto.setGiaChecklist(checklistItem);
 		}
 
@@ -652,7 +651,7 @@ public class ProjectProposalService {
 
 				gia.addReview(review);
 			});
-			
+
 			gia.setSubStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
 		}
 		gia.setStatus(ProcessStatus.PENDING.getPersistenceValue());
@@ -677,49 +676,52 @@ public class ProjectProposalService {
 		final GrantImplementationAgreementReview review = proposal.getGia().getReviews().stream()
 				.filter(r -> r.getAssignee().getId().equals(userId)).findAny()
 				.orElseThrow(() -> new ValidationException("You're unauthorized to add review to this request."));
-		
+
 		review.setComments(body.getComments());
 		review.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
-		
-		if(proposal.getGia().getReviews().stream().allMatch(r -> r.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue()))) {
+
+		if (proposal.getGia().getReviews().stream()
+				.allMatch(r -> r.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue()))) {
 			proposal.getGia().setSubStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
 		}
 	}
-	
+
 	@Transactional
-	public void updateGrantImplementationAgreementStatus(UUID proposalId, ProcessStatus status, Date checklistDeadline) {
+	public void updateGrantImplementationAgreementStatus(UUID proposalId, ProcessStatus status,
+			Date checklistDeadline) {
 		final ProjectProposal proposal = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
 
 		if (proposal.getGia() == null) {
 			throw new ValidationException("GIA does not exist for this proposal");
 		}
-		
-		if (proposal.getGia().getReviews() != null && proposal.getGia().getSubStatus().equals(ProcessStatus.REVIEW_PENDING.getPersistenceValue())) {
+
+		if (proposal.getGia().getReviews() != null
+				&& proposal.getGia().getSubStatus().equals(ProcessStatus.REVIEW_PENDING.getPersistenceValue())) {
 			throw new ValidationException("Cannot change Status. There are still Pending Reviews for GIA");
 		}
-		
+
 		proposal.getGia().setStatus(status.getPersistenceValue());
-		
-		if(status.equals(ProcessStatus.APPROVED)) {
+
+		if (status.equals(ProcessStatus.APPROVED)) {
 			GIAChecklist checklist = new GIAChecklist();
 			checklist.setDeadline(checklistDeadline);
 			checklist.setStatus(ProcessStatus.PENDING.getPersistenceValue());
-			
+
 			proposal.setGiaChecklist(checklist);
 			proposal.setStatus(ProcessStatus.GIA_CHECKLIST.getPersistenceValue());
 		}
 	}
-	
+
 	@Transactional
 	public void submitGIAChecklist(UUID proposalId, AddGIAChecklistRequest body) {
 		final ProjectProposal proposal = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
-		
+
 		if (proposal.getGiaChecklist() == null) {
 			throw new ValidationException("GIA checklist does not exist for this proposal");
 		}
-		
+
 		proposal.getGiaChecklist().setData(body.getData());
 		proposal.getGiaChecklist().setTemplate(body.getTemplate());
 		proposal.getGiaChecklist().setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
@@ -758,18 +760,30 @@ public class ProjectProposalService {
 	public void updateProposalStatus(UUID proposalId, UUID userId, ProcessStatus status) {
 		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
-		
-		if(status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
-			//p.setSubStatus(status.getPersistenceValue());
-			if(p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())) {
+
+		if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())
+				&& (p.getPreAppraisal().getStatus().equals(ProcessStatus.MARKED_TO_GM.getPersistenceValue())
+						|| p.getPreAppraisal().getStatus().equals(ProcessStatus.MARKED_TO_CEO.getPersistenceValue()))) {
+			
+			if(status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
+				p.getPreAppraisal().setSubStatus(status.getPersistenceValue());	
+			}
+			else {
 				p.getPreAppraisal().setStatus(status.getPersistenceValue());
 			}
-			else if(p.getStatus().equals(ProcessStatus.EXTENDED_APPRAISAL.getPersistenceValue())) {
-				p.getExtendedAppraisal().setStatus(status.getPersistenceValue());
-			}
 		}
-		else {
-			p.setStatus(status.getPersistenceValue());	
+
+		if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
+			if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())) {
+				p.getPreAppraisal().setStatus(status.getPersistenceValue());
+				p.getPreAppraisal().setSubStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+				
+			} else if (p.getStatus().equals(ProcessStatus.EXTENDED_APPRAISAL.getPersistenceValue())) {
+				p.getExtendedAppraisal().setStatus(status.getPersistenceValue());
+				p.getPreAppraisal().setSubStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+			}
+		} else {
+			p.setStatus(status.getPersistenceValue());
 		}
 	}
 
@@ -785,11 +799,10 @@ public class ProjectProposalService {
 		attachment.setStage(stage.getPersistenceValue());
 
 		p.addAttachement(attachment);
-		
-		if(stage == ProcessStatus.UPLOAD_PC1) {
+
+		if (stage == ProcessStatus.UPLOAD_PC1) {
 			p.setStatus(ProcessStatus.UPLOAD_PDRMC.getPersistenceValue());
-		}
-		else if(stage == ProcessStatus.UPLOAD_PDRMC) {
+		} else if (stage == ProcessStatus.UPLOAD_PDRMC) {
 			p.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
 		}
 

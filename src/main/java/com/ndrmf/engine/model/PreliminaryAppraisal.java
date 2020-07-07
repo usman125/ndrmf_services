@@ -40,6 +40,7 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	private Date startDate;
 	private Date endDate;
 	private Date completedOn;
+	private String subStatus;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -138,5 +139,11 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	}
 	public void setCompletedOn(Date completedOn) {
 		this.completedOn = completedOn;
+	}
+	public String getSubStatus() {
+		return subStatus;
+	}
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
 	}
 }
