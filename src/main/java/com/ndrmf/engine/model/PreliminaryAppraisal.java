@@ -41,6 +41,7 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	private Date endDate;
 	private Date completedOn;
 	private String subStatus;
+	private String isMarkedTo;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -145,5 +146,11 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	}
 	public void setSubStatus(String subStatus) {
 		this.subStatus = subStatus;
+	}
+	public String getIsMarkedTo() {
+		return isMarkedTo;
+	}
+	public void setIsMarkedTo(String isMarkedTo) {
+		this.isMarkedTo = isMarkedTo;
 	}
 }

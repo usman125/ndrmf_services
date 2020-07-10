@@ -14,6 +14,7 @@ public class PreliminaryAppraisalItem {
 	private boolean assigned;
 	private String status;
 	private String subStatus;
+	private String isMarkedTo;
 	
 	public UUID getId() {
 		return id;
@@ -75,5 +76,11 @@ public class PreliminaryAppraisalItem {
 	}
 	public void setSubStatus(String subStatus) {
 		this.subStatus = subStatus;
+	}
+	public String getIsMarkedTo() {
+		return isMarkedTo;
+	}
+	public void setIsMarkedTo(String isMarkedTo) {
+		this.isMarkedTo = isMarkedTo;
 	}
 }

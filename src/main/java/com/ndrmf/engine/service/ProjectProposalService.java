@@ -173,7 +173,7 @@ public class ProjectProposalService {
 		dto.setStatus(p.getStatus());
 		dto.setSubmittedAt(p.getCreatedDate());
 
-		if (principal.getRoles().contains(SystemRoles.ORG_GOVT)) {
+		if (p.getInitiatedBy().getRoles().stream().anyMatch(r -> r.getOrg().getId() == SystemRoles.ORG_GOVT_ID)) {
 			dto.setGovFip(true);
 		}
 
@@ -249,9 +249,12 @@ public class ProjectProposalService {
 			preAppItem.setStartDate(p.getPreAppraisal().getStartDate());
 			preAppItem.setEndDate(p.getPreAppraisal().getEndDate());
 			preAppItem.setAssigned(p.getPreAppraisal().getAssignee().getId().equals(userId));
-			preAppItem.setStatus(p.getPreAppraisal().getStatus());
 			preAppItem.setCompletedDate(p.getPreAppraisal().getCompletedOn());
-
+			
+			preAppItem.setStatus(p.getPreAppraisal().getStatus());
+			preAppItem.setIsMarkedTo(p.getPreAppraisal().getIsMarkedTo());
+			preAppItem.setSubStatus(p.getPreAppraisal().getSubStatus());
+			
 			dto.setPreAppraisal(preAppItem);
 			dto.setSubStatus(p.getPreAppraisal().getStatus());
 		}
@@ -265,8 +268,11 @@ public class ProjectProposalService {
 			eaItem.setComments(e.getComments());
 			eaItem.setEndDate(e.getEndDate());
 			eaItem.setStartDate(e.getStartDate());
-			eaItem.setStatus(e.getStatus());
 			eaItem.setCompletedDate(e.getCompletedOn());
+			
+			eaItem.setStatus(e.getStatus());
+			eaItem.setIsMarkedTo(e.getIsMarkedTo());
+			eaItem.setSubStatus(e.getSubStatus());
 
 			e.getSections().forEach(s -> {
 				ExtendedAppraisalSectionItem item = new ExtendedAppraisalSectionItem();
@@ -762,27 +768,28 @@ public class ProjectProposalService {
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 
 		if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())
-				&& (p.getPreAppraisal().getStatus().equals(ProcessStatus.MARKED_TO_GM.getPersistenceValue())
-						|| p.getPreAppraisal().getStatus().equals(ProcessStatus.MARKED_TO_CEO.getPersistenceValue()))) {
-			
-			if(status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
-				p.getPreAppraisal().setSubStatus(status.getPersistenceValue());	
-			}
-			else {
+				&& (p.getPreAppraisal().getIsMarkedTo().equals(ProcessStatus.MARKED_TO_GM.getPersistenceValue()) || p
+						.getPreAppraisal().getIsMarkedTo().equals(ProcessStatus.MARKED_TO_CEO.getPersistenceValue()))) {
+
+			if (status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
+				p.getPreAppraisal().setSubStatus(status.getPersistenceValue());
+			} else {
 				p.getPreAppraisal().setStatus(status.getPersistenceValue());
 			}
 		}
-
-		if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
+		else if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
 			if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())) {
-				p.getPreAppraisal().setStatus(status.getPersistenceValue());
-				p.getPreAppraisal().setSubStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
-				
+
+				p.getPreAppraisal().setIsMarkedTo(status.getPersistenceValue());
+				p.getPreAppraisal().setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+
 			} else if (p.getStatus().equals(ProcessStatus.EXTENDED_APPRAISAL.getPersistenceValue())) {
-				p.getExtendedAppraisal().setStatus(status.getPersistenceValue());
-				p.getPreAppraisal().setSubStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+
+				p.getExtendedAppraisal().setIsMarkedTo(status.getPersistenceValue());
+				p.getExtendedAppraisal().setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
 			}
-		} else {
+		}
+		else {
 			p.setStatus(status.getPersistenceValue());
 		}
 	}

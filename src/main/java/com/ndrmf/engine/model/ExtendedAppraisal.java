@@ -34,6 +34,7 @@ public class ExtendedAppraisal extends Auditable<String> {
 	private Date completedOn;
 	private String comments;
 	private String subStatus;
+	private String isMarkedTo;
 	
 	private ProjectProposal proposalRef;
 	private List<ExtendedAppraisalSection> sections;
@@ -135,5 +136,13 @@ public class ExtendedAppraisal extends Auditable<String> {
 
 	public void setSubStatus(String subStatus) {
 		this.subStatus = subStatus;
+	}
+
+	public String getIsMarkedTo() {
+		return isMarkedTo;
+	}
+
+	public void setIsMarkedTo(String isMarkedTo) {
+		this.isMarkedTo = isMarkedTo;
 	}
 }

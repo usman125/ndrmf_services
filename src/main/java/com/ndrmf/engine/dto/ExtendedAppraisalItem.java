@@ -17,6 +17,7 @@ public class ExtendedAppraisalItem {
 	private boolean assigned;
 	private String status;
 	private String subStatus;
+	private String isMarkedTo;
 	private List<ExtendedAppraisalSectionItem> sections;
 	
 	public UUID getId() {
@@ -104,6 +105,14 @@ public class ExtendedAppraisalItem {
 
 	public void setSubStatus(String subStatus) {
 		this.subStatus = subStatus;
+	}
+
+	public String getIsMarkedTo() {
+		return isMarkedTo;
+	}
+
+	public void setIsMarkedTo(String isMarkedTo) {
+		this.isMarkedTo = isMarkedTo;
 	}
 
 	public static class ExtendedAppraisalSectionItem {
