@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserSyncStatsItem {
 	private int inserted, updated;
-	private Set<UserItem> rejectedUsers;
+	private Set<SAPUserItem> rejectedUsers;
 	
 	public int getInserted() {
 		return inserted;
@@ -30,11 +30,11 @@ public class UserSyncStatsItem {
 		return this.updated;
 	}
 	
-	public Set<UserItem> getRejectedUsers() {
+	public Set<SAPUserItem> getRejectedUsers() {
 		return rejectedUsers;
 	}
 		
-	public void addRejectedUser(UserItem item) {
+	public void addRejectedUser(SAPUserItem item) {
 		if(this.rejectedUsers == null) {
 			this.rejectedUsers = new HashSet<>();
 		}

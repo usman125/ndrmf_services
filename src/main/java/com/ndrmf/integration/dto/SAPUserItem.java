@@ -1,7 +1,7 @@
 package com.ndrmf.integration.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 
-public class UserItem {
+public class SAPUserItem {
 	private String username, firstName, lastName, email, company;
 
 	public String getUsername() {

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.ndrmf.integration.dto.SAPResponseWrapper;
-import com.ndrmf.integration.dto.UserItem;
+import com.ndrmf.integration.dto.SAPUserItem;
 import com.ndrmf.integration.dto.UserSyncStatsItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.OrganisationRepository;
@@ -66,15 +66,15 @@ public class SAPIntegrationService {
 	public UserSyncStatsItem downloadUsers() {
 		final String url = "opu/odata/sap/Z_UM_INFO_PROJ_SRV/ET_UM_INFO_SET";
 		
-		SAPResponseWrapper<UserItem> wrappedResonse = this.webClient.get().uri(url)
+		SAPResponseWrapper<SAPUserItem> wrappedResonse = this.webClient.get().uri(url)
 				.retrieve()
-				.bodyToMono(new ParameterizedTypeReference<SAPResponseWrapper<UserItem>>() {})
+				.bodyToMono(new ParameterizedTypeReference<SAPResponseWrapper<SAPUserItem>>() {})
 				.block();
 		
 		UserSyncStatsItem dto = new UserSyncStatsItem();
 		
 		if(wrappedResonse != null && wrappedResonse.getResults() != null) {
-			for(UserItem sapUser: wrappedResonse.getResults()) {
+			for(SAPUserItem sapUser: wrappedResonse.getResults()) {
 				CRUDType crudType;
 				
 				User user = userRepo.findByUsernameOrEmail(sapUser.getUsername(), sapUser.getEmail());
