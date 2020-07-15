@@ -250,11 +250,11 @@ public class ProjectProposalService {
 			preAppItem.setEndDate(p.getPreAppraisal().getEndDate());
 			preAppItem.setAssigned(p.getPreAppraisal().getAssignee().getId().equals(userId));
 			preAppItem.setCompletedDate(p.getPreAppraisal().getCompletedOn());
-			
+
 			preAppItem.setStatus(p.getPreAppraisal().getStatus());
 			preAppItem.setIsMarkedTo(p.getPreAppraisal().getIsMarkedTo());
 			preAppItem.setSubStatus(p.getPreAppraisal().getSubStatus());
-			
+
 			dto.setPreAppraisal(preAppItem);
 			dto.setSubStatus(p.getPreAppraisal().getStatus());
 		}
@@ -269,7 +269,7 @@ public class ProjectProposalService {
 			eaItem.setEndDate(e.getEndDate());
 			eaItem.setStartDate(e.getStartDate());
 			eaItem.setCompletedDate(e.getCompletedOn());
-			
+
 			eaItem.setStatus(e.getStatus());
 			eaItem.setIsMarkedTo(e.getIsMarkedTo());
 			eaItem.setSubStatus(e.getSubStatus());
@@ -767,26 +767,31 @@ public class ProjectProposalService {
 		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 
-		if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())
-				&& (p.getPreAppraisal().getIsMarkedTo().equals(ProcessStatus.MARKED_TO_GM.getPersistenceValue()) || p
-						.getPreAppraisal().getIsMarkedTo().equals(ProcessStatus.MARKED_TO_CEO.getPersistenceValue()))) {
+		if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())) {
+			PreliminaryAppraisal app = p.getPreAppraisal();
 
-			if (status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
-				p.getPreAppraisal().setSubStatus(status.getPersistenceValue());
-			} else {
-				p.getPreAppraisal().setStatus(status.getPersistenceValue());
+			if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
+				app.setIsMarkedTo(status.getPersistenceValue());
+				app.setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+			}
+			else if (status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
+				app.setSubStatus(status.getPersistenceValue());
+			}
+			else {
+				p.setStatus(status.getPersistenceValue());
 			}
 		}
-		else if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
-			if (p.getStatus().equals(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue())) {
+		else if (p.getStatus().equals(ProcessStatus.EXTENDED_APPRAISAL.getPersistenceValue())) {
+			ExtendedAppraisal app = p.getExtendedAppraisal();
 
-				p.getPreAppraisal().setIsMarkedTo(status.getPersistenceValue());
-				p.getPreAppraisal().setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
-
-			} else if (p.getStatus().equals(ProcessStatus.EXTENDED_APPRAISAL.getPersistenceValue())) {
-
-				p.getExtendedAppraisal().setIsMarkedTo(status.getPersistenceValue());
-				p.getExtendedAppraisal().setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+			if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
+				app.setIsMarkedTo(status.getPersistenceValue());
+				app.setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+			} else if (status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
+				app.setSubStatus(status.getPersistenceValue());
+			}
+			else {
+				p.setStatus(status.getPersistenceValue());
 			}
 		}
 		else {
