@@ -100,7 +100,32 @@ public class UserService {
 		User u = userRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("Invalid User ID"));
 		
-		u.setEnabled(body.isEnabled());
+		if(body.isEnabled() != null)
+			u.setEnabled(body.isEnabled());
+		
+		if(body.getFirstName() != null)
+			u.setFirstName(body.getFirstName());
+		
+		if(body.getLastName() != null)
+			u.setLastName(body.getLastName());
+		
+		if(body.getOrgId() != null)
+			u.setOrg(orgRepo.getOne(body.getOrgId()));
+		
+		if(body.getPassword() != null)
+			u.setPassword(passwordEncoder.encode(body.getPassword()));
+        
+        if(body.getRoleId() != null && body.getRoleId() > 0) {
+        	u.addRole(roleRepository.getOne(body.getRoleId()));
+        }
+        
+        if(body.getDepartmentId() != null && body.getDepartmentId() > 0) {
+        	u.setDepartment(deptRepo.getOne(body.getDepartmentId()));
+        }
+        
+        if(body.getDesignationId() != null && body.getDesignationId() > 0) {
+        	u.setDesignation(desigRepo.getOne(body.getDesignationId()));
+        }
 	}
     
 	public List<OrganisationAndRoles> getOrganisations() {
