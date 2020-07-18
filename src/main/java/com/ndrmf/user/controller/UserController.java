@@ -53,6 +53,11 @@ public class UserController {
         return new ResponseEntity<ApiResponse>(new ApiResponse(true, "User created successfully."), HttpStatus.CREATED);
     }
 	
+	@GetMapping("/{id}")
+	public ResponseEntity<UserItem> getUserById(@PathVariable(name = "id", required = true) UUID id){
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+    }
+	
 	@RolesAllowed("ADMIN")
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UpdateUserRequest body,
@@ -126,5 +131,11 @@ public class UserController {
     @GetMapping("/role")
     public ResponseEntity<List<RoleItem>> getAllRoles(@RequestParam(name = "orgId", required = true) int orgId){
         return new ResponseEntity<List<RoleItem>>(userService.getRolesForOrganisation(orgId), HttpStatus.OK);
+    }
+    
+    @RolesAllowed("ADMIN")
+    @GetMapping("/missing-credentials")
+    public ResponseEntity<List<UserItem>> getUsersWithMissingCredentials(){
+    	return new ResponseEntity<>(userService.getUsersWithMissigCredentials(), HttpStatus.OK);
     }
 }

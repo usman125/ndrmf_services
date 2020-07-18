@@ -95,6 +95,40 @@ public class UserService {
         }
     }
 	
+	public UserItem getUserById(UUID id) {
+		User u = userRepo.findById(id).orElseThrow(() -> new ValidationException("Invalid User ID"));
+		
+		UserItem dto = new UserItem();
+		
+		dto.setId(u.getId());
+		dto.setUsername(u.getUsername());
+		dto.setEmail(u.getEmail());
+		dto.setFirstName(u.getFirstName());
+		dto.setLastName(u.getLastName());
+		dto.setEnabled(false);
+		
+		if(u.getOrg() != null) {
+			dto.setOrgId(u.getOrg().getId());
+			dto.setOrgName(u.getOrg().getName());
+		}
+		
+		List<Map<String, Object>> roles = new ArrayList<>();
+		
+		if(u.getRoles() != null) {
+			u.getRoles().forEach(r -> {
+				Map<String, Object> role = new HashMap<>();
+				role.put("id", r.getId());
+				role.put("name", r.getName());
+				
+				roles.add(role);
+			});
+			
+			dto.setRoles(roles);
+		}
+		
+		return dto;
+	}
+	
 	@Transactional
 	public void updateUser(UUID id, UpdateUserRequest body) {
 		User u = userRepo.findById(id)
@@ -181,6 +215,48 @@ public class UserService {
 		users.forEach(u -> {
 			UserItem dto = new UserItem();
 			
+			dto.setId(u.getId());
+			dto.setUsername(u.getUsername());
+			dto.setEmail(u.getEmail());
+			dto.setFirstName(u.getFirstName());
+			dto.setLastName(u.getLastName());
+			dto.setEnabled(false);
+			
+			if(u.getOrg() != null) {
+				dto.setOrgId(u.getOrg().getId());
+				dto.setOrgName(u.getOrg().getName());
+			}
+			
+			List<Map<String, Object>> roles = new ArrayList<>();
+			
+			if(u.getRoles() != null) {
+				u.getRoles().forEach(r -> {
+					Map<String, Object> role = new HashMap<>();
+					role.put("id", r.getId());
+					role.put("name", r.getName());
+					
+					roles.add(role);
+				});
+				
+				dto.setRoles(roles);
+			}
+			
+			dtos.add(dto);
+			
+		});
+		
+		return dtos;
+	}
+	
+	public List<UserItem> getUsersWithMissigCredentials() {
+		List<User> users = userRepo.findAllUsersWithPasswordNull();
+		
+		List<UserItem> dtos = new ArrayList<>();
+		
+		users.forEach(u -> {
+			UserItem dto = new UserItem();
+			
+			dto.setId(u.getId());
 			dto.setUsername(u.getUsername());
 			dto.setEmail(u.getEmail());
 			dto.setFirstName(u.getFirstName());
