@@ -95,6 +95,7 @@ public class SAPIntegrationService {
 					user.setLastName(sapUser.getLastName());
 					user.setEmail(sapUser.getEmail());
 					user.setEnabled(true);
+					user.setSAP(true);
 					
 					if(sapUser.getCompany() != null) {
 						if(sapUser.getCompany().equals("NDMRF")) {

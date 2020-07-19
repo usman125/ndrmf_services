@@ -33,6 +33,8 @@ public class User extends Auditable<String> implements UserDetails{
 	
 	private Department department;
 	private Designation designation;
+	
+	private boolean isSAP;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -184,5 +186,14 @@ public class User extends Auditable<String> implements UserDetails{
 
 	public void setDesignation(Designation designation) {
 		this.designation = designation;
+	}
+
+	@Column(columnDefinition = "boolean default false")
+	public boolean isSAP() {
+		return isSAP;
+	}
+
+	public void setSAP(boolean isSAP) {
+		this.isSAP = isSAP;
 	} 
 }

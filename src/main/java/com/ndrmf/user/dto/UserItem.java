@@ -14,6 +14,7 @@ public class UserItem {
 	private String orgName;
 	private List<Map<String, Object>> roles;
 	private boolean enabled;
+	private boolean isSAP;
 	
 	public String getUsername() {
 		return username;
@@ -68,5 +69,11 @@ public class UserItem {
 	}
 	public void setId(UUID id) {
 		this.id = id;
+	}
+	public boolean isSAP() {
+		return isSAP;
+	}
+	public void setSAP(boolean isSAP) {
+		this.isSAP = isSAP;
 	}
 }
