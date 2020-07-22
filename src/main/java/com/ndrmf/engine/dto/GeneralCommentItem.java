@@ -2,12 +2,16 @@ package com.ndrmf.engine.dto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+
+import com.ndrmf.util.KeyValue;
 
 public class GeneralCommentItem {
 	private List<String> sections;
 	private String addedBy;
 	private String comment;
 	private Date createdAt;
+	private Set<KeyValue> sectionsWithIds;
 	
 	public List<String> getSections() {
 		return sections;
@@ -32,5 +36,11 @@ public class GeneralCommentItem {
 	}
 	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
+	}
+	public Set<KeyValue> getSectionsWithIds() {
+		return sectionsWithIds;
+	}
+	public void setSectionsWithIds(Set<KeyValue> sectionsWithIds) {
+		this.sectionsWithIds = sectionsWithIds;
 	}
 }

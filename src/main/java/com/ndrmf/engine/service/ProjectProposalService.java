@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
@@ -69,6 +70,7 @@ import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.model.User;
 import com.ndrmf.user.repository.UserRepository;
 import com.ndrmf.user.service.UserService;
+import com.ndrmf.util.KeyValue;
 import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
@@ -232,7 +234,9 @@ public class ProjectProposalService {
 					gci.setComment(r.getComments());
 					gci.setCreatedAt(r.getCreatedDate());
 					gci.setSections(Arrays.asList(r.getSectionRef().getName()));
-
+					
+					gci.setSectionsWithIds(Stream.of(new KeyValue(r.getSectionRef().getId(), r.getSectionRef().getName())).collect(Collectors.toSet()));
+					
 					dto.addComment(gci);
 				});
 			}
