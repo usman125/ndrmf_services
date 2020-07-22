@@ -45,6 +45,7 @@ import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
 import com.ndrmf.engine.dto.ProjectProposalItem;
 import com.ndrmf.engine.dto.ProjectProposalListItem;
 import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
+import com.ndrmf.engine.dto.ReassignPrposalToFIPRequest;
 import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.engine.service.ProjectProposalService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -239,5 +240,14 @@ public class ProjectProposalController {
 			@RequestBody AddGrantImplementationAgreementReviewRequest body){
 		projProposalService.addGrantImplementationAgreementReview(principal.getUserId(), proposalId, body);
 		return new ResponseEntity<>(new ApiResponse(true, "GIA Review added successfully"), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/{proposalId}/reassign")
+	public ResponseEntity<ApiResponse> reassignToFIP(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId,
+			@RequestBody ReassignPrposalToFIPRequest body){
+		projProposalService.reassignProposalToFIP(proposalId, principal.getUserId(), body.getSectionIds());
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Sections reassigned successfully"), HttpStatus.ACCEPTED);
 	}
 }

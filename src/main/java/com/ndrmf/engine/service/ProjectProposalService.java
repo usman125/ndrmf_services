@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -819,5 +820,21 @@ public class ProjectProposalService {
 		}
 
 		return persistedFile.getId();
+	}
+	
+	@Transactional
+	public void reassignProposalToFIP(UUID proposalId, UUID userId, Set<UUID> sectionIds) {
+		ProjectProposal p = projProposalRepo.findById(proposalId)
+				.orElseThrow(() -> new ValidationException("Invalid Proposal ID"));
+		
+		sectionIds.forEach(sId -> {
+			ProjectProposalSection section = p.getSections()
+					.stream()
+					.filter(s -> s.getId().equals(sId))
+					.findFirst()
+					.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+			
+			section.setReassignmentStatus(ProcessStatus.PENDING.getPersistenceValue());
+		});
 	}
 }
