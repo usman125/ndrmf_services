@@ -161,6 +161,8 @@ public class TemplateService {
 		pt.setParent(processTypeRepo.findById(processType.name())
 				.orElseThrow(() -> new ValidationException("Invalid Parent Process Type")));
 		
+		processTypeRepo.save(pt);
+		
 		return name;		
 	}
 	
