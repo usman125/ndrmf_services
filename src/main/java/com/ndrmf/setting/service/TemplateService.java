@@ -1,7 +1,9 @@
 package com.ndrmf.setting.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -144,5 +146,27 @@ public class TemplateService {
 				section.setSme(userRepo.getOne(s.getSmeId()));
 			});
 		}
+	}
+	
+	public String addSubProcessType(com.ndrmf.util.enums.ProcessType processType, String name) {
+		
+		if(name == null) {
+			throw new ValidationException("Process Type name cannot be null");
+		}
+		
+		name = name.toUpperCase().replace(" ", "_");
+		
+		ProcessType pt = new ProcessType();
+		pt.setName(name);
+		pt.setParent(processTypeRepo.findById(processType.name())
+				.orElseThrow(() -> new ValidationException("Invalid Parent Process Type")));
+		
+		return name;		
+	}
+	
+	public Set<String> getSubProcessTypesForProcess(com.ndrmf.util.enums.ProcessType processType){
+		Set<String> subProcessTypes = processTypeRepo.getSubProcessTypes(processType.name());
+		
+		return subProcessTypes;
 	}
 }

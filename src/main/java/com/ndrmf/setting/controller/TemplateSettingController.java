@@ -1,6 +1,9 @@
 package com.ndrmf.setting.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
@@ -71,5 +75,21 @@ public class TemplateSettingController {
 	public ResponseEntity<ApiResponse> addTemplateForSection(@PathVariable(name = "sectionId", required = true) UUID sectionId, @RequestBody @Valid AddSectionTemplateRequest body){
 		templateService.addTemplateForSection(sectionId, body);
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section Template added successfully"), HttpStatus.CREATED);
+	}
+	
+	@PostMapping("/process/{processType}/sub-process-type/add")
+	public ResponseEntity<Map<String, String>> addSubProcessType(@PathVariable(name = "processType", required = true) ProcessType processType,
+			@RequestParam(name = "name", required = true) String name){
+		String id = templateService.addSubProcessType(processType, name);
+		
+		Map<String, String> dto = new HashMap<>();
+		dto.put("id", id);
+		
+		return new ResponseEntity<>(dto, HttpStatus.CREATED);
+	}
+	
+	@GetMapping("/process/{processType}/sub-process-type")
+	public ResponseEntity<Set<String>> getSubProcessTypes(@PathVariable(name = "processType", required = true) ProcessType processType){
+		return new ResponseEntity<>(templateService.getSubProcessTypesForProcess(processType), HttpStatus.OK);
 	}
 }

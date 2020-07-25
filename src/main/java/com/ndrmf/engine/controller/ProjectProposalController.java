@@ -32,6 +32,7 @@ import com.ndrmf.engine.dto.AddGrantImplementationAgreementRequest;
 import com.ndrmf.engine.dto.AddGrantImplementationAgreementReviewRequest;
 import com.ndrmf.engine.dto.AddImplementationPlanRequest;
 import com.ndrmf.engine.dto.AddProposalGeneralCommentRequest;
+import com.ndrmf.engine.dto.AddProposalMiscReportRequest;
 import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
 import com.ndrmf.engine.dto.AddProposalTaskRequest;
 import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
@@ -51,6 +52,7 @@ import com.ndrmf.engine.service.ProjectProposalService;
 import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.FormAction;
 import com.ndrmf.util.enums.ProcessStatus;
+import com.ndrmf.util.enums.ProcessType;
 
 import io.swagger.annotations.Api;
 
@@ -249,5 +251,13 @@ public class ProjectProposalController {
 		projProposalService.reassignProposalToFIP(proposalId, principal.getUserId(), body.getSectionIds());
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Sections reassigned successfully"), HttpStatus.ACCEPTED);
+	}
+	
+	@PostMapping("/{proposalId}/report/{subProcessType}/submit")
+	public ResponseEntity<ApiResponse> submitPrposalMiscReport(@PathVariable(name = "proposalId") UUID proposalId,
+			@PathVariable(name = "subProcessType") ProcessType subProcessType,
+			@RequestBody AddProposalMiscReportRequest body){
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Report submitted successfully"), HttpStatus.ACCEPTED);
 	}
 }

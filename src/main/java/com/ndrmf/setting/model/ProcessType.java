@@ -18,6 +18,7 @@ import com.ndrmf.user.model.User;
 public class ProcessType extends Auditable<String>{
 	private String name;
 	private User owner;
+	private ProcessType parent;
 
 	@Id
 	public String getName() {
@@ -36,5 +37,15 @@ public class ProcessType extends Auditable<String>{
 
 	public void setOwner(User owner) {
 		this.owner = owner;
+	}
+
+	@ManyToOne
+	@JoinColumn(name = "parent_name")
+	public ProcessType getParent() {
+		return parent;
+	}
+
+	public void setParent(ProcessType parent) {
+		this.parent = parent;
 	}
 }
