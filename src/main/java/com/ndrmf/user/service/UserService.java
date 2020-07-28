@@ -105,7 +105,8 @@ public class UserService {
 		dto.setEmail(u.getEmail());
 		dto.setFirstName(u.getFirstName());
 		dto.setLastName(u.getLastName());
-		dto.setEnabled(false);
+		dto.setEnabled(u.isEnabled());
+		dto.setSAP(u.isSAP());
 		
 		if(u.getOrg() != null) {
 			dto.setOrgId(u.getOrg().getId());
