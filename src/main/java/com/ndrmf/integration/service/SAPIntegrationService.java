@@ -84,7 +84,6 @@ public class SAPIntegrationService {
 					user.setFirstName(sapUser.getFirstName());
 					user.setLastName(sapUser.getLastName());
 					user.setEmail(sapUser.getEmail());
-					user.setEnabled(true);
 					
 					crudType = CRUDType.UPDATE;
 				}
