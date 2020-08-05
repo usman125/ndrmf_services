@@ -199,6 +199,7 @@ public class ProjectProposalService {
 		p.getSections().forEach(qs -> {
 			SectionItem section = new SectionItem();
 
+			section.setRevisionNo(qs.getRevisionNo());
 			section.setAssigned(qs.getSme().getId().equals(userId));
 			section.setData(qs.getData());
 			section.setId(qs.getId());

@@ -23,6 +23,7 @@ public class SectionItem {
 	private Date reviewDeadline;
 	private Date reviewCompletedDate;
 	private String reassignmentStatus;
+	private int revisionNo;
 	
 	public UUID getId() {
 		return id;
@@ -137,5 +138,11 @@ public class SectionItem {
 	}
 	public void setReviewDeadline(Date reviewDeadline) {
 		this.reviewDeadline = reviewDeadline;
+	}
+	public int getRevisionNo() {
+		return revisionNo;
+	}
+	public void setRevisionNo(int revisionNo) {
+		this.revisionNo = revisionNo;
 	}
 }
