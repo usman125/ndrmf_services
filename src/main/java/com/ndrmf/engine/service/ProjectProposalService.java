@@ -61,6 +61,7 @@ import com.ndrmf.engine.repository.ProjectProposalSectionRepository;
 import com.ndrmf.engine.repository.ProjectProposalTaskRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.notification.dto.TaskItem;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.setting.model.SectionTemplate;
 import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
@@ -107,6 +108,8 @@ public class ProjectProposalService {
 	private FileStoreService fileStoreService;
 	@Autowired
 	private ProcessTypeRepository processTypeRepo;
+	@Autowired
+	private NotificationService notificationService;
 
 	public UUID commenceProjectProposal(AuthPrincipal initiatorPrincipal, CommenceProjectProposalRequest body) {
 		final UUID initiatorUserId = initiatorPrincipal.getUserId();
@@ -147,6 +150,15 @@ public class ProjectProposalService {
 		}
 
 		p = projProposalRepo.save(p);
+		
+		try {
+			notificationService.sendPlainTextEmail(initiatorPrincipal.getEmail(),
+					initiatorPrincipal.getFullName(), "Project Proposal Submission Confirmation",
+					"Your prposal has been initiated. Please complete all the sections.");	
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 
 		return p.getId();
 	}

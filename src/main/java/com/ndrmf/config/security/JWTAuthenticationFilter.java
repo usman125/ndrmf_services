@@ -62,6 +62,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.withClaim("orgName", resBody.getUser().getOrgName())
 				.withClaim("userId", resBody.getUser().getId().toString())
 				.withClaim("fullName", resBody.getUser().getFullName())
+				.withClaim("email", resBody.getUser().getEmail())
 				.withArrayClaim("roles", resBody.getUser().getRoles())
 				.withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
 				.sign(HMAC512(SecurityConstants.SECRET.getBytes()));

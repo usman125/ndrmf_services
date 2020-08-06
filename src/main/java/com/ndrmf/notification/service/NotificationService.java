@@ -1,12 +1,19 @@
 package com.ndrmf.notification.service;
 
+import static com.google.common.collect.Lists.newArrayList;
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.mail.internet.InternetAddress;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.common.PagedList;
@@ -15,10 +22,18 @@ import com.ndrmf.notification.model.Notification;
 import com.ndrmf.notification.repository.NotificationRepository;
 import com.ndrmf.user.repository.UserRepository;
 
+import it.ozimov.springboot.mail.model.Email;
+import it.ozimov.springboot.mail.model.defaultimpl.DefaultEmail;
+import it.ozimov.springboot.mail.service.EmailService;
+
 @Service
 public class NotificationService {
 	@Autowired private NotificationRepository notificationRepo;
 	@Autowired private UserRepository userRepo;
+	@Autowired private EmailService emailService;
+	
+	@Value("${notifier.mail.fromEmail}") private String fromEmail;
+	@Value("${notifier.mail.fromName}") private String fromName;
 	
 	public PagedList<NotificationItem> getNotifications(UUID userId, Pageable pageable) {
 		Page<Notification> nots = notificationRepo.findNotificationsForUser(userId, pageable);
@@ -44,5 +59,22 @@ public class NotificationService {
 		noti.setText(text);
 		
 		notificationRepo.save(noti);
+	}
+	
+	@Async
+	public void sendPlainTextEmail(String toEmail, String toName, String subject, String body)
+			throws UnsupportedEncodingException{
+		
+		final Email email = DefaultEmail.builder()
+                .from(new InternetAddress(fromEmail,
+                        fromName))
+                .to(newArrayList(
+                        new InternetAddress(toEmail,
+                                toName)))
+                .subject(subject)
+                .body(body)
+                .encoding("UTF-8").build();
+
+        emailService.send(email);
 	}
 }

@@ -91,6 +91,11 @@
 		    <groupId>org.hibernate</groupId>
 		    <artifactId>hibernate-envers</artifactId>
 		</dependency>
+		<dependency>
+		    <groupId>it.ozimov</groupId>
+		    <artifactId>spring-boot-email-core</artifactId>
+		    <version>0.6.3</version>
+		</dependency>
     </dependencies>
 
     <build>
