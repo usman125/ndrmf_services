@@ -17,7 +17,7 @@ import com.ndrmf.user.model.User;
 public class FIPThematicArea extends Auditable<String> {
 	private int id;
 	private User fip;
-	private ThematicArea thematicArea;
+	private ThematicArea thematicArea; 
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
