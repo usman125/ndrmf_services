@@ -5,14 +5,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.ndrmf.common.ApiResponse;
+import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.user.dto.CreateUserRequest;
+import com.ndrmf.user.dto.DefineUserThematicAreasRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.RoleItem;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UpdateProfileRequest;
 import com.ndrmf.user.dto.UpdateUserRequest;
 import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.dto.UserLookupItem;
@@ -53,10 +57,27 @@ public class UserController {
         return new ResponseEntity<ApiResponse>(new ApiResponse(true, "User created successfully."), HttpStatus.CREATED);
     }
 	
+	@RolesAllowed(SystemRoles.ORG_FIP)
+    @PostMapping("/thematic-area")
+    public ResponseEntity<ApiResponse> defineThematicAreas(@AuthenticationPrincipal AuthPrincipal principal,
+    		@RequestBody DefineUserThematicAreasRequest body){
+    	userService.defineUserThematicAreas(principal.getUserId(), body);
+    	
+        return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Thematic areas defined successfully."), HttpStatus.CREATED);
+    }
+	
 	@GetMapping("/{id}")
 	public ResponseEntity<UserItem> getUserById(@PathVariable(name = "id", required = true) UUID id){
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
+	
+	@PutMapping("/profile")
+	public ResponseEntity<ApiResponse> updateProfile(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestBody UpdateProfileRequest body){
+		userService.updateProfile(principal.getUserId(), body);
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Profile updated successfully."), HttpStatus.ACCEPTED);
+	}
 	
 	@RolesAllowed("ADMIN")
 	@PutMapping("/{id}")
@@ -74,13 +95,13 @@ public class UserController {
         return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Signup request created successfully."), HttpStatus.CREATED);
     }
     
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(SystemRoles.SIGNUP_APPROVER)
     @GetMapping("/signup/requests/pending")
     public ResponseEntity<List<SignupRequestItem>> getPendingSignupRequests(){
     	return new ResponseEntity<List<SignupRequestItem>>(userService.getPendingSignupRequests(), HttpStatus.OK);
     }
     
-    @RolesAllowed("ADMIN")
+    @RolesAllowed(SystemRoles.SIGNUP_APPROVER)
     @GetMapping("/signup/requests/{id}/approve")
     public ResponseEntity<ApiResponse> approveSignupRequest(@PathVariable(name = "id", required = true) UUID id){
     	

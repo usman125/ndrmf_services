@@ -17,7 +17,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User extends Auditable<String> implements UserDetails{
-
     private static final long serialVersionUID = 1L;
 
     private UUID id;
@@ -35,6 +34,7 @@ public class User extends Auditable<String> implements UserDetails{
 	private Designation designation;
 	
 	private boolean isSAP;
+	private boolean availableAsJv;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -195,5 +195,13 @@ public class User extends Auditable<String> implements UserDetails{
 
 	public void setSAP(boolean isSAP) {
 		this.isSAP = isSAP;
+	}
+
+	public boolean isAvailableAsJv() {
+		return availableAsJv;
+	}
+
+	public void setAvailableAsJv(boolean availableAsJv) {
+		this.availableAsJv = availableAsJv;
 	} 
 }

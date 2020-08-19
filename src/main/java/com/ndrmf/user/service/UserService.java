@@ -5,17 +5,23 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.engine.model.AccreditationQuestionairre;
+import com.ndrmf.engine.model.FIPThematicArea;
 import com.ndrmf.engine.repository.AccreditationQuestionairreRepository;
+import com.ndrmf.engine.repository.FIPThematicAreaRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.ProcessType;
+import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.setting.repository.DepartmentRepository;
 import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
+import com.ndrmf.setting.repository.ThematicAreaRepository;
 import com.ndrmf.user.dto.CreateUserRequest;
+import com.ndrmf.user.dto.DefineUserThematicAreasRequest;
 import com.ndrmf.user.dto.OrganisationAndRoles;
 import com.ndrmf.user.dto.RoleItem;
 import com.ndrmf.user.dto.SignupRequest;
 import com.ndrmf.user.dto.SignupRequestItem;
+import com.ndrmf.user.dto.UpdateProfileRequest;
 import com.ndrmf.user.dto.UpdateUserRequest;
 import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.dto.UserLookupItem;
@@ -33,9 +39,11 @@ import com.ndrmf.util.enums.SignupRequestStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -52,6 +60,8 @@ public class UserService {
 	@Autowired private SignupRepository signupRepo;
 	@Autowired private ProcessTypeRepository processTypeRepo;
 	@Autowired private AccreditationQuestionairreRepository questionairreRepo;
+	@Autowired private FIPThematicAreaRepository fipThematicAreaRepo;
+	@Autowired private ThematicAreaRepository thematicAreaRepo;
 	
 	@Transactional
     public void createUser(CreateUserRequest body) {
@@ -94,6 +104,25 @@ public class UserService {
         	questionairreRepo.save(q);
         }
     }
+	
+	@Transactional
+	public void defineUserThematicAreas(UUID userId, DefineUserThematicAreasRequest body) {
+		Set<FIPThematicArea> areas = new HashSet<>();
+		
+		if(body.getAreas() != null) {
+			body.getAreas().forEach(a -> {
+				FIPThematicArea area = new FIPThematicArea();
+				area.setFip(userRepo.getOne(userId));
+				area.setThematicArea(thematicAreaRepo.getOne(a));
+				
+				areas.add(area);
+			});
+		}
+		
+		fipThematicAreaRepo.saveAll(areas);
+		
+		userRepo.findById(userId).get().setAvailableAsJv(body.isAvailableAsJv());
+	}
 	
 	public UserItem getUserById(UUID id) {
 		User u = userRepo.findById(id).orElseThrow(() -> new ValidationException("Invalid User ID"));
@@ -161,6 +190,15 @@ public class UserService {
         if(body.getDesignationId() != null && body.getDesignationId() > 0) {
         	u.setDesignation(desigRepo.getOne(body.getDesignationId()));
         }
+	}
+	
+	@Transactional
+	public void updateProfile(UUID id, UpdateProfileRequest body) {
+		User u = userRepo.findById(id).get();
+		
+		u.setFirstName(body.getFirstName());
+		u.setLastName(body.getLastName());
+		u.setPassword(passwordEncoder.encode(body.getPassword()));
 	}
     
 	public List<OrganisationAndRoles> getOrganisations() {
