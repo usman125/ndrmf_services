@@ -1,15 +1,19 @@
 package com.ndrmf.engine.model;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 import com.ndrmf.config.audit.Auditable;
 import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.user.model.User;
 
+@Entity
+@Table(name = "fip_thematic_areas")
 public class FIPThematicArea extends Auditable<String> {
 	private int id;
 	private User fip;
