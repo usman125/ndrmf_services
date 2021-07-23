@@ -1,5 +1,8 @@
 package com.ndrmf.user.service;
 
+import com.ndrmf.engine.dto.FipThematicAreasListItem;
+import com.ndrmf.engine.model.ProjectProposalGeneralCommentModel;
+import com.ndrmf.setting.dto.ThematicAreaItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,7 +13,6 @@ import com.ndrmf.engine.repository.AccreditationQuestionairreRepository;
 import com.ndrmf.engine.repository.FIPThematicAreaRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.model.ProcessType;
-import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.setting.repository.DepartmentRepository;
 import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
@@ -25,14 +27,17 @@ import com.ndrmf.user.dto.UpdateProfileRequest;
 import com.ndrmf.user.dto.UpdateUserRequest;
 import com.ndrmf.user.dto.UserItem;
 import com.ndrmf.user.dto.UserLookupItem;
+import com.ndrmf.user.dto.CreateTestTempRequest;
 import com.ndrmf.user.model.Organisation;
 import com.ndrmf.user.model.Role;
 import com.ndrmf.user.model.Signup;
 import com.ndrmf.user.model.User;
+import com.ndrmf.user.model.TestTemp;
 import com.ndrmf.user.repository.OrganisationRepository;
 import com.ndrmf.user.repository.RoleRepository;
 import com.ndrmf.user.repository.SignupRepository;
 import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.user.repository.TempTestRepository;
 import com.ndrmf.util.constants.SystemRoles;
 import com.ndrmf.util.enums.ProcessStatus;
 import com.ndrmf.util.enums.SignupRequestStatus;
@@ -62,9 +67,10 @@ public class UserService {
 	@Autowired private AccreditationQuestionairreRepository questionairreRepo;
 	@Autowired private FIPThematicAreaRepository fipThematicAreaRepo;
 	@Autowired private ThematicAreaRepository thematicAreaRepo;
+	@Autowired private TempTestRepository tempTestRepo;
 	
 	@Transactional
-    public void createUser(CreateUserRequest body) {
+    public String createUser(CreateUserRequest body) {
         User u = new User();
         u.setEmail(body.getEmail());
         u.setEnabled(true);
@@ -102,26 +108,70 @@ public class UserService {
         	q.setStatus(ProcessStatus.PENDING.getPersistenceValue());
         	
         	questionairreRepo.save(q);
+        	
+        	return "FIP_GOVT type user created successfully";
+        }
+        else {
+        	return "FIP type user created successfully";
         }
     }
 	
 	@Transactional
-	public void defineUserThematicAreas(UUID userId, DefineUserThematicAreasRequest body) {
+	public void defineUserThematicAreas(UUID userId, DefineUserThematicAreasRequest body, String type) {
 		Set<FIPThematicArea> areas = new HashSet<>();
-		
-		if(body.getAreas() != null) {
-			body.getAreas().forEach(a -> {
-				FIPThematicArea area = new FIPThematicArea();
-				area.setFip(userRepo.getOne(userId));
-				area.setThematicArea(thematicAreaRepo.getOne(a));
-				
-				areas.add(area);
-			});
+//		try {
+//			generalComments = objectMapper.readValue(generalCommentsJSON, objectMapper.getTypeFactory()
+//					.constructCollectionType(List.class, ProjectProposalGeneralCommentModel.class));
+//		} catch (Exception e) {
+//			throw new RuntimeException("General Comments are not null but couldn't read it as JSON", e);
+//		}
+		if (type.equals("eligibility")){
+			if(body.getAreas() != null) {
+				body.getAreas().forEach(a -> {
+					FIPThematicArea area = new FIPThematicArea();
+					area.setFip(userRepo.getOne(userId));
+					area.setThematicArea(thematicAreaRepo.getOne(a.getAreaId()));
+					area.setExperience(a.getExperience());
+					area.setCounterpart(a.getCounterpart());
+					areas.add(area);
+				});
+			}
+			fipThematicAreaRepo.saveAll(areas);
+		}else{
+			userRepo.findById(userId).get().setAvailableAsJv(body.isAvailableAsJv());
+			userRepo.findById(userId).get().setJvUser(body.getJvUser());
 		}
-		
-		fipThematicAreaRepo.saveAll(areas);
-		
-		userRepo.findById(userId).get().setAvailableAsJv(body.isAvailableAsJv());
+	}
+
+	@Transactional
+	public void defineUserThematicAreasByPo(UUID userId, DefineUserThematicAreasRequest body, String type) {
+		Set<FIPThematicArea> areas = new HashSet<>();
+
+		if (type.equals("eligibility")){
+			if(body.getAreas() != null) {
+				body.getAreas().forEach(a -> {
+					FIPThematicArea area = new FIPThematicArea();
+					area.setFip(userRepo.getOne(userId));
+					area.setThematicArea(thematicAreaRepo.getOne(a.getAreaId()));
+					area.setExperience(a.getExperience());
+					area.setCounterpart(a.getCounterpart());
+					areas.add(area);
+				});
+			}
+			fipThematicAreaRepo.saveAll(areas);
+		}else{
+			userRepo.findById(userId).get().setAvailableAsJv(body.isAvailableAsJv());
+			userRepo.findById(userId).get().setJvUser(body.getJvUser());
+		}
+	}
+
+	@Transactional
+	public void createTestTemp(CreateTestTempRequest body) {
+		TestTemp tT = new TestTemp();
+		tT.setName(body.getName());
+		tT.setOrgId(body.getOrgId());
+		tT.setMaritalStatus(body.getMaritalStatus());
+		tT = tempTestRepo.save(tT);
 	}
 	
 	public UserItem getUserById(UUID id) {
@@ -136,6 +186,8 @@ public class UserService {
 		dto.setLastName(u.getLastName());
 		dto.setEnabled(u.isEnabled());
 		dto.setSAP(u.isSAP());
+		dto.setDepartmentId(u.getDepartment().getId());
+		dto.setDesignationId(u.getDesignation().getId());
 		
 		if(u.getOrg() != null) {
 			dto.setOrgId(u.getOrg().getId());
@@ -180,7 +232,7 @@ public class UserService {
 			u.setPassword(passwordEncoder.encode(body.getPassword()));
         
         if(body.getRoleId() != null && body.getRoleId() > 0) {
-        	u.addRole(roleRepository.getOne(body.getRoleId()));
+        	u.replaceRole(roleRepository.getOne(body.getRoleId()));
         }
         
         if(body.getDepartmentId() != null && body.getDepartmentId() > 0) {
@@ -230,6 +282,16 @@ public class UserService {
 		signup.setFirstName(body.getFirstName());
 		signup.setLastName(body.getLastName());
 		signup.setEmail(body.getEmail());
+
+		signup.setEntityName(body.getEntityName());
+		signup.setEntityNature(body.getEntityNature());
+		signup.setEntityType(body.getEntityType());
+		signup.setLocation(body.getLocation());
+		signup.setProvince(body.getProvince());
+		signup.setAddress(body.getAddress());
+		signup.setOtherAddress(body.getOtherAddress());
+		signup.setOtherAccreditation(body.getOtherAccreditation());
+
 		signup.setPassword(this.passwordEncoder.encode(body.getPassword()));
 		
 		signup.setApprovalStatus(SignupRequestStatus.PENDING.toString());
@@ -240,7 +302,20 @@ public class UserService {
 	public List<SignupRequestItem> getPendingSignupRequests() {
 		List<Signup> reqs = signupRepo.findRequestsForStatus(SignupRequestStatus.PENDING.toString());
 		
-		List<SignupRequestItem> dtos = reqs.stream().map(req -> new SignupRequestItem(req.getId().toString(), req.getFirstName(), req.getLastName(), req.getEmail(), req.getCreatedDate()))
+		List<SignupRequestItem> dtos = reqs.stream().map(req -> new SignupRequestItem(
+				req.getId().toString(),
+				req.getFirstName(),
+				req.getLastName(),
+				req.getEmail(),
+				req.getCreatedDate(),
+				req.getEntityName(),
+				req.getEntityNature(),
+				req.getEntityType(),
+				req.getLocation(),
+				req.getProvince(),
+				req.getAddress(),
+				req.getOtherAddress(),
+				req.getOtherAccreditation()))
 				.collect(Collectors.toList());
 		
 		return dtos;
@@ -392,6 +467,48 @@ public class UserService {
 		
 		return dtos;
 	}
+
+	public List<UserItem> getAvailableAsJvUsers(UUID userId) {
+		List<User> users = userRepo.findAllAvailableAsJvUsers(userId);
+
+		List<UserItem> dtos = new ArrayList<>();
+
+		users.forEach(u -> {
+			UserItem dto = new UserItem();
+			dto.setId(u.getId());
+			dto.setUsername(u.getUsername());
+			dto.setEmail(u.getEmail());
+			dto.setFirstName(u.getFirstName());
+			dto.setLastName(u.getLastName());
+			dto.setEnabled(u.isEnabled());
+
+			dto.setSAP(u.isSAP());
+
+			if(u.getOrg() != null) {
+				dto.setOrgId(u.getOrg().getId());
+				dto.setOrgName(u.getOrg().getName());
+			}
+
+			List<Map<String, Object>> roles = new ArrayList<>();
+
+			if(u.getRoles() != null) {
+				u.getRoles().forEach(r -> {
+					Map<String, Object> role = new HashMap<>();
+					role.put("id", r.getId());
+					role.put("name", r.getName());
+
+					roles.add(role);
+				});
+
+				dto.setRoles(roles);
+			}
+
+			dtos.add(dto);
+
+		});
+
+		return dtos;
+	}
 	
 	@Transactional
 	public void approveSignupRequest(UUID id, String remarks) {
@@ -413,6 +530,16 @@ public class UserService {
 		u.setFirstName(s.getFirstName());
 		u.setLastName(s.getLastName());
 		u.setPassword(s.getPassword());
+
+		u.setEntityName(s.getEntityName());
+		u.setEntityNature(s.getEntityNature());
+		u.setEntityType(s.getEntityType());
+		u.setLocation(s.getLocation());
+		u.setProvince(s.getProvince());
+		u.setAddress(s.getAddress());
+		u.setOtherAddress(s.getOtherAddress());
+		u.setOtherAccreditation(s.getOtherAccreditation());
+
 		u.setOrg(orgRepo.findByName(SystemRoles.ORG_FIP).get());
 		u.addRole(roleRepository.findByName(SystemRoles.FIP_DATAENTRY));
 		
@@ -445,5 +572,37 @@ public class UserService {
 		}
 		
 		return Optional.of(users.get(0));
+	}
+
+	public List<FipThematicAreasListItem> getUserThematicAreas(
+			UUID userId
+	){
+		List<FIPThematicArea> fiptalist = fipThematicAreaRepo.getAllThematicAreasForUser(userId);
+
+		List<FipThematicAreasListItem> dto = new ArrayList<>();
+
+		fiptalist.forEach(item -> {
+			FipThematicAreasListItem fiptalitem = new FipThematicAreasListItem();
+			fiptalitem.setId(item.getId());
+			fiptalitem.setFip(new UserLookupItem(item.getFip().getId(), item.getFip().getFullName()));
+
+			ThematicAreaItem tai = new ThematicAreaItem();
+			tai.setId(item.getThematicArea().getId());
+			tai.setName(item.getThematicArea().getName());
+			tai.setProcessOwner(
+				new UserLookupItem(
+					item.getThematicArea().getProcessOwner().getId(),
+					item.getThematicArea().getProcessOwner().getFullName()
+				)
+			);
+			fiptalitem.setThematicAreaItem(tai);
+			fiptalitem.setExperience(item.getExperience());
+			fiptalitem.setCounterpart(item.getCounterpart());
+
+			dto.add(fiptalitem);
+		});
+
+
+		return dto;
 	}
 }

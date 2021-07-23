@@ -10,6 +10,20 @@ public class ProjectProposalListItem {
 	private String initiatorFullName;
 	private Date submittedAt;
 	private String status;
+	private UUID jvId;
+	private Boolean isGov;
+
+	
+	public ProjectProposalListItem(UUID id, String name, String thematicAreaName,
+			String initiatorFullName, Date submittedAt, String status, UUID jvId) {
+		this.id = id;
+		this.initiatorFullName = initiatorFullName;
+		this.submittedAt = submittedAt;
+		this.status = status;
+		this.name = name;
+		this.thematicAreaName = thematicAreaName;
+		this.jvId = jvId;
+	}
 	
 	public ProjectProposalListItem(UUID id, String name, String thematicAreaName,
 			String initiatorFullName, Date submittedAt, String status) {
@@ -19,6 +33,7 @@ public class ProjectProposalListItem {
 		this.status = status;
 		this.name = name;
 		this.thematicAreaName = thematicAreaName;
+
 	}
 	
 	public UUID getId() {
@@ -63,5 +78,21 @@ public class ProjectProposalListItem {
 
 	public void setThematicAreaName(String thematicAreaName) {
 		this.thematicAreaName = thematicAreaName;
+	}
+
+	public UUID getJvId() {
+		return jvId;
+	}
+
+	public void setJvId(UUID jvId) {
+		this.jvId = jvId;
+	}
+
+	public void setGov(Boolean gov) {
+		isGov = gov;
+	}
+
+	public Boolean getGov() {
+		return isGov;
 	}
 }

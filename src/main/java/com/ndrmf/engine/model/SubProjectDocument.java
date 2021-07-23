@@ -1,6 +1,6 @@
 package com.ndrmf.engine.model;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,12 +26,16 @@ public class SubProjectDocument extends Auditable<String> {
 	private UUID id;
 	private String status;
 	private User processOwner;
-	private LocalDate startDate;
-	private LocalDate endDate;
-	private LocalDate completedOn;
+	private Date startDate;
+	private Date endDate;
+	private Date completedOn;
+	private String docName;
+	private String docNumber;
 	
 	private ProjectProposal proposalRef;
 	private List<SubProjectDocumentSection> sections;
+
+	private List<SubProjectDocumentDmPamTasks> dmpamTasks;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -76,7 +80,24 @@ public class SubProjectDocument extends Auditable<String> {
 		
 		this.sections.add(section);
 	}
-	
+
+	@OneToMany(mappedBy="subProjectRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+	public List<SubProjectDocumentDmPamTasks> getDmpamTasks() {
+		return dmpamTasks;
+	}
+	public void setDmpamTasks(List<SubProjectDocumentDmPamTasks> dmpamTasks) {
+		this.dmpamTasks = dmpamTasks;
+	}
+	public void addTask(SubProjectDocumentDmPamTasks dmpamtask) {
+		if(this.dmpamTasks == null) {
+			this.dmpamTasks = new ArrayList<SubProjectDocumentDmPamTasks>();
+		}
+
+		dmpamtask.setSubProjectRef(this);
+
+		this.dmpamTasks.add(dmpamtask);
+	}
+
 	@ManyToOne
 	@JoinColumn(name = "owner_user_id", nullable = false)
 	public User getProcessOwner() {
@@ -87,26 +108,42 @@ public class SubProjectDocument extends Auditable<String> {
 	}
 	
 	@Column(columnDefinition = "DATE")
-	public LocalDate getStartDate() {
+	public Date getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(LocalDate startDate) {
+	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
 	
 	@Column(columnDefinition = "DATE")
-	public LocalDate getEndDate() {
+	public Date getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(LocalDate endDate) {
+	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
 	
 	@Column(columnDefinition = "DATE")
-	public LocalDate getCompletedOn() {
+	public Date getCompletedOn() {
 		return completedOn;
 	}
-	public void setCompletedOn(LocalDate completedOn) {
+	public void setCompletedOn(Date completedOn) {
 		this.completedOn = completedOn;
+	}
+
+	public String getDocName() {
+		return docName;
+	}
+
+	public void setDocName(String docName) {
+		this.docName = docName;
+	}
+
+	public String getDocNumber() {
+		return docNumber;
+	}
+
+	public void setDocNumber(String docNumber) {
+		this.docNumber = docNumber;
 	}
 }

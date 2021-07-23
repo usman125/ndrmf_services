@@ -14,6 +14,6 @@ import java.util.UUID;
 public interface SectionRepository extends JpaRepository<Section , UUID> {
     List<Section> findAllByEnabledTrue();
     
-    @Query(value = "SELECT s FROM Section s JOIN s.processType pt WHERE pt.id = :processType")
+    @Query(value = "SELECT s FROM Section s JOIN s.processType pt WHERE pt.id = :processType ORDER BY s.orderNum ASC")
     List<Section> findAllSectionsForProcessType(@Param("processType") String processType);
 }

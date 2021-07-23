@@ -83,7 +83,7 @@ public class LoginResponse {
 			this.roles = roles;
 		}
 		
-		@JsonIgnore
+//		@JsonIgnore
 		public UUID getId() {
 			return id;
 		}

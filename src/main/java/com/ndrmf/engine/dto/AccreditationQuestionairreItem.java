@@ -9,6 +9,9 @@ public class AccreditationQuestionairreItem {
 	private String status;
 	private String template;
 	private String data;
+	private boolean isJv;
+	private String jvUser;
+
 	
 	public UserLookupItem getForUser() {
 		return forUser;
@@ -45,5 +48,21 @@ public class AccreditationQuestionairreItem {
 	}
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public boolean isJv() {
+		return isJv;
+	}
+
+	public void setJv(boolean jv) {
+		isJv = jv;
+	}
+
+	public String getJvUser() {
+		return jvUser;
+	}
+
+	public void setJvUser(String jvUser) {
+		this.jvUser = jvUser;
 	}
 }

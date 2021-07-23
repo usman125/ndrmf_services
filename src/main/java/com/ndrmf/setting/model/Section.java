@@ -19,9 +19,11 @@ public class Section extends Auditable<String> {
     private String name;
     private ProcessType processType;
     private User sme;
-    private boolean enabled;
+    private Integer orderNum;
+    private boolean enabled;//when it is true, the section can be updated by FIP, otherwise no actions possible by FIP.
     
-    @Id
+    
+	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(columnDefinition = "uuid", updatable = false)
 	public UUID getId() {
@@ -61,5 +63,13 @@ public class Section extends Auditable<String> {
 	}
 	public void setSme(User sme) {
 		this.sme = sme;
+	}
+
+	public Integer getOrderNum() {
+		return orderNum;
+	}
+
+	public void setOrderNum(Integer orderNum) {
+		this.orderNum = orderNum;
 	}
 }

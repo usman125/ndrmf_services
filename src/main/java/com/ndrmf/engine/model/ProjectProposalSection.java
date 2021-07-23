@@ -47,6 +47,7 @@ public class ProjectProposalSection extends Auditable<String>{
 	private String reviewStatus;
 	private Date reviewCompletedOn;
 	private String reassignmentStatus;
+	private String reassignmentComments;
 	private List<ProjectProposalSectionReview> reviews;
 	
 	@Id
@@ -193,5 +194,13 @@ public class ProjectProposalSection extends Auditable<String>{
 	}
 	public void setReviewCompletedOn(Date reviewCompletedOn) {
 		this.reviewCompletedOn = reviewCompletedOn;
+	}
+
+	public String getReassignmentComments() {
+		return reassignmentComments;
+	}
+
+	public void setReassignmentComments(String reassignmentComments) {
+		this.reassignmentComments = reassignmentComments;
 	}
 }

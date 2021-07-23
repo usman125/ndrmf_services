@@ -49,7 +49,7 @@ public class ProjectImplementationPlan extends Auditable<String>{
 	@Type(type = "jsonb")
 	@Column(columnDefinition = "jsonb")
 	public String getImplementationPlan() {
-		return implementationPlan;
+		return this.implementationPlan;
 	}
 	public void setImplementationPlan(String implementationPlan) {
 		this.implementationPlan = implementationPlan;

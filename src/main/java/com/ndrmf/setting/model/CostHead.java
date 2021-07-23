@@ -11,6 +11,8 @@ import javax.persistence.Table;
 
 import com.ndrmf.config.audit.Auditable;
 
+
+
 @Entity
 @Table(name = "cost_heads")
 public class CostHead extends Auditable<String>{
@@ -18,7 +20,15 @@ public class CostHead extends Auditable<String>{
 	private String name;
 	private String glCode;
 	private boolean enabled;
+	private String data;
 	
+	
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
+	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -52,4 +62,6 @@ public class CostHead extends Auditable<String>{
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+	
+	
 }

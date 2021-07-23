@@ -1,5 +1,6 @@
 package com.ndrmf.engine.model;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,13 @@ import javax.persistence.Table;
 
 import com.ndrmf.config.audit.Auditable;
 import com.ndrmf.user.model.User;
+import com.ndrmf.util.enums.ProcessStatus;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
 
+@TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
 @Table(name = "qualifications")
 public class Qualification extends Auditable<String>{
@@ -27,7 +34,19 @@ public class Qualification extends Auditable<String>{
 	private User processOwner;
 	private String status;
 	private List<QualificationSection> sections;
+	private Date expiryDate;
+	private String comment;
+	private String subStatus;
+	private ProcessStatus markedTo;
+	private String reportUsers;
+//	private date
 	
+	public ProcessStatus getMarkedTo() {
+		return markedTo;
+	}
+	public void setMarkedTo(ProcessStatus markedTo) {
+		this.markedTo = markedTo;
+	}
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -79,5 +98,47 @@ public class Qualification extends Auditable<String>{
 		
 		section.setQualifcationRef(this);
 		this.sections.add(section);
+	}
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	//public void addComments(String comment) {
+	//	this.comments.add(comment);
+	//}
+	
+	public String getSubStatus() {
+		return subStatus;
+	}
+	public void setSubStatus(String subStatus) {
+		this.subStatus = subStatus;
+	}
+
+	@Override
+	public Date getLastModifiedDate() {
+		return super.getLastModifiedDate();
+	}
+
+	@Override
+	public void setLastModifiedDate(Date lastModifiedDate) {
+		super.setLastModifiedDate(lastModifiedDate);
+	}
+
+	@Type(type = "jsonb")
+	@Column(columnDefinition = "jsonb")
+	public String getReportUsers() {
+		return reportUsers;
+	}
+
+	public void setReportUsers(String reportUsers) {
+		this.reportUsers = reportUsers;
 	}
 }

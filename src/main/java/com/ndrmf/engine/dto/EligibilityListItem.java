@@ -8,12 +8,14 @@ public class EligibilityListItem {
 	private String initiatorFullName;
 	private Date submittedAt;
 	private String status;
+	private String comment;
 	
-	public EligibilityListItem(UUID id, String initiatorFullName, Date submittedAt, String status) {
+	public EligibilityListItem(UUID id, String initiatorFullName, Date submittedAt, String status, String comment) {
 		this.id = id;
 		this.initiatorFullName = initiatorFullName;
 		this.submittedAt = submittedAt;
 		this.status = status;
+		this.comment = comment;
 	}
 	
 	public UUID getId() {
@@ -42,5 +44,13 @@ public class EligibilityListItem {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 }

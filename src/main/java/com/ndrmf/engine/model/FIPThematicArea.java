@@ -17,7 +17,9 @@ import com.ndrmf.user.model.User;
 public class FIPThematicArea extends Auditable<String> {
 	private int id;
 	private User fip;
-	private ThematicArea thematicArea; 
+	private ThematicArea thematicArea;
+	private Integer experience;
+	private String counterpart;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -44,5 +46,21 @@ public class FIPThematicArea extends Auditable<String> {
 	}
 	public void setThematicArea(ThematicArea thematicArea) {
 		this.thematicArea = thematicArea;
+	}
+
+	public Integer getExperience() {
+		return experience;
+	}
+
+	public void setExperience(Integer experience) {
+		this.experience = experience;
+	}
+
+	public String getCounterpart() {
+		return counterpart;
+	}
+
+	public void setCounterpart(String counterpart) {
+		this.counterpart = counterpart;
 	}
 }

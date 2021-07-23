@@ -14,4 +14,5 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 	
 	@Query(value = "SELECT n FROM Notification n JOIN n.to t WHERE t.id = :userId ORDER BY n.createdDate DESC")
 	Page<Notification> findNotificationsForUser(@Param("userId") UUID userId, Pageable pageable);
+	
 }

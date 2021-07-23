@@ -18,19 +18,23 @@ import com.ndrmf.config.audit.Auditable;
 public class Role extends Auditable<String> implements GrantedAuthority {
 	private static final long serialVersionUID = 6892071001682672150L;
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
+
 	private String name;
+
+	@ManyToOne
+	@JoinColumn(name="org_id", nullable = false)
 	private Organisation org;
-	
+
 	@Transient
 	@Override
 	public String getAuthority() {
 		return name;
 	}
-	
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+
 	public int getId() {
 		return id;
 	}
@@ -47,8 +51,6 @@ public class Role extends Auditable<String> implements GrantedAuthority {
 		this.name = name;
 	}
 
-	@ManyToOne
-	@JoinColumn(name="org_id", nullable = false)
 	public Organisation getOrg() {
 		return org;
 	}

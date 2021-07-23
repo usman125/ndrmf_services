@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.ndrmf.user.dto.SmeLookupItem;
 import com.ndrmf.user.dto.UserLookupItem;
 
 public class SectionItem {
@@ -16,6 +17,7 @@ public class SectionItem {
 	private String template;
 	private String data;
 	private UserLookupItem sme;
+	private SmeLookupItem reportSme;
 	private boolean assigned;
 	private List<ReviewItem> reviewHistory;
 	private ReviewItem review;
@@ -23,7 +25,10 @@ public class SectionItem {
 	private Date reviewDeadline;
 	private Date reviewCompletedDate;
 	private String reassignmentStatus;
+	private String reassignmentComments;
 	private int revisionNo;
+	private Integer orderNum;
+	private UUID qprId;
 	
 	public UUID getId() {
 		return id;
@@ -73,6 +78,15 @@ public class SectionItem {
 	public void setSme(UserLookupItem sme) {
 		this.sme = sme;
 	}
+
+	public SmeLookupItem getReportSme() {
+		return reportSme;
+	}
+
+	public void setReportSme(SmeLookupItem reportSme) {
+		this.reportSme = reportSme;
+	}
+
 	public boolean isAssigned() {
 		return assigned;
 	}
@@ -144,5 +158,29 @@ public class SectionItem {
 	}
 	public void setRevisionNo(int revisionNo) {
 		this.revisionNo = revisionNo;
+	}
+
+	public Integer getOrderNum() {
+		return orderNum;
+	}
+
+	public void setOrderNum(Integer orderNum) {
+		this.orderNum = orderNum;
+	}
+
+	public String getReassignmentComments() {
+		return reassignmentComments;
+	}
+
+	public void setReassignmentComments(String reassignmentComments) {
+		this.reassignmentComments = reassignmentComments;
+	}
+
+	public UUID getQprId() {
+		return qprId;
+	}
+
+	public void setQprId(UUID qprId) {
+		this.qprId = qprId;
 	}
 }

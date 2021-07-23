@@ -20,4 +20,10 @@ public interface EligibilityRepository extends JpaRepository<Eligibility, UUID> 
 	
 	@Query(value = "SELECT e FROM Eligibility e JOIN e.processOwner po JOIN e.initiatedBy ib WHERE po.id = :userId OR ib.id = :userId")
 	List<Eligibility> findAllRequestsForOwnerOrInitiator(@Param("userId") UUID userId);
+	
+	@Query(value = "SELECT e FROM Eligibility e JOIN e.initiatedBy ib WHERE ib.id = :userId")
+	List<Eligibility> findAllRequestsForInitiator(@Param("userId") UUID userId);
+
+	@Query(value = "SELECT e FROM Eligibility e JOIN e.initiatedBy ib WHERE ib.id = :userId ORDER BY CreatedDate")
+	List<Eligibility> findRequestsForQualificationReport(@Param("userId") UUID userId);
 }

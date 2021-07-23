@@ -1,10 +1,7 @@
 package com.ndrmf.engine.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
@@ -13,34 +10,18 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.transaction.Transactional;
 
+import com.ndrmf.engine.dto.*;
+import com.ndrmf.engine.model.*;
+import com.ndrmf.engine.repository.*;
+import com.ndrmf.setting.dto.ThematicAreaItem;
+import com.ndrmf.setting.repository.DesignationRepository;
+import com.ndrmf.user.dto.SmeLookupItem;
+import com.ndrmf.user.dto.UserItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import com.ndrmf.engine.dto.AccreditationQuestionairreItem;
-import com.ndrmf.engine.dto.AccreditationQuestionairreListItem;
-import com.ndrmf.engine.dto.AccreditationStatusItem;
-import com.ndrmf.engine.dto.AddQualificationTaskRequest;
-import com.ndrmf.engine.dto.EligibilityItem;
-import com.ndrmf.engine.dto.EligibilityListItem;
-import com.ndrmf.engine.dto.EligibilityRequest;
-import com.ndrmf.engine.dto.QualificationItem;
-import com.ndrmf.engine.dto.QualificationListItem;
-import com.ndrmf.engine.dto.QualificationSectionRequest;
-import com.ndrmf.engine.dto.ReassignQualificationRequest;
-import com.ndrmf.engine.dto.SectionItem;
-import com.ndrmf.engine.dto.SubmitAccreditationQuestionairreRequest;
-import com.ndrmf.engine.model.AccreditationQuestionairre;
-import com.ndrmf.engine.model.Eligibility;
-import com.ndrmf.engine.model.Qualification;
-import com.ndrmf.engine.model.QualificationSection;
-import com.ndrmf.engine.model.QualificationSectionReview;
-import com.ndrmf.engine.model.QualificationTask;
-import com.ndrmf.engine.repository.AccreditationQuestionairreRepository;
-import com.ndrmf.engine.repository.EligibilityRepository;
-import com.ndrmf.engine.repository.QualificationRepository;
-import com.ndrmf.engine.repository.QualificationSectionRepository;
-import com.ndrmf.engine.repository.QualificationTaskRepository;
+import com.google.common.base.Objects;
 import com.ndrmf.event.EligibilityApprovedEvent;
 import com.ndrmf.event.QualificationCreatedEvent;
 import com.ndrmf.exception.ValidationException;
@@ -70,6 +51,8 @@ public class AccreditationService {
 	@Autowired private QualificationTaskRepository qtaskRepo;
 	@Autowired private QualificationSectionRepository qsectionRepo;
 	@Autowired private AccreditationQuestionairreRepository questionairreRepo;
+	@Autowired private FIPThematicAreaRepository fipThematicAreaRepo;
+	@Autowired private DesignationRepository designationRepository;
 	
 	@PersistenceContext private EntityManager em;
 	
@@ -98,6 +81,21 @@ public class AccreditationService {
 		eligbiligyRepo.save(elig);
 	}
 	
+	public void updateEligibility(UUID initiatedByUserId, UUID eligId, EligibilityRequest body) {
+		Eligibility elig = eligbiligyRepo.findById(eligId)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		//elig.setInitiatedBy(userRepo.getOne(initiatedByUserId));
+		//com.ndrmf.setting.model.ProcessType processMeta = processTypeRepo.findById(ProcessType.ELIGIBILITY.name()).get();
+		
+		//elig.setProcessOwner(processMeta.getOwner());
+		elig.setStatus(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
+		//elig.setTemplate(body.getTemplate());
+		elig.setData(body.getData());
+		
+		eligbiligyRepo.save(elig);
+	}
+	
 	public List<EligibilityListItem> getEligibilityRequests(UUID userId, ProcessStatus status) {
 		List<Eligibility> eligs;
 		
@@ -109,15 +107,47 @@ public class AccreditationService {
 		}
 		
 		List<EligibilityListItem> dtos = eligs.stream()
-				.map(e -> new EligibilityListItem(e.getId(), e.getInitiatedBy().getFullName(), e.getCreatedDate(), e.getStatus()))
+				.map(e -> new EligibilityListItem(e.getId(), e.getInitiatedBy().getFullName(), e.getCreatedDate(), e.getStatus(),
+						e.getComment()))
 				.collect(Collectors.toList());
 		
 		return dtos;
 	}
 	
-	public EligibilityItem getEligibilityRequest(UUID id) {
+	public EligibilityItem getEligibilityRequest(UUID id, UUID userId) {
 		Eligibility elig = eligbiligyRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+
+		List<FIPThematicArea> fiptalist;
+
+		if (elig.getInitiatedBy() == null){
+			fiptalist = fipThematicAreaRepo.getAllThematicAreasForUser(userId);
+		}else{
+			fiptalist = fipThematicAreaRepo.getAllThematicAreasForUser(elig.getInitiatedBy().getId());
+		}
+
+		List<FipThematicAreasListItem> tadto = new ArrayList<>();
+
+		fiptalist.forEach(item -> {
+			FipThematicAreasListItem fiptalitem = new FipThematicAreasListItem();
+			fiptalitem.setId(item.getId());
+			fiptalitem.setFip(new UserLookupItem(item.getFip().getId(), item.getFip().getFullName()));
+
+			ThematicAreaItem tai = new ThematicAreaItem();
+			tai.setId(item.getThematicArea().getId());
+			tai.setName(item.getThematicArea().getName());
+			tai.setProcessOwner(
+					new UserLookupItem(
+							item.getThematicArea().getProcessOwner().getId(),
+							item.getThematicArea().getProcessOwner().getFullName()
+					)
+			);
+			fiptalitem.setThematicAreaItem(tai);
+			fiptalitem.setExperience(item.getExperience());
+			fiptalitem.setCounterpart(item.getCounterpart());
+
+			tadto.add(fiptalitem);
+		});
 		
 		EligibilityItem dto = new EligibilityItem();
 		
@@ -127,6 +157,8 @@ public class AccreditationService {
 		dto.setStatus(elig.getStatus());
 		dto.setTemplate(elig.getTemplate());
 		dto.setSubmittedAt(elig.getCreatedDate());
+		dto.setComment(elig.getComment());
+		dto.setFipThematicAreasListItem(tadto);
 		
 		return dto;
 	}
@@ -142,23 +174,59 @@ public class AccreditationService {
 		}
 		
 		List<QualificationListItem> dtos = quals.stream()
-				.map(q -> new QualificationListItem(q.getId(), q.getInitiatedBy().getFullName(), q.getCreatedDate(), q.getStatus()))
+				.map(q -> new QualificationListItem(q.getId(), q.getInitiatedBy().getFullName(), q.getCreatedDate(), q.getStatus(),
+						q.getExpiryDate(), q.getSubStatus(), q.getComment()))
 				.collect(Collectors.toList());
 		
 		return dtos;
 	}
 	
-	public QualificationItem getQualificationRequest(UUID id, UUID userId) {
+	public EligPlusQual getQualificationRequest(UUID id, UUID userId) {
 		Qualification q = qualificationRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
-		QualificationItem dto = new QualificationItem();
+		EligPlusQual epqDto = new EligPlusQual();
 		
-		dto.setInitiatedBy(new UserLookupItem(q.getInitiatedBy().getId(), q.getInitiatedBy().getFullName()));
-		dto.setOwner(q.getProcessOwner().getId().equals(userId));
-		dto.setProcessOwner(new UserLookupItem(q.getProcessOwner().getId(), q.getProcessOwner().getFullName()));
-		dto.setStatus(q.getStatus());
-		dto.setSubmittedAt(q.getCreatedDate());
+		List<Eligibility> elig = eligbiligyRepo.findAllRequestsForInitiator(q.getInitiatedBy().getId());
+		List<EligibilityItem> edto = new ArrayList<EligibilityItem>();
+		
+		for (int i = 0; i < elig.size(); i++) {
+			EligibilityItem singleEdto = new EligibilityItem();
+			
+			singleEdto.setData(elig.get(i).getData());
+			singleEdto.setInitiatedBy(new UserLookupItem(elig.get(i).getInitiatedBy().getId(), elig.get(i).getInitiatedBy().getFullName()));
+			singleEdto.setProcessOwner(new UserLookupItem(elig.get(i).getProcessOwner().getId(), elig.get(i).getProcessOwner().getFullName()));
+			singleEdto.setStatus(elig.get(i).getStatus());
+			singleEdto.setTemplate(elig.get(i).getTemplate());
+			singleEdto.setSubmittedAt(elig.get(i).getCreatedDate());
+			singleEdto.setComment(elig.get(i).getComment());
+			edto.add(singleEdto);
+		}
+		
+		
+		
+		QualificationItem qdto = new QualificationItem();
+		
+		qdto.setInitiatedBy(new UserLookupItem(q.getInitiatedBy().getId(), q.getInitiatedBy().getFullName()));
+		qdto.setOwner(q.getProcessOwner().getId().equals(userId));
+		qdto.setProcessOwner(new UserLookupItem(q.getProcessOwner().getId(), q.getProcessOwner().getFullName()));
+		qdto.setStatus(q.getStatus());
+		qdto.setSubmittedAt(q.getCreatedDate());
+		qdto.setExpiryDate(q.getExpiryDate());
+		qdto.setComment(q.getComment());
+		qdto.setSubStatus(q.getSubStatus());
+		qdto.setLastModified(q.getLastModifiedDate());
+		qdto.setReviewUsers(q.getReportUsers());
+
+//		if (q.getInitiatedBy().isAvailableAsJv() && q.getInitiatedBy().getJvUser() != null){
+//			qdto.setJvUser(new UserLookupItem(
+//					userRepo.findById(q.getInitiatedBy().getJvUserId()).get().getId(),
+//					userRepo.findById(q.getInitiatedBy().getJvUserId()).get().getFullName())
+//			);
+//		}
+		qdto.setAvailableAsJv(q.getInitiatedBy().isAvailableAsJv());
+		qdto.setJvUser(q.getInitiatedBy().getJvUser());
+
 		
 		if(q.getInitiatedBy().getId().equals(userId)) {
 			List<QualificationTask> reassignmentComments = 
@@ -173,7 +241,7 @@ public class AccreditationService {
 				ti.setStartDate(lastTask.getStartDate());
 				ti.setStatus(lastTask.getStatus());
 				
-				dto.setReassignmentTask(ti);
+				qdto.setReassignmentTask(ti);
 			}
 		}
 		
@@ -186,6 +254,8 @@ public class AccreditationService {
 			section.setName(qs.getName());
 			section.setPassingScore(qs.getPassingScore());
 			section.setSme(new UserLookupItem(qs.getSme().getId(), qs.getSme().getFullName()));
+			section.setReportSme(new SmeLookupItem(qs.getSme().getId(),
+					qs.getSme().getFullName(), designationRepository.getOne(qs.getSme().getDesignation().getId()).getName()));
 			section.setTemplate(qs.getTemplate());
 			section.setTemplateType(qs.getTemplateType());
 			section.setTotalScore(qs.getTotalScore());
@@ -193,7 +263,7 @@ public class AccreditationService {
 			section.setReviewStatus(qs.getReviewStatus());
 			
 			section.setReassignmentStatus(qs.getReassignmentStatus());
-			
+			section.setOrderNum(qs.getSectionRef().getOrderNum());
 			
 			if(qs.getReviews() != null && qs.getReviews().size() > 0) {
 				QualificationSectionReview latestReview = 
@@ -212,14 +282,83 @@ public class AccreditationService {
 				});
 			}
 			
-			dto.addSection(section);
+			qdto.addSection(section);
 		});
+
+		List<FIPThematicArea> fiptalist = fipThematicAreaRepo.getAllThematicAreasForUser(q.getInitiatedBy().getId());
+		List<FipThematicAreasListItem> tadto = new ArrayList<>();
+
+		fiptalist.forEach(item -> {
+			FipThematicAreasListItem fiptalitem = new FipThematicAreasListItem();
+			fiptalitem.setId(item.getId());
+			fiptalitem.setFip(new UserLookupItem(item.getFip().getId(), item.getFip().getFullName()));
+
+			ThematicAreaItem tai = new ThematicAreaItem();
+			tai.setId(item.getThematicArea().getId());
+			tai.setName(item.getThematicArea().getName());
+			tai.setProcessOwner(
+					new UserLookupItem(
+							item.getThematicArea().getProcessOwner().getId(),
+							item.getThematicArea().getProcessOwner().getFullName()
+					)
+			);
+			fiptalitem.setThematicAreaItem(tai);
+			fiptalitem.setExperience(item.getExperience());
+			fiptalitem.setCounterpart(item.getCounterpart());
+
+			tadto.add(fiptalitem);
+		});
+
+		User userIfo = userRepo.findById(q.getInitiatedBy().getId()).orElseThrow(() -> new ValidationException("Invalid User ID"));
+
+		UserItem uidto = new UserItem();
+
+		uidto.setId(userIfo.getId());
+		uidto.setUsername(userIfo.getUsername());
+		uidto.setEmail(userIfo.getEmail());
+		uidto.setFirstName(userIfo.getFirstName());
+		uidto.setLastName(userIfo.getLastName());
+		uidto.setEnabled(userIfo.isEnabled());
+		uidto.setSAP(userIfo.isSAP());
+
+		if(userIfo.getOrg() != null) {
+			uidto.setOrgId(userIfo.getOrg().getId());
+			uidto.setOrgName(userIfo.getOrg().getName());
+		}
+
+		List<Map<String, Object>> roles = new ArrayList<>();
+
+		if(userIfo.getRoles() != null) {
+			userIfo.getRoles().forEach(r -> {
+				Map<String, Object> role = new HashMap<>();
+				role.put("id", r.getId());
+				role.put("name", r.getName());
+
+				roles.add(role);
+			});
+
+			uidto.setRoles(roles);
+		}
+
+		uidto.setEntityName(userIfo.getEntityName());
+		uidto.setEntityNature(userIfo.getEntityNature());
+		uidto.setEntityType(userIfo.getEntityType());
+		uidto.setLocation(userIfo.getLocation());
+		uidto.setAddress(userIfo.getAddress());
+		uidto.setProvince(userIfo.getProvince());
+		uidto.setOtherAddress(userIfo.getOtherAddress());
+		uidto.setOtherAccreditation(userIfo.getOtherAccreditation());
 		
-		return dto;
+		epqDto.setQualItem(qdto);
+		epqDto.setEligItem(edto);
+		epqDto.setThematicAreasListItems(tadto);
+		epqDto.setUserInfo(uidto);
+
+		return epqDto;
 	}
 	
 	public UUID commenceQualification(UUID initiatorUserId) {
-		Set<String> constraintStatuses = new HashSet<>(); 
+		Set<String> constraintStatuses = new HashSet<>();
 		constraintStatuses.add(ProcessStatus.DRAFT.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.APPROVED.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
@@ -303,9 +442,9 @@ public class AccreditationService {
 			throw new ValidationException("You cannot approve this request. Authorized user is: "+elig.getProcessOwner().getFullName());
 		}
 		
-		if(!elig.getStatus().equals(ProcessStatus.UNDER_REVIEW.getPersistenceValue())){
-			throw new ValidationException("Cannot approve request with status: "+elig.getStatus());
-		}
+//		if(!elig.getStatus().equals(ProcessStatus.UNDER_REVIEW.getPersistenceValue())){
+//			throw new ValidationException("Cannot approve request with status: "+elig.getStatus());
+//		}
 		
 		elig.setStatus(ProcessStatus.APPROVED.getPersistenceValue());
 		
@@ -315,7 +454,30 @@ public class AccreditationService {
 		
 	}
 	
-	public AccreditationStatusItem getAccreditationStatus(UUID currentUserId, List<String> roles) {
+	public void rejectEligibilityRequest(UUID id, UUID approverUserId, Comment body) {
+		Eligibility elig = eligbiligyRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+		
+		if(!elig.getProcessOwner().getId().equals(approverUserId)) {
+			throw new ValidationException("You cannot approve this request. Authorized user is: "+elig.getProcessOwner().getFullName());
+		}
+		
+//		if(!elig.getStatus().equals(ProcessStatus.UNDER_REVIEW.getPersistenceValue())){
+//			throw new ValidationException("Cannot approve request with status: "+elig.getStatus());
+//		}
+		
+		elig.setStatus(ProcessStatus.REJECTED.getPersistenceValue());
+		elig.setComment(body.getComment());
+		
+		elig = eligbiligyRepo.save(elig);
+		
+		eventPublisher.publishEvent(new EligibilityApprovedEvent(this, elig));
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Object getAccreditationStatus(UUID currentUserId, List<String> roles) {
+		//AccreditationStatusItem was the return type
 		if(roles.contains(SystemRoles.ORG_GOVT)) {
 			AccreditationQuestionairre q = questionairreRepo.findByForUser(currentUserId)
 					.orElse(null);
@@ -329,21 +491,33 @@ public class AccreditationService {
 				}
 			}
 		}
-		final String rawSql = "select er.status as eligibility, qs.status as qualification" + 
-				" from eligibility_requests er" + 
-				" left join qualifications qs on qs.initiator_user_id = er.initiator_user_id" + 
+		final String rawSql = "select er.status as eligibility, qs.status as qualification" +
+				" from eligibility_requests er" +
+				" left join qualifications qs on qs.initiator_user_id = er.initiator_user_id" +
 				" where er.initiator_user_id = :userId";
-		
+
+//		final String rawSql = "select er.status as eligibility, qs.status as qualification" +
+//				" from eligibility_requests er" +
+//				" left join qualifications qs on qs.initiator_user_id = er.initiator_user_id" +
+//				" where er.initiator_user_id = :userId order by er.last_modified_date desc
+
 		Tuple result;
+		List<Tuple> temp;
 		
 		try {
-			result = (Tuple) em.createNativeQuery(rawSql, Tuple.class)
-					.setParameter("userId", currentUserId)
-					.getSingleResult();
+			temp = em.createNativeQuery(rawSql, Tuple.class)
+					.setParameter("userId", currentUserId).getResultList();
+					//.getSingleResult();
 		}
 		catch(NoResultException ex) {
 			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue(), true);	
 		}
+		if (temp.isEmpty()) {
+			return new AccreditationStatusItem(false, ProcessStatus.NOT_INITIATED.getPersistenceValue(), ProcessStatus.NOT_INITIATED.getPersistenceValue(), true);
+		}
+		
+		//return temp.get(temp.size()-1);
+		result = temp.get(temp.size()-1);
 		
 		String qualificationStatus = result.get("qualification", String.class);
 		if(qualificationStatus == null) {
@@ -394,15 +568,44 @@ public class AccreditationService {
 		return processMeta.getOwner();
 	}
 	
-	public void updateQualificationStatus(UUID id, ProcessStatus status) {
+	public void updateQualificationStatus(UUID id, QualificationItem body) {
+		//ProcessStatus status, Date expiryDate, String comment, ProcessStatus subStatus) {
 		Qualification q = qualificationRepo.findById(id)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
-		
-		q.setStatus(status.getPersistenceValue());
+		if (Objects.equal(body.getStatus(), ProcessStatus.MARKED_TO_GM.getPersistenceValue()))
+		{
+			q.setMarkedTo(ProcessStatus.MARKED_TO_GM);
+		}
+		else if (Objects.equal(body.getStatus(), ProcessStatus.MARKED_TO_CEO.getPersistenceValue()))
+		{
+			q.setMarkedTo(ProcessStatus.MARKED_TO_CEO);
+		}else {
+			q.setStatus(ProcessStatus.valueOf( body.getStatus()).getPersistenceValue());
+		}
+		q.setMarkedTo(body.getMarkedTo());
+		q.setExpiryDate(body.getExpiryDate());
+		q.setComment(body.getComment());
+		q.setSubStatus(body.getSubStatus());
 		
 		qualificationRepo.save(q);
 		
+		//TODO - raise event, notify FIP, update accreditation status
+	}
+
+	public void addQualificationReviewUsers(UUID id, QualificationReviewUsersRequest body) {
+		//ProcessStatus status, Date expiryDate, String comment, ProcessStatus subStatus) {
+		Qualification q = qualificationRepo.findById(id)
+				.orElseThrow(() -> new ValidationException("Invalid request ID"));
+
+		q.setReportUsers(body.getReviewUsers());
+//		q.setMarkedTo(body.getMarkedTo());
+//		q.setExpiryDate(body.getExpiryDate());
+//		q.setComment(body.getComment());
+//		q.setSubStatus(body.getSubStatus());
+
+		qualificationRepo.save(q);
+
 		//TODO - raise event, notify FIP, update accreditation status
 	}
 	
@@ -449,8 +652,12 @@ public class AccreditationService {
 			item.setAssigned(userId.equals(q.getAssignee().getId()));
 			item.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
 			item.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
+
+			item.setJvUser(q.getForUser().getJvUser());
+			item.setJv(q.getForUser().isAvailableAsJv());
+
 			item.setStatus(q.getStatus());
-			
+			item.setData(q.getData());
 			dtos.add(item);
 		});
 		
@@ -465,7 +672,10 @@ public class AccreditationService {
 		dto.setAssigned(userId.equals(q.getAssignee().getId()));
 		dto.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
 		dto.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
-		
+
+		dto.setJvUser(q.getForUser().getJvUser());
+		dto.setJv(q.getForUser().isAvailableAsJv());
+
 		dto.setStatus(q.getStatus());
 		dto.setTemplate(q.getTemplate());
 		dto.setData(q.getData());
@@ -483,7 +693,7 @@ public class AccreditationService {
 			item.setAssigned(userId.equals(q.getAssignee().getId()));
 			item.setForUser(new UserLookupItem(q.getForUser().getId(), q.getForUser().getFullName()));
 			item.setAssignee(new UserLookupItem(q.getAssignee().getId(), q.getAssignee().getFullName()));
-			
+			item.setStatus(q.getStatus());
 			dtos.add(item);
 		});
 		

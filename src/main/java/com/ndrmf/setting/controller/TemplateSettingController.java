@@ -10,9 +10,11 @@ import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
+import com.ndrmf.common.AuthPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,7 @@ import com.ndrmf.setting.dto.AddSectionTemplateRequest;
 import com.ndrmf.setting.dto.ProcessTemplateItem;
 import com.ndrmf.setting.dto.ProcessTypeWithSectionsItem;
 import com.ndrmf.setting.dto.UpdateProcessMetaRequest;
+import com.ndrmf.setting.dto.UpdateSectionTemplateRequest;
 import com.ndrmf.setting.service.TemplateService;
 import com.ndrmf.util.enums.ProcessType;
 
@@ -77,6 +80,13 @@ public class TemplateSettingController {
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section Template added successfully"), HttpStatus.CREATED);
 	}
 	
+	@PutMapping("/section/{sectionId}/template/{templateId}/update")
+	public ResponseEntity<ApiResponse> updateTemplateForSection(@PathVariable(name = "sectionId", required = true) UUID sectionId, 
+			@PathVariable(name = "templateId", required = true) UUID templateId, @RequestBody @Valid UpdateSectionTemplateRequest body){
+		templateService.updateTemplateForSection(sectionId, templateId, body);
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section Template updated successfully"), HttpStatus.OK);
+	}
+	
 	@PostMapping("/process/{processType}/sub-process-type/add")
 	public ResponseEntity<Map<String, String>> addSubProcessType(@PathVariable(name = "processType", required = true) ProcessType processType,
 			@RequestParam(name = "name", required = true) String name){
@@ -91,5 +101,13 @@ public class TemplateSettingController {
 	@GetMapping("/process/{processType}/sub-process-type")
 	public ResponseEntity<Set<String>> getSubProcessTypes(@PathVariable(name = "processType", required = true) ProcessType processType){
 		return new ResponseEntity<>(templateService.getSubProcessTypesForProcess(processType), HttpStatus.OK);
+	}
+
+	@GetMapping("/processowner/get")
+	public ResponseEntity<List<String>> getProcessTypesByOwner(@AuthenticationPrincipal AuthPrincipal principal){
+//		List<String> types = Stream.of(ProcessType.values())
+//				.map(ProcessType::name)
+//				.collect(Collectors.toList());
+		return new ResponseEntity<>(templateService.getProcessTypesByOwner(principal), HttpStatus.OK);
 	}
 }

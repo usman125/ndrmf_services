@@ -1,6 +1,8 @@
 package com.ndrmf.engine.model;
 
+
 import javax.persistence.Entity;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -8,15 +10,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.ndrmf.common.File;
+import com.ndrmf.common.rFile;
+import com.ndrmf.config.audit.Auditable;
 
 @Entity
 @Table(name = "project_proposal_attachments")
-public class ProjectProposalAttachment {
+public class ProjectProposalAttachment extends Auditable<String> {
 	private long id;
 	private ProjectProposal proposalRef;
-	private File fileRef;
+	private rFile fileRef;
 	private String stage;
+	private byte[] picByte;
+	private String gmMarkingStatus;	//true in case of offer letter.
+	private String fipMarkingStatus;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -38,10 +44,10 @@ public class ProjectProposalAttachment {
 	
 	@ManyToOne
 	@JoinColumn(name = "file_id")
-	public File getFileRef() {
+	public rFile getFileRef() {
 		return fileRef;
 	}
-	public void setFileRef(File fileRef) {
+	public void setFileRef(rFile fileRef) {
 		this.fileRef = fileRef;
 	}
 	
@@ -51,4 +57,25 @@ public class ProjectProposalAttachment {
 	public void setStage(String stage) {
 		this.stage = stage;
 	}
+	
+	public String getGmMarkingStatus() {
+		return gmMarkingStatus;
+	}
+	public void setGmMarkingStatus(String gmMarkingStatus) {
+		this.gmMarkingStatus = gmMarkingStatus;
+	}
+	public String getFipMarkingStatus() {
+		return fipMarkingStatus;
+	}
+	public void setFipMarkingStatus(String fipMarkingStatus) {
+		this.fipMarkingStatus = fipMarkingStatus;
+	}
+
+	public byte[] getPicByte() {
+		return picByte;
+	}
+	public void setPicByte(byte[] picByte) {
+		this.picByte = picByte;
+	}
+
 }

@@ -21,13 +21,18 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 			+ "LEFT JOIN ea.sections eas "
 			+ "LEFT JOIN eas.sme eassme "
 			+ "LEFT JOIN p.gia pgia "
+			+ "LEFT JOIN pgia.assignee pgiaassignee "
 			+ "LEFT JOIN pgia.reviews giareveiws "
 			+ "LEFT JOIN giareveiws.assignee giareviewassignee "
 			+ "WHERE (po.id = :userId OR ib.id = :userId OR assig.id = :userId "
 			+ "OR eassme.id = :userId OR pssme.id = :userId "
-			+ "OR giareviewassignee.id = :userId) "
+			+ "OR giareviewassignee.id = :userId "
+			+ "OR pgiaassignee.id = :userId) "
 			+ "AND p.status = :status")
-	List<ProjectProposal> findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(@Param("userId") UUID userId, @Param("status") String status);
+	List<ProjectProposal> findRequestsForOwnerOrInitiatorOrDMPAMOrSMEByStatus(
+			@Param("userId") UUID userId,
+			@Param("status") String status
+	);
 	
 	@Query(value = "SELECT DISTINCT p FROM ProjectProposal p "
 			+ "JOIN p.processOwner po "
@@ -40,13 +45,24 @@ public interface ProjectProposalRepository extends JpaRepository<ProjectProposal
 			+ "LEFT JOIN ea.sections eas "
 			+ "LEFT JOIN eas.sme eassme "
 			+ "LEFT JOIN p.gia pgia "
+			+ "LEFT JOIN pgia.assignee pgiaassignee "
 			+ "LEFT JOIN pgia.reviews giareveiws "
 			+ "LEFT JOIN giareveiws.assignee giareviewassignee "
 			+ "WHERE po.id = :userId OR ib.id = :userId "
 			+ "OR assig.id = :userId OR eassme.id = :userId OR pssme.id = :userId "
-			+ "OR giareviewassignee.id = :userId")
-	List<ProjectProposal> findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(@Param("userId") UUID userId);
+			+ "OR giareviewassignee.id = :userId "
+			+ "OR pgiaassignee.id = :userId")
+	List<ProjectProposal> findAllRequestsForOwnerOrInitiatorOrDMPAMOrSME(
+			@Param("userId") UUID userId
+	);
 	
 	@Query(value = "SELECT p FROM ProjectProposal p WHERE p.status = :status")
-	List<ProjectProposal> findAllRequestsByStatus(@Param("status") String status);
+	List<ProjectProposal> findAllRequestsByStatus(
+			@Param("status") String status
+	);
+
+	@Query(value = "SELECT p FROM ProjectProposal p WHERE p.status = 'GIA' "
+			+ "OR p.status = 'Checklist to FIP' OR p.status = 'Grant Disbursment' "
+			+ "OR p.status = 'QPR'")
+	List<ProjectProposal> findAllGiaAndAboveRequests();
 }

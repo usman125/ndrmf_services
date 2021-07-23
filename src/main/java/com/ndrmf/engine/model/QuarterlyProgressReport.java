@@ -32,6 +32,7 @@ public class QuarterlyProgressReport extends Auditable<String> {
 	private String status;
 	private ProjectProposal proposalRef;
 	private List<QuarterlyProgressReportSection> sections;
+	private String assignedComments;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -103,5 +104,13 @@ public class QuarterlyProgressReport extends Auditable<String> {
 	}
 	public void setSubmittedAt(LocalDate submittedAt) {
 		this.submittedAt = submittedAt;
+	}
+
+	public String getAssignedComments() {
+		return assignedComments;
+	}
+
+	public void setAssignedComments(String assignedComments) {
+		this.assignedComments = assignedComments;
 	}
 }

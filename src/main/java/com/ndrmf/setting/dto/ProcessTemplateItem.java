@@ -88,5 +88,6 @@ public class ProcessTemplateItem {
 		public void setId(UUID id) {
 			this.id = id;
 		}
+
 	}
 }

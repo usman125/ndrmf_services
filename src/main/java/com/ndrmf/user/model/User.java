@@ -26,15 +26,38 @@ public class User extends Auditable<String> implements UserDetails{
     private String lastName;
     private String email;
 	private boolean enabled;
+
+	private String entityName;
+	private String entityNature;
+	private String entityType;
+	private String location;
+	private String province;
+	private String address;
+	private String otherAddress;
+	private String otherAccreditation;
 	
 	private Organisation org;
 	private List<Role> roles;
 	
 	private Department department;
 	private Designation designation;
-	
+
+	private String phoneNumber;
+
 	private boolean isSAP;
 	private boolean availableAsJv;
+	private String jvUser;
+	//private List<Notification> notifications;
+
+	/*
+	 * public List<Notification> getNotifications() { return notifications; }
+	 * 
+	 * public void setNotifications(List<Notification> notifications) {
+	 * this.notifications = notifications; }
+	 * 
+	 * public void addNotificaitons(List<Notification> notifications) {
+	 * this.notifications.addAll(notifications); }
+	 */
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -157,6 +180,11 @@ public class User extends Auditable<String> implements UserDetails{
 		}
 		this.roles.add(role);
 	}
+	
+	public void replaceRole(Role role) {
+		this.roles = new ArrayList<>();
+		this.roles.add(role);
+	}
 
 	@ManyToOne
 	@JoinColumn(name="org_id", nullable = false)
@@ -203,5 +231,83 @@ public class User extends Auditable<String> implements UserDetails{
 
 	public void setAvailableAsJv(boolean availableAsJv) {
 		this.availableAsJv = availableAsJv;
-	} 
+	}
+
+	public String getJvUser() {
+		return jvUser;
+	}
+
+	public void setJvUser(String jvUser) {
+		this.jvUser = jvUser;
+	}
+
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public void setEntityName(String entityName) {
+		this.entityName = entityName;
+	}
+
+	public String getEntityNature() {
+		return entityNature;
+	}
+
+	public String getEntityType() {
+		return entityType;
+	}
+
+	public void setEntityType(String entityType) {
+		this.entityType = entityType;
+	}
+
+	public void setEntityNature(String entityNature) {
+		this.entityNature = entityNature;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
+	public String getProvince() {
+		return province;
+	}
+
+	public void setProvince(String province) {
+		this.province = province;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public void setOtherAddress(String otherAddress) {
+		this.otherAddress = otherAddress;
+	}
+
+	public String getOtherAddress() {
+		return otherAddress;
+	}
+
+	public void setOtherAccreditation(String otherAccreditation) {
+		this.otherAccreditation = otherAccreditation;
+	}
+
+	public String getOtherAccreditation() {
+		return otherAccreditation;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getPhoneNumber(){ return phoneNumber;}
 }

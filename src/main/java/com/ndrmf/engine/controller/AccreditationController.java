@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
+import com.ndrmf.engine.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,19 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
-import com.ndrmf.engine.dto.AccreditationQuestionairreItem;
-import com.ndrmf.engine.dto.AccreditationQuestionairreListItem;
-import com.ndrmf.engine.dto.AccreditationStatusItem;
-import com.ndrmf.engine.dto.AddQualificationSectionReviewRequest;
-import com.ndrmf.engine.dto.AddQualificationTaskRequest;
-import com.ndrmf.engine.dto.EligibilityItem;
-import com.ndrmf.engine.dto.EligibilityListItem;
-import com.ndrmf.engine.dto.EligibilityRequest;
-import com.ndrmf.engine.dto.QualificationItem;
-import com.ndrmf.engine.dto.QualificationListItem;
-import com.ndrmf.engine.dto.QualificationSectionRequest;
-import com.ndrmf.engine.dto.ReassignQualificationRequest;
-import com.ndrmf.engine.dto.SubmitAccreditationQuestionairreRequest;
 import com.ndrmf.engine.service.AccreditationService;
 import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -54,8 +42,9 @@ public class AccreditationController {
 	
 	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
 	@GetMapping("/status")
-	public ResponseEntity<AccreditationStatusItem> getAccreditationStatus(@AuthenticationPrincipal AuthPrincipal principal){
-		return new ResponseEntity<AccreditationStatusItem>(accreditationService.getAccreditationStatus(principal.getUserId(), principal.getRoles()), HttpStatus.OK);
+	public ResponseEntity<Object> getAccreditationStatus(@AuthenticationPrincipal AuthPrincipal principal){
+		//return type was AccreditationStatusItem
+		return new ResponseEntity<Object>(accreditationService.getAccreditationStatus(principal.getUserId(), principal.getRoles()), HttpStatus.OK);
 	}
 	
 	@GetMapping("/eligibility")
@@ -64,8 +53,8 @@ public class AccreditationController {
 	}
 	
 	@GetMapping("/eligibility/{id}")
-	public ResponseEntity<EligibilityItem> getEligibilityRequest(@PathVariable(name = "id", required = true) UUID id){
-		return new ResponseEntity<EligibilityItem>(accreditationService.getEligibilityRequest(id), HttpStatus.OK);
+	public ResponseEntity<EligibilityItem> getEligibilityRequest(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id){
+		return new ResponseEntity<EligibilityItem>(accreditationService.getEligibilityRequest(id, principal.getUserId()), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)
@@ -76,11 +65,28 @@ public class AccreditationController {
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request added successfully."), HttpStatus.CREATED);
 	}
 	
+	@RolesAllowed(SystemRoles.ORG_FIP)
+	@PutMapping("/eligibility/{eligId}")
+	public ResponseEntity<ApiResponse> updateEligibility(@AuthenticationPrincipal AuthPrincipal principal, @RequestBody @Valid EligibilityRequest body,
+			@PathVariable(name = "eligId", required = true) UUID eligId){
+		accreditationService.updateEligibility(principal.getUserId(), eligId, body);
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request updated successfully."), HttpStatus.OK);
+	}
+	
 	@PostMapping("/eligibility/{id}/approve")
 	public ResponseEntity<ApiResponse> approveEligibility(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id){
 		accreditationService.approveEligibilityRequest(id, principal.getUserId());
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request approved successfully."), HttpStatus.ACCEPTED);
+	}
+	
+	@PostMapping("/eligibility/{id}/reject")
+	public ResponseEntity<ApiResponse> rejectEligibility(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id,
+			@RequestBody @Valid Comment body){
+		accreditationService.rejectEligibilityRequest(id, principal.getUserId(), body);
+		
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request rejected successfully."), HttpStatus.OK);
 	}
 	
 	@GetMapping("/qualification")
@@ -90,16 +96,22 @@ public class AccreditationController {
 	
 	@PutMapping("/qualification/{id}")
 	public ResponseEntity<ApiResponse> updateQualificationStatus(@PathVariable(name = "id", required = true) UUID id,
-			@RequestParam(name = "status", required = true) ProcessStatus status){
+			@RequestBody(required = false) @Valid QualificationItem body){
 		
-		accreditationService.updateQualificationStatus(id, status);
-		
+		accreditationService.updateQualificationStatus(id, body);
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification status updated successfully."), HttpStatus.CREATED);
+	}
+
+	@PutMapping("/qualification/{id}/addReviewUsers")
+	public ResponseEntity<ApiResponse> addQualificationReviewUsers(@PathVariable(name = "id", required = true) UUID id,
+																 @RequestBody(required = false) @Valid QualificationReviewUsersRequest body){
+		accreditationService.addQualificationReviewUsers(id, body);
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification review users added successfully."), HttpStatus.OK);
 	}
 	
 	@GetMapping("/qualification/{id}")
-	public ResponseEntity<QualificationItem> getQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id){
-		return new ResponseEntity<QualificationItem>(accreditationService.getQualificationRequest(id, principal.getUserId()), HttpStatus.OK);
+	public ResponseEntity<EligPlusQual> getQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal, @PathVariable(name = "id", required = true) UUID id){
+		return new ResponseEntity<EligPlusQual>(accreditationService.getQualificationRequest(id, principal.getUserId()), HttpStatus.OK);
 	}
 	
 	@RolesAllowed(SystemRoles.ORG_FIP)

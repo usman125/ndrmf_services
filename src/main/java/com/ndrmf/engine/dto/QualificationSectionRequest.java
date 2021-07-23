@@ -6,6 +6,7 @@ public class QualificationSectionRequest {
 	private UUID id;
 	private String data;
 
+
 	public UUID getId() {
 		return id;
 	}

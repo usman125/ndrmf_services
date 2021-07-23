@@ -1,6 +1,6 @@
 package com.ndrmf.engine.dto;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,24 +9,27 @@ import java.util.UUID;
 import com.ndrmf.user.dto.UserLookupItem;
 
 public class SubProjectDocumentItem {
-	private LocalDate startDate;
-	private LocalDate endDate;
+	private Date startDate;
+	private Date endDate;
 	private String status;
 	private List<SubProjectDocumentSectionItem> sections;
+	private List<SubProjectDocumentDmPamTasksItem> dmpamTasks;
+	private String docName;
+	private String docNumber;
 
-	public LocalDate getStartDate() {
+	public Date getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(LocalDate startDate) {
+	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
 
-	public LocalDate getEndDate() {
+	public Date getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(LocalDate endDate) {
+	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
 
@@ -54,6 +57,37 @@ public class SubProjectDocumentItem {
 		this.sections.add(section);
 	}
 
+	public List<SubProjectDocumentDmPamTasksItem> getDmpamTasks() {
+		return dmpamTasks;
+	}
+
+	public void setDmpamTasks(List<SubProjectDocumentDmPamTasksItem> dmpamTasks) {
+		this.dmpamTasks = dmpamTasks;
+	}
+	public void addTask(SubProjectDocumentDmPamTasksItem task) {
+		if(this.dmpamTasks == null) {
+			this.dmpamTasks = new ArrayList<>();
+		}
+
+		this.dmpamTasks.add(task);
+	}
+
+	public String getDocName() {
+		return docName;
+	}
+
+	public void setDocName(String docName) {
+		this.docName = docName;
+	}
+
+	public String getDocNumber() {
+		return docNumber;
+	}
+
+	public void setDocNumber(String docNumber) {
+		this.docNumber = docNumber;
+	}
+
 	public static class SubProjectDocumentSectionItem {
 		private UUID id;
 		private String templateType;
@@ -64,6 +98,9 @@ public class SubProjectDocumentItem {
 		private String status;
 		private String comments;
 		private String reviewStatus;
+		private String sectionName;
+		private String reassignmentStatus;
+		private String reassignmentComments;
 		private Date reviewCompletedOn;
 		
 		public UUID getId() {
@@ -125,6 +162,30 @@ public class SubProjectDocumentItem {
 		}
 		public void setReviewCompletedOn(Date reviewCompletedOn) {
 			this.reviewCompletedOn = reviewCompletedOn;
+		}
+
+		public String getSectionName() {
+			return sectionName;
+		}
+
+		public void setSectionName(String sectionName) {
+			this.sectionName = sectionName;
+		}
+
+		public void setReassignmentStatus(String reassignmentStatus) {
+			this.reassignmentStatus = reassignmentStatus;
+		}
+
+		public String getReassignmentStatus() {
+			return reassignmentStatus;
+		}
+
+		public void setReassignmentComments(String reassignmentComments) {
+			this.reassignmentComments = reassignmentComments;
+		}
+
+		public String getReassignmentComments() {
+			return reassignmentComments;
 		}
 	}
 }

@@ -1,25 +1,23 @@
 package com.ndrmf.engine.service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import com.ndrmf.engine.dto.*;
+import com.ndrmf.engine.model.*;
+import com.ndrmf.engine.repository.*;
+import com.ndrmf.user.dto.QprUserLookUpItem;
+import com.ndrmf.user.model.Role;
+import com.ndrmf.user.repository.UserRepository;
+import com.ndrmf.util.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.ndrmf.common.AuthPrincipal;
-import com.ndrmf.engine.dto.SectionItem;
 import com.ndrmf.engine.dto.qpr.QPRSectionRequest;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportItem;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportListItem;
-import com.ndrmf.engine.model.QuarterlyProgressReport;
-import com.ndrmf.engine.model.QuarterlyProgressReportSection;
-import com.ndrmf.engine.model.QuarterlyProgressReportSectionReview;
-import com.ndrmf.engine.model.QuarterlyProgressReportTask;
-import com.ndrmf.engine.repository.ProjectProposalRepository;
-import com.ndrmf.engine.repository.QuarterlyProgressReportRepository;
 import com.ndrmf.engine.repository.qpr.QPRTaskRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.notification.dto.TaskItem;
@@ -28,10 +26,8 @@ import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.util.constants.SystemRoles;
-import com.ndrmf.util.enums.FormAction;
-import com.ndrmf.util.enums.ProcessStatus;
-import com.ndrmf.util.enums.ProcessType;
-import com.ndrmf.util.enums.ReassignmentStatus;
+
+import javax.transaction.Transactional;
 
 @Service
 public class QPRService {
@@ -40,19 +36,40 @@ public class QPRService {
 	@Autowired private ProcessTypeRepository processTypeRepo;
 	@Autowired private QuarterlyProgressReportRepository qprRepo;
 	@Autowired private QPRTaskRepository qprTasksRepo;
+	@Autowired private UserRepository userRepository;
+	@Autowired private QuarterlyProgressReportSectionRepository quarterlyProgressReportSectionRepository;
+	@Autowired private QuarterlyProgressReportTaskRepository quarterlyProgressReportTaskRepository;
+	@Autowired private QuarterlyProgressReportTaskReviewRepository qprTaskReviewRepo;
 	
-	public UUID commenceQPR(UUID proposalId) {
+	public UUID commenceQPR(UUID proposalId, DateAndCommentBody body) {
 		com.ndrmf.setting.model.ProcessType  processType = processTypeRepo.findById(ProcessType.QPR.toString())
 				.orElseThrow(() -> new RuntimeException("QPR Process Type is undefined in the system."));
 		
 		if(processType.getOwner() == null) {
 			new RuntimeException("Process owner undefined for QPR Process");
 		}
-		
+
+		ProjectProposal p;
+		p = projProposalRepo.getOne(proposalId);
+
+		List<QuarterlyProgressReport> prevQprs;
+		prevQprs = qprRepo.getQuarterlyProgressReportsByProposalId(proposalId);
+
 		QuarterlyProgressReport qpr = new QuarterlyProgressReport();
-		qpr.setQuarter(1);
-		qpr.setDueDate(LocalDate.now().withMonth(3).withDayOfMonth(31));
-		qpr.setProposalRef(projProposalRepo.getOne(proposalId));
+
+		if (prevQprs != null && prevQprs.size() > 0){
+			qpr.setQuarter(prevQprs.get(prevQprs.size() - 1).getQuarter() + 1);
+//			qpr.setDueDate(prevQprs.get(prevQprs.size() - 1).getDueDate().plusMonths(3));
+			qpr.setDueDate(body.getDueDate());
+			qpr.setAssignedComments(body.getComments());
+		}else{
+			qpr.setQuarter(1);
+//			qpr.setDueDate(LocalDate.now().withMonth(3).withDayOfMonth(31).plusDays(10));
+			qpr.setDueDate(body.getDueDate());
+			qpr.setAssignedComments(body.getComments());
+		}
+
+		qpr.setProposalRef(p);
 		qpr.setProcessOwner(processType.getOwner());
 		qpr.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
 		
@@ -81,9 +98,10 @@ public class QPRService {
 	public List<QuarterlyProgressReportListItem> getQPRRequests(AuthPrincipal principal){
 		List<QuarterlyProgressReport> qprs = new ArrayList<>();
 		
-		if(principal.getRoles().contains(SystemRoles.ORG_FIP)) {
+//		if(principal.getRoles().contains(SystemRoles.ORG_FIP)
+//		|| principal.getRoles().contains(SystemRoles.PROCESS_OWNER)) {
 			qprs = qprRepo.getQuarterlyProgressReportsForFIP(principal.getUserId());
-		}
+//		}
 		
 		List<QuarterlyProgressReportListItem> dtos = new ArrayList<>();
 		qprs.forEach(r -> {
@@ -113,6 +131,10 @@ public class QPRService {
 		dto.setQuarter(qpr.getQuarter());
 		dto.setStatus(qpr.getStatus());
 		dto.setSubmittedAt(qpr.getSubmittedAt());
+		dto.setProposalRef(qpr.getProposalRef().getId());
+		dto.setImplementationPlan(qpr.getProposalRef().getPip().getImplementationPlan());
+
+		dto.setAssignedComments(qpr.getAssignedComments());
 		
 		if(qpr.getProposalRef().getInitiatedBy().getId().equals(principal.getUserId())) {
 			List<QuarterlyProgressReportTask> reassignmentComments = 
@@ -130,7 +152,10 @@ public class QPRService {
 				dto.setReassignmentTask(ti);
 			}
 		}
-		
+
+//		List<QuarterlyProgressReportTask> qprtl = quarterlyProgressReportTaskRepository.findTasksForQprWithNoSection(qpr.getId());
+				List<QuarterlyProgressReportTask> qprtl = qprTasksRepo.findTasksForQprWithNoSection(qpr.getId());
+
 		qpr.getSections().forEach(qs -> {
 			SectionItem section = new SectionItem();
 			section.setAssigned(qs.getSme().getId().equals(principal.getUserId()));
@@ -143,7 +168,7 @@ public class QPRService {
 			section.setReviewStatus(qs.getReviewStatus());
 			section.setReviewCompletedDate(qs.getReviewCompletedOn());
 			section.setReassignmentStatus(qs.getReassignmentStatus());
-			
+			section.setQprId(qpr.getId());
 			List<QuarterlyProgressReportTask> tasks = qprTasksRepo.findTasksForSection(qs.getId(), PageRequest.of(0, 1));
 
 			if (tasks != null && tasks.size() > 0) {
@@ -151,23 +176,88 @@ public class QPRService {
 			}
 			
 			if (qs.getReviews() != null && qs.getReviews().size() > 0) {
-				QuarterlyProgressReportSectionReview latestReview = qs.getReviews().get(qs.getReviews().size() - 1);
-
-				section.setReview(latestReview.getCreatedDate(), null, null, latestReview.getStatus(),
-						latestReview.getComments());
-
+				QuarterlyProgressReportSectionReview latestReview;
+				latestReview = qs.getReviews().get(qs.getReviews().size() - 1);
+				section.setReview(
+						latestReview.getCreatedDate(),
+						null,
+						null,
+						latestReview.getStatus(),
+						latestReview.getComments()
+				);
 				qs.getReviews().forEach(r -> {
-					section.addReviewHistory(r.getCreatedDate(), null, null, r.getStatus(), r.getComments());
+					section.addReviewHistory(
+							r.getCreatedDate(),
+							null,
+							null,
+							r.getStatus(), r.getComments()
+					);
 				});
 			}
-			
 			dto.addSection(section);
 		});
-		
+
+		qprtl.forEach(t -> {
+			TaskItem.TaskItemForQpr ti = new TaskItem.TaskItemForQpr();
+
+			ti.setComments(t.getComments());
+			ti.setEndDate(t.getEndDate());
+			ti.setRequestId(t.getQpr().getId());
+			ti.setStartDate(t.getStartDate());
+			ti.setTaskId(t.getId());
+			if (ti.getSectionId() != null){
+				ti.setSectionId(t.getSection().getId());
+			}
+			if (ti.getSectionId() != null){
+				ti.setSectionName(t.getSection().getName());
+			}
+			ti.setStatus(t.getStatus());
+			if(t.getQpr().getProposalRef() != null) {
+				ti.setFipName(t.getQpr().getProposalRef().getInitiatedBy().getFullName());
+			}
+
+			List<String> roles = new ArrayList<>();
+
+			if(t.getAssignee().getRoles() != null) {
+				t.getAssignee().getRoles().forEach(r -> {
+//					Map<String, Object> role = new HashMap<>();
+//					role.put("id", r.getId());
+//					role.put("name", r.getName());
+
+					roles.add(r.getName());
+				});
+
+			}
+
+
+			ti.setAssignee(new QprUserLookUpItem(
+					t.getAssignee().getId(),
+					t.getAssignee().getFullName(),
+					roles,
+					t.getAssignee().getDepartment().getName()
+				)
+			);
+
+			Optional<QuarterlyProgressReportTaskReview> qprtr = qprTaskReviewRepo.findReviewsForTask(t.getId());
+
+			if (qprtr.isPresent()){
+				ti.setOthersDecision(qprtr.get().getDecision());
+				ti.setOthersRemarks(qprtr.get().getComments());
+				ti.setReviewCompletedOn(qprtr.get().getReviewCompletedOn());
+			}
+
+			dto.addTasksForOthers(ti);
+		});
+
+
+		System.out.println(qprtl.size());
+
 		return dto;
 	}
 	
-	public void submitQPRSection(UUID id, UUID userId, QPRSectionRequest body,
+	public void submitQPRSection(
+			UUID id, UUID userId,
+		 	QPRSectionRequest body,
 			FormAction action) {
 		
 		QuarterlyProgressReport qpr = qprRepo.findById(id)
@@ -198,5 +288,133 @@ public class QPRService {
 			// TODO raise event
 			// eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));
 		}
+	}
+
+
+	@Transactional
+	public void addQprSectionTask(UUID sectionId, UUID currentUserId, AddQualificationTaskRequest body) {
+		QuarterlyProgressReportSection section;
+		section = quarterlyProgressReportSectionRepository.findById(sectionId)
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+		if(!section.getQprRef().getProcessOwner().getId().equals(currentUserId)) {
+			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ section.getQprRef().getProcessOwner().getFullName());
+		}
+		QuarterlyProgressReportTask task = new QuarterlyProgressReportTask();
+		task.setStartDate(body.getStartDate());
+		task.setEndDate(body.getEndDate());
+		task.setComments(body.getComments());
+		task.setSection(section);
+		task.setAssignee(section.getSme());
+		task.setStatus(TaskStatus.PENDING.getPersistenceValue());
+		task.setQpr(section.getQprRef());
+		section.setReviewStatus(ReviewStatus.PENDING.getPersistenceValue());
+		section.getQprRef().setStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+		quarterlyProgressReportTaskRepository.save(task);
+
+	}
+
+	@Transactional
+	public void addTasksForQpr(UUID qprId, UUID currentUserId, AddQprTasksRequest body) {
+		QuarterlyProgressReport qpr;
+		qpr = qprRepo.findById(qprId)
+				.orElseThrow(() -> new ValidationException("Invalid QPR ID"));
+		if(!qpr.getProcessOwner().getId().equals(currentUserId)) {
+			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ qpr.getProcessOwner().getFullName());
+		}
+		body.getUsersId().forEach(userId -> {
+
+			Optional<QuarterlyProgressReportTask> oqprt = qprTasksRepo.findTasksForUserWithNoSection(userId);
+
+			if (oqprt.isPresent()){
+				oqprt.get().setStatus(ProcessStatus.PENDING.getPersistenceValue());
+				oqprt.get().setStartDate(body.getStartDate());
+				oqprt.get().setEndDate(body.getEndDate());
+				oqprt.get().setComments(body.getComments());
+			}else{
+				QuarterlyProgressReportTask task = new QuarterlyProgressReportTask();
+				task.setStartDate(body.getStartDate());
+				task.setEndDate(body.getEndDate());
+				task.setComments(body.getComments());
+				task.setAssignee(userRepository.findById(userId).get());
+				task.setStatus(TaskStatus.PENDING.getPersistenceValue());
+				task.setQpr(qpr);
+
+				quarterlyProgressReportTaskRepository.save(task);
+			}
+		});
+
+	}
+
+	@Transactional
+	public void addQprSectionReview(UUID byUserId, UUID sectionId, AddQprSectionReviewRequest body) {
+		QuarterlyProgressReportSection section = quarterlyProgressReportSectionRepository.findById(sectionId)
+				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
+
+		if(!section.getSme().getId().equals(byUserId)) {
+			throw new ValidationException("Only SME can add review for this section. Authorized SME is: " + section.getSme().getFullName());
+		}
+
+		QuarterlyProgressReportSectionReview qprsr = new QuarterlyProgressReportSectionReview();
+		qprsr.setComments(body.getComments());
+		qprsr.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+
+		section.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+		section.setReviewStatus(ReviewStatus.COMPLETED.getPersistenceValue());
+		section.setReviewCompletedOn(new Date());
+		section.addReview(qprsr);
+
+		List<QuarterlyProgressReportTask> tasks = quarterlyProgressReportTaskRepository.findTasksForSectionAndAssignee(byUserId, sectionId);
+
+
+		tasks.forEach(t -> {
+			t.setStatus(TaskStatus.COMPLETED.getPersistenceValue());
+		});
+
+		List<QuarterlyProgressReportTask> peningTasks = quarterlyProgressReportTaskRepository.findTasksForQpr(section.getQprRef().getId());
+
+		System.out.println(peningTasks);
+		System.out.println(peningTasks.size());
+
+		if (peningTasks.stream().anyMatch(r -> r.getStatus() == ProcessStatus.PENDING.getPersistenceValue())){
+			section.getQprRef().setStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+		}else{
+			section.getQprRef().setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
+		}
+	}
+
+	@Transactional
+	public void addQprReviewByDepUser(UUID byUserId, UUID taskId, AddQprTaskReviewRequest body) {
+		QuarterlyProgressReportTask qprt = qprTasksRepo.findById(taskId)
+				.orElseThrow(() -> new ValidationException("Invalid TASK ID"));
+
+		Optional<QuarterlyProgressReportTaskReview> oqprtr = qprTaskReviewRepo.findReviewsForTask(qprt.getId());
+
+		if (oqprtr.isPresent()){
+			oqprtr.get().setDecision(body.getDecision());
+			oqprtr.get().setComments(body.getComments());
+			oqprtr.get().setReviewCompletedOn(new Date());
+		}else{
+			QuarterlyProgressReportTaskReview qprtr = new QuarterlyProgressReportTaskReview();
+			qprtr.setDecision(body.getDecision());
+			qprtr.setComments(body.getComments());
+			qprtr.setQprRef(qprt.getQpr());
+			qprtr.setQprTaskRef(qprt);
+			qprtr.setReviewCompletedOn(new Date());
+			qprTaskReviewRepo.save(qprtr);
+		}
+		qprt.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+	}
+
+	@Transactional
+	public void extendQprTimeline(UUID byUserId, UUID qprId, DateAndCommentBody body) {
+		QuarterlyProgressReport qpr = qprRepo.findById(qprId)
+				.orElseThrow(() -> new ValidationException("Invalid QPR ID"));
+
+
+		qpr.setDueDate(body.getDueDate());
+		qpr.setAssignedComments(body.getComments());
+//		System.out.println(qpr.getDueDate());
+//		System.out.println(body.getDueDate());
+//		System.out.println(qpr.getAssignedComments() + body.getComments());
 	}
 }

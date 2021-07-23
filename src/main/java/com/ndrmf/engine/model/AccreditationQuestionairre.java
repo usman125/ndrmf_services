@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import com.ndrmf.config.audit.Auditable;
 import com.ndrmf.user.model.User;
@@ -22,6 +24,7 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
 @Table(name = "accreditation_questionairres")
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)	//added by yousaf - Test
 public class AccreditationQuestionairre extends Auditable<String>{
 	private UUID id;
 	private User forUser;

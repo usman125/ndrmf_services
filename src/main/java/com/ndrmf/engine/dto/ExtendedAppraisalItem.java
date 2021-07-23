@@ -19,6 +19,8 @@ public class ExtendedAppraisalItem {
 	private String subStatus;
 	private String isMarkedTo;
 	private List<ExtendedAppraisalSectionItem> sections;
+	private String decisionByDm;
+
 	
 	public UUID getId() {
 		return id;
@@ -115,6 +117,14 @@ public class ExtendedAppraisalItem {
 		this.isMarkedTo = isMarkedTo;
 	}
 
+	public String getDecisionByDm() {
+		return decisionByDm;
+	}
+
+	public void setDecisionByDm(String decisionByDm) {
+		this.decisionByDm = decisionByDm;
+	}
+
 	public static class ExtendedAppraisalSectionItem {
 		private UUID id;
 		private String templateType;
@@ -123,6 +133,7 @@ public class ExtendedAppraisalItem {
 		private UserLookupItem sme;
 		private boolean assigned;
 		private String status;
+		private int orderNum;
 		public UUID getId() {
 			return id;
 		}
@@ -164,6 +175,14 @@ public class ExtendedAppraisalItem {
 		}
 		public void setStatus(String status) {
 			this.status = status;
+		}
+
+		public int getOrderNum() {
+			return orderNum;
+		}
+
+		public void setOrderNum(int orderNum) {
+			this.orderNum = orderNum;
 		}
 	}
 }

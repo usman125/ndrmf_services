@@ -34,6 +34,7 @@ public class SectionTemplate extends Auditable<String> {
 	private String template;
 	private boolean enabled;
 	
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(columnDefinition = "uuid", updatable = false)
@@ -89,4 +90,5 @@ public class SectionTemplate extends Auditable<String> {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+	
 }

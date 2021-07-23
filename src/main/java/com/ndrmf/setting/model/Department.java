@@ -11,25 +11,28 @@ import javax.validation.constraints.Size;
 
 import com.ndrmf.config.audit.Auditable;
 
+import java.io.Serializable;
+
 @Entity
 @Table(name = "departments")
-public class Department extends Auditable<String> {
-	private int id;
-	private String name;
-	private boolean enabled;
-	
+public class Department extends Auditable<String> implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+
+	@NotBlank
+    @Size(max = 100)
+    @Column(unique = true)
+	private String name;
+	private boolean enabled;
+
 	public int getId() {
 		return id;
 	}
 	public void setId(int id) {
 		this.id = id;
 	}
-	
-	@NotBlank
-    @Size(max = 100)
-    @Column(unique = true)
+
 	public String getName() {
 		return name;
 	}

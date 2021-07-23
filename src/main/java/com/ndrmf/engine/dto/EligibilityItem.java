@@ -1,6 +1,7 @@
 package com.ndrmf.engine.dto;
 
 import java.util.Date;
+import java.util.List;
 
 import com.ndrmf.user.dto.UserLookupItem;
 
@@ -11,7 +12,15 @@ public class EligibilityItem {
 	private String template;
 	private String data;
 	private String status;
+	private String comment;
+	private List<FipThematicAreasListItem> fipThematicAreasListItem;
 	
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 	public UserLookupItem getInitiatedBy() {
 		return initiatedBy;
 	}
@@ -47,5 +56,13 @@ public class EligibilityItem {
 	}
 	public void setSubmittedAt(Date submittedAt) {
 		this.submittedAt = submittedAt;
+	}
+
+	public List<FipThematicAreasListItem> getFipThematicAreasListItem() {
+		return fipThematicAreasListItem;
+	}
+
+	public void setFipThematicAreasListItem(List<FipThematicAreasListItem> fipThematicAreasListItem) {
+		this.fipThematicAreasListItem = fipThematicAreasListItem;
 	}
 }

@@ -1,5 +1,6 @@
 package com.ndrmf.engine.model;
 
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -33,6 +34,8 @@ public class Eligibility extends Auditable<String>{
 	private String template;
 	private String data;
 	private String status;
+	private String comment;
+	private Date CreatedDate;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -85,5 +88,21 @@ public class Eligibility extends Auditable<String>{
 	}
 	public void setData(String data) {
 		this.data = data;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	@Override
+	public Date getCreatedDate() {
+		return super.getCreatedDate();
+	}
+
+	@Override
+	public void setCreatedDate(Date createdDate) {
+		super.setCreatedDate(createdDate);
 	}
 }

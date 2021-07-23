@@ -10,6 +10,9 @@ public class AccreditationQuestionairreListItem {
 	private UserLookupItem assignee;
 	private boolean assigned;
 	private String status;
+	private String data;
+	private boolean isJv;
+	private String jvUser;
 	
 	public UUID getId() {
 		return id;
@@ -41,4 +44,30 @@ public class AccreditationQuestionairreListItem {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public String getData() {
+		return data;
+	}
+
+	public void setData(String data) {
+		this.data = data;
+	}
+
+	public boolean isJv() {
+		return isJv;
+	}
+
+	public void setJv(boolean jv) {
+		isJv = jv;
+	}
+
+	public String getJvUser() {
+		return jvUser;
+	}
+
+	public void setJvUser(String jvUser) {
+		this.jvUser = jvUser;
+	}
+
+
 }

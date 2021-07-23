@@ -2,11 +2,13 @@ package com.ndrmf.setting.dto;
 
 import java.util.UUID;
 
+
 public class CostHeadItem {
 	private UUID id;
 	private String name;
 	private String glCode;
 	private boolean enabled;
+	private String data;
 	
 	public UUID getId() {
 		return id;
@@ -31,5 +33,11 @@ public class CostHeadItem {
 	}
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
 	}
 }

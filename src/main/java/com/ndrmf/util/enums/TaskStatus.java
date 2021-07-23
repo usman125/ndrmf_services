@@ -1,7 +1,12 @@
 package com.ndrmf.util.enums;
 
 public enum TaskStatus {
-	PENDING("Pending"), COMPLETED("Completed"), ASSIGNED("Assigned");
+	PENDING("Pending"),
+	COMPLETED("Completed"),
+	UNSATISFACTORY("Unsatisfactory"),
+	PARTIAL_UNSATISFACTORY("Partial Satisfactory"),
+	SATISFACTORY("Satisfactory"),
+	ASSIGNED("Assigned");
 	
 	private final String persistenceValue;
 	

@@ -1,6 +1,7 @@
 package com.ndrmf.engine.repository.qpr;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -22,4 +23,10 @@ public interface QPRTaskRepository extends JpaRepository<QuarterlyProgressReport
 	
 	@Query(value = "SELECT t FROM QuarterlyProgressReportTask t JOIN t.section s WHERE s.id = :sectionId ORDER BY t.createdDate DESC")
 	List<QuarterlyProgressReportTask> findTasksForSection(@Param("sectionId") UUID sectionId, Pageable pageable);
+
+	@Query(value = "SELECT t FROM QuarterlyProgressReportTask t JOIN t.qpr qpr WHERE qpr.id = :qprId AND t.section = null")
+	List<QuarterlyProgressReportTask> findTasksForQprWithNoSection(@Param("qprId") UUID qprId);
+
+	@Query(value = "SELECT t FROM QuarterlyProgressReportTask t JOIN t.assignee u WHERE u.id = :userId AND t.section = null")
+	Optional<QuarterlyProgressReportTask> findTasksForUserWithNoSection(@Param("userId") UUID userId);
 }

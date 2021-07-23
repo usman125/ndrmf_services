@@ -6,26 +6,20 @@ import java.util.UUID;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 
+import com.ndrmf.engine.dto.*;
+import com.ndrmf.util.enums.ProcessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
-import com.ndrmf.engine.dto.AddSubProjectSectionReviewRequest;
-import com.ndrmf.engine.dto.SubProjectDocumentItem;
-import com.ndrmf.engine.dto.SubProjectDocumentListItem;
-import com.ndrmf.engine.dto.SubProjectDocumentSectionRequest;
 import com.ndrmf.engine.service.ImplementationService;
 import com.ndrmf.util.constants.SystemRoles;
+
+import com.ndrmf.engine.service.CommentService;
 
 import io.swagger.annotations.Api;
 
@@ -34,14 +28,16 @@ import io.swagger.annotations.Api;
 @RequestMapping("/implementation")
 public class ImplementationController {
 	@Autowired private ImplementationService implService;
+	@Autowired private CommentService commentService;
 	
 	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
 	@PostMapping("/{proposalId}/sub-proj-doc/commence")
-	public ResponseEntity<ApiResponse> commenceSubProjectDocument(@AuthenticationPrincipal AuthPrincipal principal,
+	public ResponseEntity<ApiResponse> commenceSubProjectDocument(
+			@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestBody @Valid CommenceSubProjectDocumentBody body,
 			@PathVariable(name = "proposalId", required = true) UUID proposalId){
 		
-		implService.commenceSubProjectDocument(proposalId);
-	
+		implService.commenceSubProjectDocument(proposalId, body);
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Process Commenced Successfully."), HttpStatus.CREATED);
 	}
 	
@@ -89,5 +85,74 @@ public class ImplementationController {
 		implService.submitSubProjectDocumentSectionReview(sectionId, body);
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
+	}
+
+	@PostMapping("/sub-proj-doc/{requestId}/assign/dmpam/tasks")
+	public ResponseEntity<ApiResponse> addSubProjectDmPamTasks(@AuthenticationPrincipal AuthPrincipal principal,
+																  @PathVariable(name = "requestId", required = true) UUID requestId,
+																  @RequestBody @Valid AddQprTasksRequest body){
+
+		implService.addSubProjectDmPamTasks(principal, requestId, body);
+
+		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
+	}
+
+	@PostMapping("/sub-proj-doc/{requestId}/dmpam/assign/reviews")
+	public ResponseEntity<ApiResponse> assignUserReviewsByDmpam(@AuthenticationPrincipal AuthPrincipal principal,
+															   @PathVariable(name = "requestId", required = true) UUID requestId,
+															   @RequestBody @Valid AddQprTasksRequest body){
+
+		implService.assignUserReviewsByDmpam(principal, requestId, body);
+
+		return new ResponseEntity<>(new ApiResponse(true, "Review added successfully."), HttpStatus.OK);
+	}
+
+	@GetMapping("/sub-proj-doc/dmpam/tasks")
+	public ResponseEntity<List<SubProjectDocumentDmPamTasksListItem>> getSubProjectDmPamTasks(@AuthenticationPrincipal AuthPrincipal principal){
+		return new ResponseEntity<>(implService.getSubProjectDmPamTasks(principal), HttpStatus.OK);
+	}
+
+	@GetMapping("/sub-proj-doc/user/tasks")
+	public ResponseEntity<List<SubProjectDocumentTasksListItem>> getSubProjectTasks(@AuthenticationPrincipal AuthPrincipal principal){
+		return new ResponseEntity<>(implService.getSubProjectTasks(principal), HttpStatus.OK);
+	}
+
+	@PostMapping("/sub-proj-doc/{id}/comment/add/{taskId}")
+	public ResponseEntity<ApiResponse> addGeneralComments(@AuthenticationPrincipal AuthPrincipal principal,
+														  @PathVariable(name = "id", required = true) UUID requestId,
+														  @PathVariable(name = "taskId", required = true) UUID taskId,
+														  @RequestBody @Valid AddProposalGeneralCommentRequest body){
+
+		commentService.addSubProjectDocumentGeneralComment(requestId, taskId, principal, body);
+		return new ResponseEntity<>(new ApiResponse(true, "Comment added successfully."), HttpStatus.CREATED);
+	}
+
+	@PostMapping("/sub-proj-doc/{requestId}/reassign")
+	public ResponseEntity<ApiResponse> reassignSubProjectDocumentToFIP(@AuthenticationPrincipal AuthPrincipal principal,
+													 @PathVariable(name = "requestId") UUID requestId,
+													 @RequestBody ReassignPrposalToFIPRequest body){
+		implService.reassignSubProjectDocumentToFIP(requestId, principal.getUserId(), body.getSectionIds(), body.getComments());
+
+		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Sections reassigned successfully"), HttpStatus.ACCEPTED);
+	}
+
+	@PutMapping("/sub-proj-doc/change/{requestId}/status")
+	public ResponseEntity<ApiResponse> changeSubProjectDocStatus(
+			@PathVariable(name = "requestId", required = true) UUID requestId,
+			@RequestParam(name = "status", required = true) ProcessStatus status,
+			@AuthenticationPrincipal AuthPrincipal principal){
+
+		implService.changeSubProjectDocStatus(requestId, principal, status);
+		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
+	}
+
+	@PutMapping("/sub-proj-doc/change-dmpam-task/{requestId}/status")
+	public ResponseEntity<ApiResponse> changeSubProjectDocDmPamTaskStatus(
+			@PathVariable(name = "requestId", required = true) UUID requestId,
+			@RequestParam(name = "status", required = true) ProcessStatus status,
+			@AuthenticationPrincipal AuthPrincipal principal){
+
+		implService.changeSubProjectDocDmPamTaskStatus(requestId, principal, status);
+		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
 	}
 }

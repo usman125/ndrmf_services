@@ -2,10 +2,14 @@ package com.ndrmf.engine.dto;
 
 import java.util.UUID;
 
+
+
 public class CommenceProjectProposalRequest {
 	private String name;
 	private UUID thematicAreaId;
 	private String type;
+	private UUID jvUserID;
+
 	
 	public UUID getThematicAreaId() {
 		return thematicAreaId;
@@ -25,4 +29,11 @@ public class CommenceProjectProposalRequest {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public UUID getJvUserID() {
+		return jvUserID;
+	}
+	public void setJvUserID(UUID jvUserID) {
+		this.jvUserID = jvUserID;
+	}
+	
 }

@@ -101,9 +101,22 @@ public class SettingController {
 	
 	@RolesAllowed(SystemRoles.ADMIN)
 	@PostMapping("/cost-head/add")
-	public ResponseEntity<ApiResponse> addCostHead(@RequestBody @Valid AddCostHeadRequest body){
-		settingService.addCostHead(body);
+	public ResponseEntity<ApiResponse> addCostHead(@RequestBody(required = false) @Valid AddCostHeadRequest body){
+		boolean status = settingService.addCostHead(body);
+		if (status) {
+			return new ResponseEntity<>(new ApiResponse(true, "Cost head addedd successfully"), HttpStatus.CREATED);
+		}
+		else {
+			return new ResponseEntity<>(new ApiResponse(true, "No more than one cost-head can be there. Use update instead"), HttpStatus.FORBIDDEN);
+		}
 		
-		return new ResponseEntity<>(new ApiResponse(true, "Cost head addedd successfully"), HttpStatus.CREATED);
+	}
+	
+	@RolesAllowed(SystemRoles.ADMIN)
+	@PostMapping("/cost-head/update")
+	public ResponseEntity<ApiResponse> updateCostHead(@RequestBody(required = false) @Valid AddCostHeadRequest body){
+		settingService.updateCostHead(body);
+		
+		return new ResponseEntity<>(new ApiResponse(true, "Cost head updated successfully"), HttpStatus.CREATED);
 	}
 }

@@ -3,6 +3,7 @@ package com.ndrmf.engine.model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,7 +25,9 @@ import org.hibernate.annotations.TypeDefs;
 import com.ndrmf.config.audit.Auditable;
 import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.user.model.User;
+
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import org.springframework.data.annotation.CreatedDate;
 
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
@@ -32,8 +35,10 @@ import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 public class ProjectProposal extends Auditable<String> {
 	private UUID id;
 	private String name;
+	private String type;
 	private ThematicArea thematicArea;
 	private User initiatedBy;
+	private User jvUser;
 	private User processOwner;
 	private String status;
 	private List<ProjectProposalSection> sections;
@@ -45,6 +50,13 @@ public class ProjectProposal extends Auditable<String> {
 	private GrantImplementationAgreement gia;
 	private GIAChecklist giaChecklist;
 	private List<SubProjectDocument> subProjectDocuments;
+	private Integer numOfQuarters;
+	private OfferLetter offerLetter;
+	private GrantDisbursment grantDisbursment;
+	private Date created_at;
+	private String closed;
+	private Tpv tpv;
+	private ProjectClosure pc;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -176,7 +188,25 @@ public class ProjectProposal extends Auditable<String> {
 	public void setGia(GrantImplementationAgreement gia) {
 		this.gia = gia;
 	}
-	
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "tpv_id")
+	public Tpv getTpv() {
+		return tpv;
+	}
+	public void setTpv(Tpv tpv) {
+		this.tpv = tpv;
+	}
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "pc_id")
+	public ProjectClosure getPc() {
+		return pc;
+	}
+	public void setPc(ProjectClosure pc) {
+		this.pc = pc;
+	}
+
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "gia_checklist_id")
 	public GIAChecklist getGiaChecklist() {
@@ -202,5 +232,69 @@ public class ProjectProposal extends Auditable<String> {
 		doc.setProposalRef(this);
 		
 		this.subProjectDocuments.add(doc);
+	}
+	@ManyToOne
+	@JoinColumn(name = "jv_user_id")
+	public User getJvUser() {
+		return jvUser;
+	}
+	public void setJvUser(User jvUser) {
+		this.jvUser = jvUser;
+	}
+	public Integer getNumOfQuarters() {
+		return numOfQuarters;
+	}
+	public void setNumOfQuarters(Integer numOfQuarters) {
+		this.numOfQuarters = numOfQuarters;
+	}
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "offer_letter_id")
+	public OfferLetter getOfferLetter() {
+		return offerLetter;
+	}
+	public void setOfferLetter(OfferLetter offerLetter) {
+		this.offerLetter = offerLetter;
+	}
+	@OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "grant_disb_id")
+	public GrantDisbursment getGrantDisbursment() {
+		return grantDisbursment;
+	}
+	public void setGrantDisbursment(GrantDisbursment grantDisbursment) {
+		this.grantDisbursment = grantDisbursment;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	@Override
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	@Override
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	public Date getCreated_at() {
+		return created_at;
+	}
+
+	public void setCreated_at(Date created_at) {
+		this.created_at = created_at;
+	}
+
+	public String getClosed() {
+		return closed;
+	}
+
+	public void setClosed(String closed) {
+		this.closed = closed;
 	}
 }

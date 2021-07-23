@@ -15,6 +15,7 @@ public class PreliminaryAppraisalItem {
 	private String status;
 	private String subStatus;
 	private String isMarkedTo;
+	private String commentsByPo;
 	
 	public UUID getId() {
 		return id;
@@ -82,5 +83,13 @@ public class PreliminaryAppraisalItem {
 	}
 	public void setIsMarkedTo(String isMarkedTo) {
 		this.isMarkedTo = isMarkedTo;
+	}
+
+	public String getCommentsByPo() {
+		return commentsByPo;
+	}
+
+	public void setCommentsByPo(String commentsByPo) {
+		this.commentsByPo = commentsByPo;
 	}
 }

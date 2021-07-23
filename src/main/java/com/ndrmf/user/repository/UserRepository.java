@@ -33,4 +33,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     
     @Query("SELECT u FROM User u WHERE u.password is NULL")
     List<User> findAllUsersWithPasswordNull();
+
+    @Query("SELECT u FROM User u WHERE u.availableAsJv = true AND u.id != :userId")
+    List<User> findAllAvailableAsJvUsers(@Param("userId") UUID userId);
 }

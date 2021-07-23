@@ -1,15 +1,9 @@
 package com.ndrmf.engine.model;
 
+import java.util.Date;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
@@ -17,8 +11,8 @@ import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
 import com.ndrmf.config.audit.Auditable;
-import com.ndrmf.user.model.User;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.ndrmf.user.model.User;
 
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
@@ -29,7 +23,11 @@ public class GrantImplementationAgreementReview extends Auditable<String>{
 	private User assignee;
 	private String status;
 	private String comments;
+	private String poComments;
+	private Date startDate;
+	private Date endDate;
 	private GrantImplementationAgreement giaRef;
+	private ProjectProposal proposalRef;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -65,11 +63,40 @@ public class GrantImplementationAgreementReview extends Auditable<String>{
 	public void setGiaRef(GrantImplementationAgreement giaRef) {
 		this.giaRef = giaRef;
 	}
-	
+
+	@ManyToOne
+	@JoinColumn(name = "proposal_ref", nullable = false)
+	public ProjectProposal getProposalRef(){return proposalRef;}
+	public void setProposalRef(ProjectProposal proposalRef){this.proposalRef = proposalRef;}
+
 	public String getComments() {
 		return comments;
 	}
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public String getPoComments() {
+		return poComments;
+	}
+
+	public void setPoComments(String poComments) {
+		this.poComments = poComments;
+	}
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 }

@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="ndrmf-backend-service">
+    <output-path>$PROJECT_DIR$/out/artifacts/ndrmf_backend_service</output-path>
+    <root id="root">
+      <element id="archive" name="ndrmf_backend_service.jar">
+        <element id="module-output" name="ndrmf-backend-service" />
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -1,14 +1,16 @@
 package com.ndrmf.engine.dto;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
 public class SubProjectDocumentListItem {
 	private UUID id;
-	private LocalDate startDate;
-	private LocalDate endDate;
+	private Date startDate;
+	private Date endDate;
 	private String status;
 	private String proposalName;
+	private String docName;
+	private String docNumber;
 	
 	public UUID getId() {
 		return id;
@@ -16,16 +18,16 @@ public class SubProjectDocumentListItem {
 	public void setId(UUID id) {
 		this.id = id;
 	}
-	public LocalDate getStartDate() {
+	public Date getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(LocalDate startDate) {
+	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
-	public LocalDate getEndDate() {
+	public Date getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(LocalDate endDate) {
+	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
 	public String getStatus() {
@@ -39,5 +41,21 @@ public class SubProjectDocumentListItem {
 	}
 	public void setProposalName(String proposalName) {
 		this.proposalName = proposalName;
+	}
+
+	public String getDocName() {
+		return docName;
+	}
+
+	public void setDocName(String docName) {
+		this.docName = docName;
+	}
+
+	public String getDocNumber() {
+		return docNumber;
+	}
+
+	public void setDocNumber(String docNumber) {
+		this.docNumber = docNumber;
 	}
 }

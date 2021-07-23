@@ -38,6 +38,8 @@ public class SubProjectDocumentSection {
 	private String status;
 	private String reviewStatus;
 	private Date reviewCompletedOn;
+	private String reassignmentStatus;
+	private String reassignmentComments;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -127,5 +129,21 @@ public class SubProjectDocumentSection {
 	}
 	public void setReviewCompletedOn(Date reviewCompletedOn) {
 		this.reviewCompletedOn = reviewCompletedOn;
+	}
+
+	public String getReassignmentStatus() {
+		return reassignmentStatus;
+	}
+
+	public void setReassignmentStatus(String reassignmentStatus) {
+		this.reassignmentStatus = reassignmentStatus;
+	}
+
+	public String getReassignmentComments() {
+		return reassignmentComments;
+	}
+
+	public void setReassignmentComments(String reassignmentComments) {
+		this.reassignmentComments = reassignmentComments;
 	}
 }

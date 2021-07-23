@@ -1,5 +1,6 @@
 package com.ndrmf.user.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -18,33 +19,35 @@ import com.ndrmf.config.audit.Auditable;
 
 @Entity
 @Table(name = "organisations")
-public class Organisation extends Auditable<String> {
-	private int id;
-	private String name;
-	private List<Role> roles;
-	
+public class Organisation extends Auditable<String> implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	public int getId() {
-		return id;
-	}
-	
-	public void setId(int id) {
-		this.id = id;
-	}
-	
+	private int id;
+
 	@NotBlank
     @Size(max = 50)
     @Column(unique = true)
+	private String name;
+
+	@OneToMany(mappedBy="org", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+	private List<Role> roles;
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	@OneToMany(mappedBy="org", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+
 	public List<Role> getRoles(){
 		return this.roles;
 	}

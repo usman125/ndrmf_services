@@ -39,6 +39,8 @@ public class ExtendedAppraisal extends Auditable<String> {
 	private ProjectProposal proposalRef;
 	private List<ExtendedAppraisalSection> sections;
 
+	private String decisionByDm;
+
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -144,5 +146,13 @@ public class ExtendedAppraisal extends Auditable<String> {
 
 	public void setIsMarkedTo(String isMarkedTo) {
 		this.isMarkedTo = isMarkedTo;
+	}
+
+	public String getDecisionByDm() {
+		return decisionByDm;
+	}
+
+	public void setDecisionByDm(String decisionByDm) {
+		this.decisionByDm = decisionByDm;
 	}
 }

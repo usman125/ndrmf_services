@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.ndrmf.engine.model.GrantDisbursment;
+import com.ndrmf.engine.model.OfferLetter;
 import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.user.dto.UserLookupItem;
 
 public class ProjectProposalItem {
 	private UserLookupItem initiatedBy;
 	private UserLookupItem processOwner;
+	private UserLookupItem jv;
 	private String status;
 	private String subStatus;
 	private Date submittedAt;
@@ -23,6 +26,12 @@ public class ProjectProposalItem {
 	private GrantImplmentationItem gia;
 	private GIAChecklistItem giaChecklist;
 	private boolean isGovFip;
+	private Integer numOfQuarters;
+	private OfferLetterItem offerLetter;
+	private GrantDisbursment grantDisbursment;
+	private String proposalName;
+	private String tpvStatus;
+	private String pcStatus;
 	
 	public List<GeneralCommentItem> getCommentsMatrix() {
 		return commentsMatrix;
@@ -54,6 +63,14 @@ public class ProjectProposalItem {
 
 	public void setProcessOwner(UserLookupItem processOwner) {
 		this.processOwner = processOwner;
+	}
+
+	public UserLookupItem getJv() {
+		return jv;
+	}
+
+	public void setJv(UserLookupItem jv) {
+		this.jv = jv;
 	}
 
 	public String getStatus() {
@@ -158,5 +175,53 @@ public class ProjectProposalItem {
 
 	public void setGovFip(boolean isGovFip) {
 		this.isGovFip = isGovFip;
+	}
+
+	public Integer getNumOfQuarters() {
+		return numOfQuarters;
+	}
+
+	public void setNumOfQuarters(Integer numOfQuarters) {
+		this.numOfQuarters = numOfQuarters;
+	}
+
+	public OfferLetterItem getOfferLetter() {
+		return offerLetter;
+	}
+
+	public void setOfferLetter(OfferLetterItem offerLetter) {
+		this.offerLetter = offerLetter;
+	}
+
+	public GrantDisbursment getGrantDisbursment() {
+		return grantDisbursment;
+	}
+
+	public void setGrantDisbursment(GrantDisbursment grantDisbursment) {
+		this.grantDisbursment = grantDisbursment;
+	}
+
+	public String getProposalName() {
+		return proposalName;
+	}
+
+	public void setProposalName(String proposalName) {
+		this.proposalName = proposalName;
+	}
+
+	public String getTpvStatus() {
+		return tpvStatus;
+	}
+
+	public void setTpvStatus(String tpvStatus) {
+		this.tpvStatus = tpvStatus;
+	}
+
+	public String getPcStatus() {
+		return pcStatus;
+	}
+
+	public void setPcStatus(String pcStatus) {
+		this.pcStatus = pcStatus;
 	}
 }

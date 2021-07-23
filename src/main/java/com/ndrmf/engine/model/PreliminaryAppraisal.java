@@ -3,7 +3,6 @@ package com.ndrmf.engine.model;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -43,6 +42,7 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	private Date completedOn;
 	private String subStatus;
 	private String isMarkedTo;
+	private String commentsByPo;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -153,5 +153,13 @@ public class PreliminaryAppraisal extends Auditable<String> {
 	}
 	public void setIsMarkedTo(String isMarkedTo) {
 		this.isMarkedTo = isMarkedTo;
+	}
+
+	public String getCommentsByPo() {
+		return commentsByPo;
+	}
+
+	public void setCommentsByPo(String commentsByPo) {
+		this.commentsByPo = commentsByPo;
 	}
 }

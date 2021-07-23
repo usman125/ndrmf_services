@@ -1,7 +1,6 @@
 package com.ndrmf.setting.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -9,8 +8,12 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.util.enums.ProcessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.setting.dto.AddSectionRequest;
@@ -18,6 +21,7 @@ import com.ndrmf.setting.dto.AddSectionTemplateRequest;
 import com.ndrmf.setting.dto.ProcessTemplateItem;
 import com.ndrmf.setting.dto.ProcessTypeWithSectionsItem;
 import com.ndrmf.setting.dto.UpdateProcessMetaRequest;
+import com.ndrmf.setting.dto.UpdateSectionTemplateRequest;
 import com.ndrmf.setting.model.ProcessType;
 import com.ndrmf.setting.model.Section;
 import com.ndrmf.setting.model.SectionTemplate;
@@ -27,6 +31,7 @@ import com.ndrmf.setting.repository.SectionTemplateRepository;
 import com.ndrmf.user.dto.UserLookupItem;
 import com.ndrmf.user.repository.UserRepository;
 
+
 @Service
 public class TemplateService {
 	@Autowired private SectionRepository sectionRepo;
@@ -35,10 +40,24 @@ public class TemplateService {
 	@Autowired private ProcessTypeRepository processTypeRepo;
 	
 	public void addSectionForProcess(String processType, AddSectionRequest body) {
+		
+		/*Section section = new Section();
+		ProcessType p = new ProcessType();
+		p.setName(processType);
+		UUID ownerId = processTypeRepo.getPOByProcessType(processType);
+		
+		p.setOwner(userRepo.getOne(ownerId));
+		section.setProcessType(p);
+		section.setEnabled(body.isEnabled());
+		section.setName(body.getName());
+		
+		sectionRepo.save(section);*/
+		
 		Section section = new Section();
 		
 		section.setEnabled(body.isEnabled());
 		section.setName(body.getName());
+		section.setOrderNum(body.getOrderNum());
 		section.setProcessType(processTypeRepo.getOne(processType));
 		
 		sectionRepo.save(section);
@@ -54,6 +73,31 @@ public class TemplateService {
 		template.setTotalScore(body.getTotalScore());
 		template.setTemplateType(body.getTemplateType());
 		template.setTemplate(body.getTemplate());
+		
+		
+		
+		if(body.isEnableAndEffective()) {
+			List<SectionTemplate> existingTemplatesForSection = templateRepo.findBySectionId(sectionId);
+			
+			existingTemplatesForSection.forEach(t -> {
+				t.setEnabled(false);
+			});
+		}
+		
+		templateRepo.save(template);
+	}
+	
+	@Transactional
+	public void updateTemplateForSection(UUID sectionId, UUID templateId, UpdateSectionTemplateRequest body) {
+		SectionTemplate template = templateRepo.findATemplateOfASection(sectionId, templateId);
+		
+		template.setEnabled(body.isEnableAndEffective());
+		template.setPassingScore(body.getPassingScore());
+		template.setTotalScore(body.getTotalScore());
+		template.setTemplateType(body.getTemplateType());
+		template.setTemplate(body.getTemplate());
+		
+		
 		
 		if(body.isEnableAndEffective()) {
 			List<SectionTemplate> existingTemplatesForSection = templateRepo.findBySectionId(sectionId);
@@ -72,9 +116,27 @@ public class TemplateService {
 		
 		
 		List<Section> sections = sectionRepo.findAllSectionsForProcessType(processType);
-		
 		ProcessTypeWithSectionsItem dto = new ProcessTypeWithSectionsItem();
-		
+//		System.out.println(processType);
+//		System.out.println(ProcessStatus.GIA);
+//		System.out.println(processType.equals(ProcessStatus.GIA.toString()));
+
+		if (sections.isEmpty())
+		{
+			if (processType.equals(ProcessStatus.GIA.toString())){
+				if(meta.getOwner() != null) {
+					dto.setProcessOwner(new UserLookupItem(meta.getOwner().getId(), meta.getOwner().getFullName()));
+					return dto;
+				}else{
+					throw new ResponseStatusException(HttpStatus.NOT_FOUND, "GIA PROCESS OWNER NOT DEFINED");
+				}
+			}else{
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find resource");
+			}
+
+		}
+
+
 		if(meta.getOwner() != null) {
 			dto.setProcessOwner(new UserLookupItem(meta.getOwner().getId(), meta.getOwner().getFullName()));	
 		}
@@ -83,10 +145,10 @@ public class TemplateService {
 			if(s.getSme() != null) {
 				UserLookupItem sme = new UserLookupItem(s.getSme().getId(), s.getSme().getFullName());
 				
-				dto.addSection(s.getId(), s.getName(), s.isEnabled(), sme);	
+				dto.addSection(s.getId(), s.getName(), s.isEnabled(), sme, s.getOrderNum());
 			}
 			else {
-				dto.addSection(s.getId(), s.getName(), s.isEnabled(), null);	
+				dto.addSection(s.getId(), s.getName(), s.isEnabled(), null, s.getOrderNum());
 			}
 		});
 		
@@ -123,7 +185,8 @@ public class TemplateService {
 		dto.setProcessType(processType);
 		
 		sts.forEach(st -> {	
-			dto.addSection(st.getSection().getId(), st.getSection().getName(), st.getTotalScore(), st.getPassingScore(), st.getTemplateType(), st.getTemplate());
+			dto.addSection(st.getSection().getId(), st.getSection().getName(), st.getTotalScore(), st.getPassingScore(), st.getTemplateType(),
+					st.getTemplate());
 		});
 		
 		return dto;
@@ -167,8 +230,16 @@ public class TemplateService {
 	}
 	
 	public Set<String> getSubProcessTypesForProcess(com.ndrmf.util.enums.ProcessType processType){
-		Set<String> subProcessTypes = processTypeRepo.getSubProcessTypes(processType.name());
-		
+		final Set<String> subProcessTypes = processTypeRepo.getSubProcessTypes(processType.name());
 		return subProcessTypes;
+	}
+
+	public List<String> getProcessTypesByOwner(AuthPrincipal principal){
+		final List<ProcessType> processTypes = processTypeRepo.getProcessTypesByOwner(principal.getUserId());
+		final List<String> pts = new ArrayList<>();
+		processTypes.forEach(pt -> {
+			pts.add(pt.getName());
+		});
+		return pts;
 	}
 }

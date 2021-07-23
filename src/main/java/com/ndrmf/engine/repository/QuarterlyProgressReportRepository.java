@@ -14,6 +14,13 @@ public interface QuarterlyProgressReportRepository extends JpaRepository<Quarter
 	@Query(value = "SELECT qpr FROM QuarterlyProgressReport qpr "
 			+ "JOIN qpr.proposalRef p "
 			+ "JOIN p.initiatedBy u "
-			+ "WHERE u.id = :userId")
+			+ "JOIN qpr.processOwner qprpo "
+			+ "WHERE u.id = :userId OR qprpo.id = :userId")
 	List<QuarterlyProgressReport> getQuarterlyProgressReportsForFIP(@Param("userId") UUID userId);
+
+	@Query(value = "SELECT qpr FROM QuarterlyProgressReport qpr "
+			+ "JOIN qpr.proposalRef p "
+			+ "JOIN p.initiatedBy u "
+			+ "WHERE p.id = :proposalId")
+	List<QuarterlyProgressReport> getQuarterlyProgressReportsByProposalId(@Param("proposalId") UUID proposalId);
 }

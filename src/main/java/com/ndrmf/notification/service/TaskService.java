@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.ndrmf.engine.model.QuarterlyProgressReportTask;
+import com.ndrmf.engine.repository.QuarterlyProgressReportTaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import com.ndrmf.notification.dto.TaskItem;
 public class TaskService {
 	@Autowired private QualificationTaskRepository qTaskRepo;
 	@Autowired private ProjectProposalTaskRepository proposalTaskRepo;
+	@Autowired private QuarterlyProgressReportTaskRepository quarterlyProgressReportTaskRepository;
 	
 	public Map<String, List<TaskItem>> getAllTasks(UUID userId) {
 		Map<String, List<TaskItem>> dto = new HashMap<String, List<TaskItem>>();
@@ -67,6 +70,37 @@ public class TaskService {
 		});
 		
 		dto.put("proposal", proposalTasks);
+
+		List<QuarterlyProgressReportTask> qprTasks = quarterlyProgressReportTaskRepository.findAllTasksForAssignee(userId);
+		List<TaskItem> qpTasks = new ArrayList<TaskItem>();
+
+		qprTasks.forEach(t -> {
+			TaskItem ti = new TaskItem();
+
+			ti.setComments(t.getComments());
+			ti.setEndDate(t.getEndDate());
+//			if (t.getSection() != null){
+//				ti.setRequestId(t.getSection().getQprRef().getId());
+//			}else{
+				ti.setRequestId(t.getQpr().getId());
+//			}
+			ti.setStartDate(t.getStartDate());
+			ti.setTaskId(t.getId());
+			if (ti.getSectionId() != null){
+				ti.setSectionId(t.getSection().getId());
+			}
+			if (ti.getSectionId() != null){
+				ti.setSectionName(t.getSection().getName());
+			}
+			ti.setStatus(t.getStatus());
+			if(t.getQpr().getProposalRef() != null) {
+				ti.setFipName(t.getQpr().getProposalRef().getInitiatedBy().getFullName());
+			}
+
+			qpTasks.add(ti);
+		});
+
+		dto.put("qpr", qpTasks);
 		
 		return dto;
 	}

@@ -1,7 +1,6 @@
 package com.ndrmf.exception;
 
 import org.springframework.core.NestedExceptionUtils;
-import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

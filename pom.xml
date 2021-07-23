@@ -11,6 +11,7 @@
     <groupId>com.ndrmf</groupId>
     <artifactId>ndrmf-backend-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
     <name>ndrmf-backend-service</name>
     <description>NDRMF Backend APIs</description>
 
@@ -20,6 +21,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -96,6 +102,11 @@
 		    <artifactId>spring-boot-email-core</artifactId>
 		    <version>0.6.3</version>
 		</dependency>
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.3.7</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,10 +114,17 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.4.0</version>
                 <configuration>
                     <executable>true</executable>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration></configuration>
+            </plugin>
+
         </plugins>
     </build>
 

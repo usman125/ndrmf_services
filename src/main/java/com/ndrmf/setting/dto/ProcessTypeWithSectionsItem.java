@@ -18,7 +18,7 @@ public class ProcessTypeWithSectionsItem {
 		this.sections = sections;
 	}
 	
-	public void addSection(UUID id, String name, boolean enabled, UserLookupItem sme) {
+	public void addSection(UUID id, String name, boolean enabled, UserLookupItem sme, Integer orderNum) {
 		if(this.sections == null) {
 			this.sections = new ArrayList<>();
 		}
@@ -28,6 +28,7 @@ public class ProcessTypeWithSectionsItem {
 		s.setName(name);
 		s.setEnabled(enabled);
 		s.setSme(sme);
+		s.setOrderNum(orderNum);
 		
 		this.sections.add(s);
 	}
@@ -45,6 +46,7 @@ public class ProcessTypeWithSectionsItem {
 		private String name;
 		private UserLookupItem sme;
 		private boolean enabled;
+		private Integer orderNum;
 		
 		public UUID getId() {
 			return id;
@@ -69,6 +71,14 @@ public class ProcessTypeWithSectionsItem {
 		}
 		public void setSme(UserLookupItem sme) {
 			this.sme = sme;
+		}
+
+		public Integer getOrderNum() {
+			return orderNum;
+		}
+
+		public void setOrderNum(Integer orderNum) {
+			this.orderNum = orderNum;
 		}
 	}
 }

@@ -136,13 +136,34 @@ public class SettingService {
 		thematicAreaRepo.save(ta);
 	}
 	
-	public void addCostHead(AddCostHeadRequest body) {
-		CostHead head = new CostHead();
-		head.setName(body.getName());
-		head.setGlCode(body.getGlCode());
-		head.setEnabled(true);
+	public boolean addCostHead(AddCostHeadRequest body) {
+		List<CostHead> heads = costHeadRepo.findAll();
+		if (heads.isEmpty())
+		{
+			CostHead head = new CostHead();
+			head.setName(body.getName());
+			head.setGlCode(body.getGlCode());
+			head.setEnabled(true);
+			
+			costHeadRepo.save(head);
+			return true;
+		}
+		return false;
 		
-		costHeadRepo.save(head);
+	}
+	
+	public void updateCostHead(AddCostHeadRequest body) {
+		List<CostHead> heads = costHeadRepo.findAll();
+		if (heads.isEmpty()) {
+			addCostHead(body);
+		}
+		else {
+			heads.get(0).setName(body.getName());
+			heads.get(0).setGlCode(body.getGlCode());
+			//heads.get(0).setData(body.getData());
+			heads.get(0).setEnabled(true);
+			costHeadRepo.save(heads.get(0));
+		}
 	}
 	
 	public List<CostHeadItem> findAllCostHeads(boolean enabled) {

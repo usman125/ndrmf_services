@@ -18,4 +18,7 @@ public interface SectionTemplateRepository extends JpaRepository<SectionTemplate
 	
 	@Query(value = "SELECT st FROM SectionTemplate st JOIN st.section s JOIN s.processType pt WHERE st.enabled = true AND s.enabled = true AND pt.name = :processType")
 	List<SectionTemplate> findTemplatesForProcessType(@Param("processType") String processType);
+	
+	@Query(value = "SELECT st FROM SectionTemplate st WHERE st.id = :id AND st.section = :section_id")
+	SectionTemplate findATemplateOfASection(@Param("section_id") UUID sectionId, @Param("id") UUID templateId);
 }

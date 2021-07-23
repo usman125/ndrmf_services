@@ -1,15 +1,17 @@
 package com.ndrmf.engine.controller;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+
+import java.util.*;
 
 import javax.annotation.security.RolesAllowed;
+
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
+
+import com.ndrmf.engine.dto.*;
+import com.ndrmf.engine.model.ProjectProposalAttachment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -21,32 +23,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import com.ndrmf.common.ApiResponse;
 import com.ndrmf.common.AuthPrincipal;
-import com.ndrmf.engine.dto.AddGIAChecklistRequest;
-import com.ndrmf.engine.dto.AddGrantImplementationAgreementRequest;
-import com.ndrmf.engine.dto.AddGrantImplementationAgreementReviewRequest;
-import com.ndrmf.engine.dto.AddImplementationPlanRequest;
-import com.ndrmf.engine.dto.AddProposalGeneralCommentRequest;
-import com.ndrmf.engine.dto.AddProposalMiscReportRequest;
-import com.ndrmf.engine.dto.AddProposalSectionReviewRequest;
-import com.ndrmf.engine.dto.AddProposalTaskRequest;
-import com.ndrmf.engine.dto.CommenceExtendedAppraisalRequest;
-import com.ndrmf.engine.dto.CommencePreliminaryAppraisalRequest;
-import com.ndrmf.engine.dto.CommenceProjectProposalRequest;
-import com.ndrmf.engine.dto.ExtendedAppraisalItem;
-import com.ndrmf.engine.dto.ExtendedAppraisalSectionRequest;
-import com.ndrmf.engine.dto.PreliminaryAppraisalItem;
-import com.ndrmf.engine.dto.PreliminaryAppraisalListItem;
-import com.ndrmf.engine.dto.PreliminaryAppraisalRequest;
-import com.ndrmf.engine.dto.ProjectProposalItem;
-import com.ndrmf.engine.dto.ProjectProposalListItem;
-import com.ndrmf.engine.dto.ProjectProposalSectionRequest;
-import com.ndrmf.engine.dto.ReassignPrposalToFIPRequest;
+
 import com.ndrmf.engine.service.CommentService;
 import com.ndrmf.engine.service.ProjectProposalService;
 import com.ndrmf.util.constants.SystemRoles;
@@ -65,14 +50,14 @@ public class ProjectProposalController {
 	
 	@GetMapping("/")
 	public ResponseEntity<List<ProjectProposalListItem>> getProjectProposals(@AuthenticationPrincipal AuthPrincipal principal,
-			@RequestParam(name = "status", required = false) ProcessStatus status){
+			@RequestParam(name = "status", required = false) ProcessStatus status) throws IOException{
 		return new ResponseEntity<>(projProposalService.getProjectProposalRequests(principal, status), HttpStatus.OK);
 	}
 	
 	@RolesAllowed({SystemRoles.ORG_FIP, SystemRoles.ORG_GOVT})
 	@PostMapping("/commence")
-	public ResponseEntity<?> commentProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
-			@RequestBody CommenceProjectProposalRequest body){
+	public ResponseEntity<?> commenceProjectProposalRequest(@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestBody(required = false) CommenceProjectProposalRequest body){
 		Map<String, UUID> dto = new HashMap<>();
 		dto.put("id", projProposalService.commenceProjectProposal(principal, body));
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
@@ -142,6 +127,21 @@ public class ProjectProposalController {
 		
 		return new ResponseEntity<>(new ApiResponse(true, "Section submitted successfully."), HttpStatus.CREATED);
 	}
+
+	@PostMapping("/ext-appraisal/{extendedAppraisalId}/section/assign")
+	public ResponseEntity<ApiResponse> assignExtendedAppraisalSection(@AuthenticationPrincipal AuthPrincipal principal,
+																	  @PathVariable(name = "extendedAppraisalId") UUID extendedAppraisalId,
+																	  @RequestBody AssignExtendedAppraisalSectionRequest body){
+		projProposalService.assignExtendedAppraisalSection(principal.getUserId(), extendedAppraisalId, body);
+		return new ResponseEntity<>(new ApiResponse(true, "Section assigned successfully."), HttpStatus.OK);
+	}
+
+	@PutMapping("/ext-appraisal/{extendedAppraisalId}/decisionbydm")
+	public ResponseEntity<ApiResponse> extendedAppraisalDecisionByDm(@AuthenticationPrincipal AuthPrincipal principal,
+																	  @PathVariable(name = "extendedAppraisalId") UUID extendedAppraisalId){
+		projProposalService.extendedAppraisalDecisionByDm(principal.getUserId(), extendedAppraisalId);
+		return new ResponseEntity<>(new ApiResponse(true, "Appraisal approved successfully."), HttpStatus.OK);
+	}
 	
 	@PostMapping("/section/{sectionId}/task/add")
 	public ResponseEntity<ApiResponse> addTaskForProposalSection(@AuthenticationPrincipal AuthPrincipal principal,
@@ -172,11 +172,25 @@ public class ProjectProposalController {
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ApiResponse> updateProposalStatus(@PathVariable(name = "id", required = true) UUID proposalId,
+	public ResponseEntity<ApiResponse> updateProposalStatus(
+			@PathVariable(name = "id", required = true) UUID proposalId,
 			@RequestParam(name = "status", required = true) ProcessStatus status,
-			@AuthenticationPrincipal AuthPrincipal principal){
+			@RequestParam(name = "subStatus", required = true) ProcessStatus subStatus,
+			@AuthenticationPrincipal AuthPrincipal principal,
+			@RequestBody(required = false) @Valid OfferLetterUpdateRequest body){
 		
-		projProposalService.updateProposalStatus(proposalId, principal.getUserId(), status);
+		projProposalService.updateProposalStatus(proposalId, principal.getUserId(), status, subStatus, body);
+	
+		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
+	}
+	
+	@PutMapping("/offerLetterStatus/{id}")
+	public ResponseEntity<ApiResponse> updateProposalOfferLetterStatus(
+			@PathVariable(name = "id", required = true) UUID proposalId,
+			@RequestParam(name = "status", required = true) ProcessStatus status,
+			@AuthenticationPrincipal AuthPrincipal principal) throws IOException {
+		
+		String response = projProposalService.updateProposalOfferLetterStatus(proposalId, principal.getUserId(), status);
 	
 		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
 	}
@@ -185,14 +199,72 @@ public class ProjectProposalController {
 	public ResponseEntity<?> addAttachement(@PathVariable(name = "id", required = true) UUID proposalId,
 			@RequestParam(name = "stage", required = true) ProcessStatus status,
 			@RequestParam(name = "file", required = true) MultipartFile file,
-			@AuthenticationPrincipal AuthPrincipal principal){
+			@AuthenticationPrincipal AuthPrincipal principal) throws IOException{
 		
-		UUID id = projProposalService.addProposalAttachment(proposalId, principal.getUserId(), status, file);
-		Map<String, UUID> dto = new HashMap<>();
-		dto.put("id", id);
+		String path = projProposalService.addProposalAttachment(proposalId, principal.getUserId(), status, file);
+		Map<String, String> dto = new HashMap<>();
+		dto.put("filePath", path);
 		
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	}
+	
+	@GetMapping("/{id}/attachments/")
+	public ResponseEntity<?> getAttachementByProposalIdAndProposalStage(@PathVariable(name = "id", required = true) UUID proposalId,
+			@RequestParam(name = "stage", required = true) ProcessStatus status,
+			@AuthenticationPrincipal AuthPrincipal principal){
+		
+		List<Object> attachments = projProposalService.readProposalAttachmentByStage(proposalId, status);
+		
+		return new ResponseEntity<>(attachments, HttpStatus.OK);
+	}
+	
+	@GetMapping("/{id}/allAttachments")
+	public ResponseEntity<?>getAllAttachmentsByProposalId(@PathVariable(name = "id", required = true) UUID proposalId){
+		List<ProjectProposalAttachment> attachments = projProposalService.readProposalAttachmentsByProposalId(proposalId);
+
+		List<ProjectProposalAttachmentListItem> dto = new ArrayList<>();
+		attachments.forEach(c -> {
+			ProjectProposalAttachmentListItem ppali;
+			ppali = new ProjectProposalAttachmentListItem();
+			ppali.setName(c.getFileRef().getFileName());
+			ppali.setPath(c.getFileRef().getPath());
+			ppali.setPicByte(c.getFileRef().getData());
+			ppali.setStatus(c.getStage());
+			ppali.setCreated_by(c.getCreatedBy());
+
+			dto.add(ppali);
+		});
+
+		return new ResponseEntity<>(dto, HttpStatus.OK);
+	}
+	
+	//@GetMapping("/download/", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	@RequestMapping(path = "/attachment/download/", method = RequestMethod.GET)
+    public List download(@RequestParam(name = "fileName") String fileName,
+						 @RequestParam(name = "filePath") String filePath) throws IOException {
+
+		List dto = projProposalService.getAttachmentsByFileNameAndPath(fileName, filePath);
+
+//        File file = new File(filePath);
+//
+//        HttpHeaders header = new HttpHeaders();
+//        String headerParam = "attachment; " + "filename=" + fileName;
+//        header.add(HttpHeaders.CONTENT_DISPOSITION, headerParam);
+//        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
+//        header.add("Pragma", "no-cache");
+//        header.add("Expires", "0");
+//
+//        Path path = Paths.get(file.getAbsolutePath());
+//        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
+//		System.out.prit
+
+        return dto;
+//                .headers(header)
+//                .contentLength(file.length())
+//                .contentType(MediaType.parseMediaType("application/octet-stream"))
+//                .body(resource);
+    }
+
 	
 	@PostMapping("/{proposalId}/pip/submit")
 	public ResponseEntity<ApiResponse> addProjectImplementationPlan(@AuthenticationPrincipal AuthPrincipal principal,
@@ -248,7 +320,7 @@ public class ProjectProposalController {
 	public ResponseEntity<ApiResponse> reassignToFIP(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "proposalId") UUID proposalId,
 			@RequestBody ReassignPrposalToFIPRequest body){
-		projProposalService.reassignProposalToFIP(proposalId, principal.getUserId(), body.getSectionIds());
+		projProposalService.reassignProposalToFIP(proposalId, principal.getUserId(), body.getSectionIds(), body.getComments());
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Sections reassigned successfully"), HttpStatus.ACCEPTED);
 	}
@@ -259,5 +331,11 @@ public class ProjectProposalController {
 			@RequestBody AddProposalMiscReportRequest body){
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Report submitted successfully"), HttpStatus.ACCEPTED);
+	}
+	@GetMapping("/offerLetter/{proposalId}")
+	public ResponseEntity<OfferLetterItem> getOfferLetter(@AuthenticationPrincipal AuthPrincipal principal,
+			@PathVariable(name = "proposalId") UUID proposalId) throws IOException {
+		OfferLetterItem dto = projProposalService.getOfferLetter(principal, proposalId);
+		return new ResponseEntity<OfferLetterItem>(dto, HttpStatus.OK);
 	}
 }
