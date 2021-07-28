@@ -8,10 +8,12 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
+
 
 public interface GrantDisbursmentAdvanceLiquidationRepository extends JpaRepository<GrantDisbursmentAdvanceLiquidation, UUID> {
     @Query(value = "SELECT gdal FROM GrantDisbursmentAdvanceLiquidation gdal WHERE gdal.initialAdvanceRef.id = :id")
-    Optional<GrantDisbursmentAdvanceLiquidation> findRequestsByInitialAdvanceId(@Param("id") UUID id);
+    List<GrantDisbursmentAdvanceLiquidation> findRequestsByInitialAdvanceId(@Param("id") UUID id);
     @Query(value = "SELECT gdal FROM GrantDisbursmentAdvanceLiquidation gdal WHERE gdal.quarterAdvanceRef.id = :id")
-    Optional<GrantDisbursmentAdvanceLiquidation> findRequestsByQuarterAdvanceId(@Param("id") UUID id);
+    List<GrantDisbursmentAdvanceLiquidation> findRequestsByQuarterAdvanceId(@Param("id") UUID id);
 }

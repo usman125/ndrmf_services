@@ -14,7 +14,16 @@ public class TaskItem {
 	private String status;
 	private Date startDate;
 	private String fipName;
-	
+	private int quarter;
+
+	public int getQuarter() {
+		return quarter;
+	}
+
+	public void setQuarter(int quarter) {
+		this.quarter = quarter;
+	}
+
 	public UUID getSectionId() {
 		return sectionId;
 	}

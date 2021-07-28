@@ -14,7 +14,7 @@ public class QuarterAdvanceItem {
     public UUID id;
     public String subStatus;
     private List<QuarterAdvanceReviewsListItem> quarterAdvanceReviewsList;
-    private AdvanceLiquidationItem advanceLiquidationItem;
+    private List<AdvanceLiquidationItem> advanceLiquidations;
 
     private String payeesName;
     private String payeesAddress;
@@ -133,12 +133,19 @@ public class QuarterAdvanceItem {
         this.quarterAdvanceReviewsList = quarterAdvanceReviewsList;
     }
 
-    public AdvanceLiquidationItem getAdvanceLiquidationItem() {
-        return advanceLiquidationItem;
+    public List<AdvanceLiquidationItem> getAdvanceLiquidations() {
+        return advanceLiquidations;
     }
 
-    public void setAdvanceLiquidationItem(AdvanceLiquidationItem advanceLiquidationItem) {
-        this.advanceLiquidationItem = advanceLiquidationItem;
+    public void setAdvanceLiquidations(List<AdvanceLiquidationItem> advanceLiquidations) {
+        this.advanceLiquidations = advanceLiquidations;
+    }
+
+    public void addAdvanceLiquidation(AdvanceLiquidationItem liquidation){
+        if (this.getAdvanceLiquidations() == null){
+            this.advanceLiquidations = new ArrayList<>();
+        }
+        this.advanceLiquidations.add(liquidation);
     }
 
     public void addQuarterAdvanceReviewsList(QuarterAdvanceReviewsListItem review){

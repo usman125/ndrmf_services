@@ -40,8 +40,8 @@ public class QuarterAdvance extends Auditable<String> {
     @OneToMany(mappedBy = "quarterAdvanceRef", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<GrantDisbursmentAdvanceReviews> reviewsList;
 
-    @OneToOne(mappedBy = "quarterAdvanceRef")
-    private GrantDisbursmentAdvanceLiquidation grantDisbursmentAdvanceLiquidationRef;
+    @OneToMany(mappedBy = "quarterAdvanceRef", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private List<GrantDisbursmentAdvanceLiquidation> grantDisbursmentAdvanceLiquidations;
 
     private String payeesName;
     private String payeesAddress;
@@ -57,7 +57,7 @@ public class QuarterAdvance extends Auditable<String> {
 
     private Date reassignedOn;
 
-    @OneToMany(mappedBy="qaRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+    @OneToMany(mappedBy = "qaRef", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<GrantDisbursmentWithdrawalFiles> attachments;
 
     public String getPayeesName() {
@@ -119,15 +119,19 @@ public class QuarterAdvance extends Auditable<String> {
     public UUID getId() {
         return Id;
     }
+
     public void setId(UUID id) {
         Id = id;
     }
+
     public GrantDisbursment getGrantDisbursmentRef() {
         return grantDisbursmentRef;
     }
+
     public void setGrantDisbursmentRef(GrantDisbursment grantDisbursmentRef) {
         this.grantDisbursmentRef = grantDisbursmentRef;
     }
+
     public String getStatus() {
         return status;
     }
@@ -147,6 +151,7 @@ public class QuarterAdvance extends Auditable<String> {
     public String getData() {
         return data;
     }
+
     public void setData(String data) {
         this.data = data;
     }
@@ -154,6 +159,7 @@ public class QuarterAdvance extends Auditable<String> {
     public void setAmount(Integer amount) {
         this.amount = amount;
     }
+
     public Integer getAmount() {
         return amount;
     }
@@ -167,7 +173,7 @@ public class QuarterAdvance extends Auditable<String> {
     }
 
     public void addReviewList(GrantDisbursmentAdvanceReviews review) {
-        if(this.reviewsList == null) {
+        if (this.reviewsList == null) {
             this.reviewsList = new ArrayList<>();
         }
 
@@ -175,12 +181,27 @@ public class QuarterAdvance extends Auditable<String> {
         this.reviewsList.add(review);
     }
 
-    public GrantDisbursmentAdvanceLiquidation getGrantDisbursmentAdvanceLiquidationRef() {
-        return grantDisbursmentAdvanceLiquidationRef;
+//    public GrantDisbursmentAdvanceLiquidation getGrantDisbursmentAdvanceLiquidationRef() {
+//        return grantDisbursmentAdvanceLiquidationRef;
+//    }
+//
+//    public void setGrantDisbursmentAdvanceLiquidationRef(GrantDisbursmentAdvanceLiquidation grantDisbursmentAdvanceLiquidationRef) {
+//        this.grantDisbursmentAdvanceLiquidationRef = grantDisbursmentAdvanceLiquidationRef;
+//    }
+
+    public List<GrantDisbursmentAdvanceLiquidation> getGrantDisbursmentAdvanceLiquidations() {
+        return grantDisbursmentAdvanceLiquidations;
     }
 
-    public void setGrantDisbursmentAdvanceLiquidationRef(GrantDisbursmentAdvanceLiquidation grantDisbursmentAdvanceLiquidationRef) {
-        this.grantDisbursmentAdvanceLiquidationRef = grantDisbursmentAdvanceLiquidationRef;
+    public void setGrantDisbursmentAdvanceLiquidations(List<GrantDisbursmentAdvanceLiquidation> grantDisbursmentAdvanceLiquidations) {
+        this.grantDisbursmentAdvanceLiquidations = grantDisbursmentAdvanceLiquidations;
+    }
+
+    public void addGrantDisbursmentAdvanceLiquidation(GrantDisbursmentAdvanceLiquidation liquidation) {
+        if (this.grantDisbursmentAdvanceLiquidations == null)
+            this.grantDisbursmentAdvanceLiquidations = new ArrayList<>();
+        liquidation.setQuarterAdvanceRef(this);
+        this.grantDisbursmentAdvanceLiquidations.add(liquidation);
     }
 
     public Integer getQuarter() {
@@ -211,12 +232,13 @@ public class QuarterAdvance extends Auditable<String> {
     public List<GrantDisbursmentWithdrawalFiles> getAttachments() {
         return attachments;
     }
+
     public void setAttachments(List<GrantDisbursmentWithdrawalFiles> attachments) {
         this.attachments = attachments;
     }
 
     public void addAttachement(GrantDisbursmentWithdrawalFiles a) {
-        if(this.attachments == null) {
+        if (this.attachments == null) {
             this.attachments = new ArrayList<>();
         }
 

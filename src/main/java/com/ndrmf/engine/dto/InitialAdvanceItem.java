@@ -14,7 +14,7 @@ public class InitialAdvanceItem {
     private String initAdvanceStatus;
     private UUID id;
     private List<InitialAdvanceReviewsItem> initialAdvanceReviewsList;
-    private InitialAdvanceLiquidationItem advanceLiquidationItem;
+    private List<InitialAdvanceLiquidationItem> advanceLiquidations;
 
     private String payeesName;
     private String payeesAddress;
@@ -93,12 +93,27 @@ public class InitialAdvanceItem {
         this.initialAdvanceReviewsList.add(review);
     }
 
-    public InitialAdvanceLiquidationItem getAdvanceLiquidationItem() {
-        return advanceLiquidationItem;
+//    public InitialAdvanceLiquidationItem getAdvanceLiquidationItem() {
+//        return advanceLiquidations;
+//    }
+//
+//    public void setAdvanceLiquidationItem(InitialAdvanceLiquidationItem advanceLiquidationItem) {
+//        this.advanceLiquidations = advanceLiquidationItem;
+//    }
+
+
+    public List<InitialAdvanceLiquidationItem> getAdvanceLiquidations() {
+        return advanceLiquidations;
     }
 
-    public void setAdvanceLiquidationItem(InitialAdvanceLiquidationItem advanceLiquidationItem) {
-        this.advanceLiquidationItem = advanceLiquidationItem;
+    public void setAdvanceLiquidations(List<InitialAdvanceLiquidationItem> advanceLiquidations) {
+        this.advanceLiquidations = advanceLiquidations;
+    }
+
+    public void addAdvanceLiquidation(InitialAdvanceLiquidationItem liquidation){
+        if (this.getAdvanceLiquidations() == null)
+            this.advanceLiquidations = new ArrayList<>();
+        this.advanceLiquidations.add(liquidation);
     }
 
     public String getPayeesName() {

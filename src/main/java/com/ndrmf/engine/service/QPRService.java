@@ -18,7 +18,6 @@ import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.qpr.QPRSectionRequest;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportItem;
 import com.ndrmf.engine.dto.qpr.QuarterlyProgressReportListItem;
-import com.ndrmf.engine.repository.qpr.QPRTaskRepository;
 import com.ndrmf.exception.ValidationException;
 import com.ndrmf.notification.dto.TaskItem;
 import com.ndrmf.setting.model.SectionTemplate;
@@ -35,7 +34,6 @@ public class QPRService {
 	@Autowired private SectionTemplateRepository sectionTemplateRepo;
 	@Autowired private ProcessTypeRepository processTypeRepo;
 	@Autowired private QuarterlyProgressReportRepository qprRepo;
-	@Autowired private QPRTaskRepository qprTasksRepo;
 	@Autowired private UserRepository userRepository;
 	@Autowired private QuarterlyProgressReportSectionRepository quarterlyProgressReportSectionRepository;
 	@Autowired private QuarterlyProgressReportTaskRepository quarterlyProgressReportTaskRepository;
@@ -138,7 +136,7 @@ public class QPRService {
 		
 		if(qpr.getProposalRef().getInitiatedBy().getId().equals(principal.getUserId())) {
 			List<QuarterlyProgressReportTask> reassignmentComments = 
-					qprTasksRepo.findAllTasksForAssigneeAndRequest(principal.getUserId(), id);
+					quarterlyProgressReportTaskRepository.findAllTasksForAssigneeAndRequest(principal.getUserId(), id);
 			
 			if (reassignmentComments != null && reassignmentComments.size() > 0) {
 				QuarterlyProgressReportTask lastTask = reassignmentComments.get(reassignmentComments.size() - 1);
@@ -154,7 +152,7 @@ public class QPRService {
 		}
 
 //		List<QuarterlyProgressReportTask> qprtl = quarterlyProgressReportTaskRepository.findTasksForQprWithNoSection(qpr.getId());
-				List<QuarterlyProgressReportTask> qprtl = qprTasksRepo.findTasksForQprWithNoSection(qpr.getId());
+		List<QuarterlyProgressReportTask> qprtl = quarterlyProgressReportTaskRepository.findTasksForQprWithNoSection(qpr.getId());
 
 		qpr.getSections().forEach(qs -> {
 			SectionItem section = new SectionItem();
@@ -169,7 +167,7 @@ public class QPRService {
 			section.setReviewCompletedDate(qs.getReviewCompletedOn());
 			section.setReassignmentStatus(qs.getReassignmentStatus());
 			section.setQprId(qpr.getId());
-			List<QuarterlyProgressReportTask> tasks = qprTasksRepo.findTasksForSection(qs.getId(), PageRequest.of(0, 1));
+			List<QuarterlyProgressReportTask> tasks = quarterlyProgressReportTaskRepository.findTasksForSection(qs.getId(), PageRequest.of(0, 1));
 
 			if (tasks != null && tasks.size() > 0) {
 				section.setReviewDeadline(tasks.get(0).getEndDate());
@@ -322,10 +320,11 @@ public class QPRService {
 			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ qpr.getProcessOwner().getFullName());
 		}
 		body.getUsersId().forEach(userId -> {
-
-			Optional<QuarterlyProgressReportTask> oqprt = qprTasksRepo.findTasksForUserWithNoSection(userId);
+			System.out.println("THIS FNNCTION CALLED1" + qprId);
+			Optional<QuarterlyProgressReportTask> oqprt = quarterlyProgressReportTaskRepository.findTasksForUserWithNoSection(userId, qprId);
 
 			if (oqprt.isPresent()){
+				System.out.println("THIS FNNCTION CALLED2" + qprId);
 				oqprt.get().setStatus(ProcessStatus.PENDING.getPersistenceValue());
 				oqprt.get().setStartDate(body.getStartDate());
 				oqprt.get().setEndDate(body.getEndDate());
@@ -338,8 +337,8 @@ public class QPRService {
 				task.setAssignee(userRepository.findById(userId).get());
 				task.setStatus(TaskStatus.PENDING.getPersistenceValue());
 				task.setQpr(qpr);
-
 				quarterlyProgressReportTaskRepository.save(task);
+				System.out.println("THIS FNNCTION CALLED3" + qprId);
 			}
 		});
 
@@ -384,7 +383,7 @@ public class QPRService {
 
 	@Transactional
 	public void addQprReviewByDepUser(UUID byUserId, UUID taskId, AddQprTaskReviewRequest body) {
-		QuarterlyProgressReportTask qprt = qprTasksRepo.findById(taskId)
+		QuarterlyProgressReportTask qprt = quarterlyProgressReportTaskRepository.findById(taskId)
 				.orElseThrow(() -> new ValidationException("Invalid TASK ID"));
 
 		Optional<QuarterlyProgressReportTaskReview> oqprtr = qprTaskReviewRepo.findReviewsForTask(qprt.getId());

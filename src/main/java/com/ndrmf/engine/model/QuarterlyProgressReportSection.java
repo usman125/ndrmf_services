@@ -41,8 +41,7 @@ public class QuarterlyProgressReportSection {
 	private String reviewStatus;
 	private Date reviewCompletedOn;
 	private String reassignmentStatus;
-	
-	List<QuarterlyProgressReportSectionReview> reviews;
+	private List<QuarterlyProgressReportSectionReview> reviews;
 
 	
 	@Id

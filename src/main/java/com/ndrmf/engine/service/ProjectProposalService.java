@@ -437,17 +437,22 @@ public class ProjectProposalService {
 //		}
 
 		dto.setProposalName(p.getName());
-		dto.setTpvStatus(p.getTpv().getStatus());
-		dto.setPcStatus(p.getPc().getStatus());
+
+		if (p.getTpv() != null && p.getTpv().getStatus() != null)
+			dto.setTpvStatus(p.getTpv().getStatus());
+		if (p.getPc() != null && p.getPc().getStatus() != null)
+			dto.setPcStatus(p.getPc().getStatus());
 
 		return dto;
 	}
 
 	public List<ProjectProposalListItem> getProjectProposalRequests(AuthPrincipal currentUser, ProcessStatus status) throws IOException {
+
 		List<ProjectProposal> props = new ArrayList<ProjectProposal>();
 		List<ProjectProposal> giaprops = new ArrayList<ProjectProposal>();
 		List<ProjectProposal> qprprops = new ArrayList<ProjectProposal>();
 		List<ProjectProposal> disbursmentprops = new ArrayList<ProjectProposal>();
+
 		com.ndrmf.setting.model.ProcessType giaProcessType = processTypeRepo
 				.findById(ProcessStatus.GIA.getPersistenceValue())
 				.orElseThrow(() -> new ValidationException("GIA Process is not defined."));
@@ -457,9 +462,10 @@ public class ProjectProposalService {
 		com.ndrmf.setting.model.ProcessType disbursmentProcessType = processTypeRepo
 				.findById(ProcessType.DISBURSEMENT.toString())
 				.orElseThrow(() -> new ValidationException("Disbursment Process is not defined."));
+
 		if (currentUser.getUserId().equals(giaProcessType.getOwner().getId())
-		|| currentUser.getUserId().equals(qprProcessType.getOwner().getId()) ||
-				currentUser.getUserId().equals(disbursmentProcessType.getOwner().getId())) {
+				|| currentUser.getUserId().equals(qprProcessType.getOwner().getId()) ||
+					currentUser.getUserId().equals(disbursmentProcessType.getOwner().getId())) {
 //			giaprops.addAll(projProposalRepo.findAllRequestsByStatus(ProcessStatus.GIA.getPersistenceValue()));
 			giaprops.addAll(projProposalRepo.findAllGiaAndAboveRequests());
 		}

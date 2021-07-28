@@ -59,12 +59,12 @@ public class GrantDisbursementController {
 		return new ResponseEntity<>(new ApiResponse(true, "Initial Advance Updated Successfully."), HttpStatus.OK);
 	}
 
-	@PostMapping("/commence/{disbursmentId}")
+	@PostMapping("/commence/{proposalId}")
 	public ResponseEntity<ApiResponse> commenceGrantDisbursment(
 			@AuthenticationPrincipal AuthPrincipal principal,
-			@PathVariable(name = "disbursmentId", required = true) UUID disbursmentId,
+			@PathVariable(name = "proposalId", required = true) UUID proposalId,
 			@RequestBody @Valid GrantDisbursmentAdvanceRequest body){
-		grantDisbursmentService.commenceGrantDisbursment(principal, disbursmentId, body);
+		grantDisbursmentService.commenceGrantDisbursment(principal, proposalId, body);
 		return new ResponseEntity<>(new ApiResponse(true, "Grant Disbursment Generated Successfully."), HttpStatus.CREATED);
 	}
 
@@ -102,6 +102,20 @@ public class GrantDisbursementController {
 			@RequestBody(required = true) InitialAdvanceAssignReviewsRequest body){
 		grantDisbursmentService.assignQuarterAdvanceReviews(principal, disbursmentId, body);
 		return new ResponseEntity<>(new ApiResponse(true, "Users Assigned Successfully."), HttpStatus.CREATED);
+	}
+
+	@PostMapping("/{disbursmentId}/initial-advance/commence/liquidation/")
+	public ResponseEntity<ApiResponse> commenceInitialAdvanceLiquidation(
+			@PathVariable(name = "disbursmentId", required = true) UUID disbursmentId){
+		grantDisbursmentService.commenceInitialAdvanceLiquidation(disbursmentId);
+		return new ResponseEntity<>(new ApiResponse(true, "Liquidation Generated Successfully."), HttpStatus.CREATED);
+	}
+
+	@PostMapping("/{advanceId}/quarter-advance/commence/liquidation/")
+	public ResponseEntity<ApiResponse> commenceQuarterAdvanceLiquidation(
+			@PathVariable(name = "advanceId", required = true) UUID advanceId){
+		grantDisbursmentService.commenceQuarterAdvanceLiquidation(advanceId);
+		return new ResponseEntity<>(new ApiResponse(true, "Liquidation Generated Successfully."), HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{disbursmentId}/initial-advance/approve")

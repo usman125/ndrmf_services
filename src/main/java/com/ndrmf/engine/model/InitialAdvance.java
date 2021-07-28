@@ -57,8 +57,8 @@ public class InitialAdvance extends Auditable<String> {
 	@OneToMany(mappedBy = "initialAdvanceRef", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<GrantDisbursmentAdvanceReviews> reviewsList;
 
-	@OneToOne(mappedBy = "initialAdvanceRef")
-	private GrantDisbursmentAdvanceLiquidation grantDisbursmentAdvanceLiquidationRef;
+	@OneToMany(mappedBy = "initialAdvanceRef", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<GrantDisbursmentAdvanceLiquidation> grantDisbursmentAdvanceLiquidations;
 
 
 	public UUID getId() {
@@ -125,12 +125,27 @@ public class InitialAdvance extends Auditable<String> {
 		this.reviewsList.add(review);
 	}
 
-	public void setGrantDisbursmentAdvanceLiquidationRef(GrantDisbursmentAdvanceLiquidation grantDisbursmentAdvanceLiquidationRef) {
-		this.grantDisbursmentAdvanceLiquidationRef = grantDisbursmentAdvanceLiquidationRef;
+//	public void setGrantDisbursmentAdvanceLiquidationRef(GrantDisbursmentAdvanceLiquidation grantDisbursmentAdvanceLiquidationRef) {
+//		this.grantDisbursmentAdvanceLiquidationRef = grantDisbursmentAdvanceLiquidationRef;
+//	}
+//
+//	public GrantDisbursmentAdvanceLiquidation getGrantDisbursmentAdvanceLiquidationRef() {
+//		return grantDisbursmentAdvanceLiquidationRef;
+//	}
+
+	public List<GrantDisbursmentAdvanceLiquidation> getGrantDisbursmentAdvanceLiquidations() {
+		return grantDisbursmentAdvanceLiquidations;
 	}
 
-	public GrantDisbursmentAdvanceLiquidation getGrantDisbursmentAdvanceLiquidationRef() {
-		return grantDisbursmentAdvanceLiquidationRef;
+	public void setGrantDisbursmentAdvanceLiquidations(List<GrantDisbursmentAdvanceLiquidation> grantDisbursmentAdvanceLiquidations) {
+		this.grantDisbursmentAdvanceLiquidations = grantDisbursmentAdvanceLiquidations;
+	}
+
+	public void addGrantDisbursmentAdvanceLiquidation(GrantDisbursmentAdvanceLiquidation liquidation){
+		if (this.grantDisbursmentAdvanceLiquidations == null)
+			this.grantDisbursmentAdvanceLiquidations = new ArrayList<>();
+		liquidation.setInitialAdvanceRef(this);
+		this.grantDisbursmentAdvanceLiquidations.add(liquidation);
 	}
 
 	public String getPayeesName() {
