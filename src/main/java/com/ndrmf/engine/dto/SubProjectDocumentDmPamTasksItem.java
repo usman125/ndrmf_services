@@ -22,6 +22,7 @@ public class SubProjectDocumentDmPamTasksItem {
 	private List<SubProjectDocumentTasksItem> tasks;
 	private List<GeneralCommentItem> commentsMatrix;
 	private String comments;
+	private String dmComments;
 
 	public List<GeneralCommentItem> getCommentsMatrix() {
 		return commentsMatrix;
@@ -125,5 +126,13 @@ public class SubProjectDocumentDmPamTasksItem {
 			this.tasks = new ArrayList<>();
 
 		this.tasks.add(spdt);
+	}
+
+	public String getDmComments() {
+		return dmComments;
+	}
+
+	public void setDmComments(String dmComments) {
+		this.dmComments = dmComments;
 	}
 }

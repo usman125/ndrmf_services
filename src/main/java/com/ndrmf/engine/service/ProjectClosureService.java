@@ -2,6 +2,7 @@ package com.ndrmf.engine.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.common.AuthPrincipal;
+import com.ndrmf.engine.dto.Comment;
 import com.ndrmf.engine.dto.ProjectClosureTaskSubmitRequest;
 import com.ndrmf.engine.dto.CommenceProjectClosure;
 import com.ndrmf.engine.dto.ProjectClosureTasksListItem;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -163,6 +165,13 @@ public class ProjectClosureService {
 			ppli.setAssigned(q.getAssignee().getId().equals(currentUser.getUserId()));
 			ppli.setOrderNum(q.getOrderNum());
 
+
+			ppli.setIsMarkedTo(q.getProjectClosureRef().getIsMarkedTo());
+			ppli.setMarkedToStatus(q.getProjectClosureRef().getMarkedToStatus());
+			ppli.setMarkedToComments(q.getProjectClosureRef().getMarkedToComments());
+			ppli.setMarkedToSubStatus(q.getProjectClosureRef().getMarkedToSubStatus());
+			ppli.setClosureId(q.getProjectClosureRef().getId());
+
 			dtos.add(ppli);
 		});
 		return dtos;
@@ -180,5 +189,27 @@ public class ProjectClosureService {
 		)){
 			props.getProjectClosureRef().setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
 		}
+	}
+
+	@Transactional
+	public void markProjectClosureToCeo(UUID currentUserId, UUID requestId) throws IOException {
+		ProjectClosure prop;
+		prop = projClosureRepo.findById(requestId)
+				.orElseThrow(() -> new ValidationException("INVALID CLOSURE ID"));
+		prop.setIsMarkedTo(ProcessStatus.MARKED_TO_CEO.getPersistenceValue());
+		prop.setMarkedToStatus(ProcessStatus.PENDING.getPersistenceValue());
+	}
+
+	@Transactional
+	public void projectClosureCeoApproval(UUID currentUserId,
+										  UUID requestId,
+										  Comment body,
+										  ProcessStatus status) throws IOException {
+		ProjectClosure prop;
+		prop = projClosureRepo.findById(requestId)
+				.orElseThrow(() -> new ValidationException("INVALID CLOSURE ID"));
+		prop.setMarkedToStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+		prop.setMarkedToSubStatus(status.getPersistenceValue());
+		prop.setMarkedToComments(body.getComment());
 	}
 }

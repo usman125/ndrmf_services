@@ -24,6 +24,10 @@ public class ProjectClosure extends Auditable<String> {
 	private String generalComments;
 	private Date created_at;
 	private List<ProjectClosureTasks> tasks;
+	private String isMarkedTo;
+	private String markedToStatus;
+	private String markedToComments;
+	private String markedToSubStatus;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -83,6 +87,37 @@ public class ProjectClosure extends Auditable<String> {
 	}
 	public void setGeneralComments(String generalComments) {
 		this.generalComments = generalComments;
+	}
+
+	public String getIsMarkedTo() {
+		return isMarkedTo;
+	}
+
+	public void setIsMarkedTo(String isMarkedTo) {
+		this.isMarkedTo = isMarkedTo;
+	}
+
+	public String getMarkedToStatus() {
+		return markedToStatus;
+	}
+
+	public void setMarkedToStatus(String markedToStatus) {
+		this.markedToStatus = markedToStatus;
+	}
+
+	public String getMarkedToComments() {
+		return markedToComments;
+	}
+	public void setMarkedToComments(String markedToComments) {
+		this.markedToComments = markedToComments;
+	}
+
+	public String getMarkedToSubStatus() {
+		return markedToSubStatus;
+	}
+
+	public void setMarkedToSubStatus(String markedToSubStatus) {
+		this.markedToSubStatus = markedToSubStatus;
 	}
 
 	@Override

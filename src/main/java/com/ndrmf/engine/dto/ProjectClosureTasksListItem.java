@@ -14,6 +14,11 @@ public class ProjectClosureTasksListItem extends Auditable<String> {
 	private Date created_at;
 	private boolean assigned;
 	private Integer orderNum;
+	private String isMarkedTo;
+	private String markedToStatus;
+	private String markedToComments;
+	private String markedToSubStatus;
+	private UUID closureId;
 
 	public UUID getId() {
 		return id;
@@ -72,5 +77,44 @@ public class ProjectClosureTasksListItem extends Auditable<String> {
 
 	public void setOrderNum(Integer orderNum) {
 		this.orderNum = orderNum;
+	}
+
+	public String getIsMarkedTo() {
+		return isMarkedTo;
+	}
+
+	public void setIsMarkedTo(String isMarkedTo) {
+		this.isMarkedTo = isMarkedTo;
+	}
+
+	public String getMarkedToStatus() {
+		return markedToStatus;
+	}
+
+	public void setMarkedToStatus(String markedToStatus) {
+		this.markedToStatus = markedToStatus;
+	}
+
+	public String getMarkedToComments() {
+		return markedToComments;
+	}
+	public void setMarkedToComments(String markedToComments) {
+		this.markedToComments = markedToComments;
+	}
+
+	public String getMarkedToSubStatus() {
+		return markedToSubStatus;
+	}
+
+	public void setMarkedToSubStatus(String markedToSubStatus) {
+		this.markedToSubStatus = markedToSubStatus;
+	}
+
+	public UUID getClosureId() {
+		return closureId;
+	}
+
+	public void setClosureId(UUID closureId) {
+		this.closureId = closureId;
 	}
 }

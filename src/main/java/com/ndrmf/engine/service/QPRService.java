@@ -175,7 +175,7 @@ public class QPRService {
 			
 			if (qs.getReviews() != null && qs.getReviews().size() > 0) {
 				QuarterlyProgressReportSectionReview latestReview;
-				latestReview = qs.getReviews().get(qs.getReviews().size() - 1);
+				latestReview = qs.getReviews().get(0);
 				section.setReview(
 						latestReview.getCreatedDate(),
 						null,

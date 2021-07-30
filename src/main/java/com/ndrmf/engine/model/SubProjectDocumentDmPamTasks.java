@@ -38,6 +38,7 @@ public class SubProjectDocumentDmPamTasks extends Auditable<String> {
 	private List<SubProjectDocumentTasks> tasks;
 	private String comments;
 	private String generalComments;
+	private String dmComments;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -152,4 +153,11 @@ public class SubProjectDocumentDmPamTasks extends Auditable<String> {
 		this.generalComments = generalComments;
 	}
 
+	public String getDmComments() {
+		return dmComments;
+	}
+
+	public void setDmComments(String dmComments) {
+		this.dmComments = dmComments;
+	}
 }

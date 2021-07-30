@@ -150,9 +150,10 @@ public class ImplementationController {
 	public ResponseEntity<ApiResponse> changeSubProjectDocDmPamTaskStatus(
 			@PathVariable(name = "requestId", required = true) UUID requestId,
 			@RequestParam(name = "status", required = true) ProcessStatus status,
+			@RequestBody Comment body,
 			@AuthenticationPrincipal AuthPrincipal principal){
 
-		implService.changeSubProjectDocDmPamTaskStatus(requestId, principal, status);
+		implService.changeSubProjectDocDmPamTaskStatus(requestId, principal, status, body);
 		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
 	}
 }

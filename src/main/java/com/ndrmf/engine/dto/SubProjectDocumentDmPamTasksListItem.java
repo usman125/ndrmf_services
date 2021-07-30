@@ -19,7 +19,16 @@ public class SubProjectDocumentDmPamTasksListItem {
 	private String comments;
 	private String docName;
 	private String docNumber;
-	
+	private String fipName;
+
+	public String getFipName() {
+		return fipName;
+	}
+
+	public void setFipName(String fipName) {
+		this.fipName = fipName;
+	}
+
 	public UUID getId() {
 		return id;
 	}

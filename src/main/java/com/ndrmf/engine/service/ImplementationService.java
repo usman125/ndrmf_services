@@ -180,6 +180,7 @@ public class ImplementationService {
 				spddmpamli.setStartDate(c.getStartDate());
 				spddmpamli.setEndDate(c.getEndDate());
 				spddmpamli.setId(c.getId());
+				spddmpamli.setDmComments(c.getDmComments());
 				subProjectTasksRepo.getSubProjectDocumentTasksBySpdDmpamId(c.getId()).forEach(e -> {
 					SubProjectDocumentTasksItem spdti = new SubProjectDocumentTasksItem();
 					spdti.setAssignee(new UserLookupItem(e.getAssignee().getId(), e.getAssignee().getFullName()));
@@ -303,6 +304,7 @@ public class ImplementationService {
 			spddmpamli.setStatus(c.getStatus());
 			spddmpamli.setDocName(c.getSubProjectRef().getDocName());
 			spddmpamli.setDocNumber(c.getSubProjectRef().getDocNumber());
+			spddmpamli.setFipName(c.getSubProjectRef().getProposalRef().getName());
 			dto.add(spddmpamli);
 		});
 
@@ -328,7 +330,7 @@ public class ImplementationService {
 			spdtli.setDocName(c.getSubProjectDocumentDmPamTasksRef().getSubProjectRef().getDocName());
 			spdtli.setDocNumber(c.getSubProjectDocumentDmPamTasksRef().getSubProjectRef().getDocNumber());
 			spdtli.setSubProjectRef(c.getSubProjectDocumentDmPamTasksRef().getSubProjectRef().getId());
-
+			spdtli.setFipName(c.getSubProjectDocumentDmPamTasksRef().getSubProjectRef().getProposalRef().getName());
 			dto.add(spdtli);
 		});
 
@@ -391,10 +393,12 @@ public class ImplementationService {
 	public void changeSubProjectDocDmPamTaskStatus(
 			UUID requestId,
 			AuthPrincipal principal,
-			ProcessStatus status
+			ProcessStatus status,
+			Comment body
 	){
 		SubProjectDocumentDmPamTasks spddmpt = subProjectDmpamTasksRepo.findById(requestId)
 				.orElseThrow(() -> new ValidationException("Invalid DM PAM TASK ID"));
 		spddmpt.setStatus(status.getPersistenceValue());
+		spddmpt.setDmComments(body.getComment());
 	}
 }
