@@ -143,7 +143,7 @@ public class ProjectClosureService {
 		}
 
 		p.setPc(pc);
-//		projClosureRepo.save(pc);
+		projClosureRepo.save(pc);
 	}
 
 

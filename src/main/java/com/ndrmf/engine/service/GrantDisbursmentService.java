@@ -490,7 +490,8 @@ public class GrantDisbursmentService {
 
         if (gdqar.stream()
                 .allMatch(r -> r.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue()))) {
-            review.getQuarterAdvanceRef().setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
+            if (review.getQuarterAdvanceRef() != null)
+                review.getQuarterAdvanceRef().setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
             gd.setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
         }
     }

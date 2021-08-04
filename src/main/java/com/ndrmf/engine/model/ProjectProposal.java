@@ -57,6 +57,7 @@ public class ProjectProposal extends Auditable<String> {
 	private String closed;
 	private Tpv tpv;
 	private ProjectClosure pc;
+//	private List<QuarterlyProgressReport> qprs;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -170,7 +171,25 @@ public class ProjectProposal extends Auditable<String> {
 		
 		this.attachments.add(a);
 	}
-	
+
+//	@OneToMany(mappedBy="proposalRef", fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+//	public List<QuarterlyProgressReport> getQprs() {
+//		return qprs;
+//	}
+//
+//	public void setQprs(List<QuarterlyProgressReport> qprs) {
+//		this.qprs = qprs;
+//	}
+//
+//	public void addQpr(QuarterlyProgressReport qpr){
+//		if (this.qprs == null)
+//			this.qprs = new ArrayList<>();
+//
+//		qpr.setProposalRef(this);
+//
+//		this.qprs.add(qpr);
+//	}
+
 	@OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "pip_id")
 	public ProjectImplementationPlan getPip() {

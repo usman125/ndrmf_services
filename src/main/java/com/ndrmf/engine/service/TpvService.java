@@ -151,8 +151,9 @@ public class TpvService {
 
 		tpv.addTask(tpv9);
 
-//		tpvRepo.save(tpv);
 		p.setTpv(tpv);
+
+		tpvRepo.save(tpv);
 	}
 
 

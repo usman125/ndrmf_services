@@ -56,7 +56,7 @@ public class QPRService {
 		QuarterlyProgressReport qpr = new QuarterlyProgressReport();
 
 		if (prevQprs != null && prevQprs.size() > 0){
-			qpr.setQuarter(prevQprs.get(prevQprs.size() - 1).getQuarter() + 1);
+			qpr.setQuarter(prevQprs.size() + 1);
 //			qpr.setDueDate(prevQprs.get(prevQprs.size() - 1).getDueDate().plusMonths(3));
 			qpr.setDueDate(body.getDueDate());
 			qpr.setAssignedComments(body.getComments());
