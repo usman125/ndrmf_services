@@ -186,6 +186,16 @@ public class QuarterAdvanceItem {
         private String comments;
         private String status;
         private String subStatus;
+        private int amount;
+
+        public int getAmount() {
+            return amount;
+        }
+
+        public void setAmount(int amount) {
+            this.amount = amount;
+        }
+
         public UUID getId() {
             return id;
         }
@@ -249,6 +259,8 @@ public class QuarterAdvanceItem {
 
         private List<GrantDisbursmentAdvanceLiquidationSoesItem> ndrmfSoes;
         private List<GrantDisbursmentAdvanceLiquidationSoesItem> fipSoes;
+
+        private Integer orderNumber;
 
         public String getReassignmentComments() {
             return reassignmentComments;
@@ -396,6 +408,14 @@ public class QuarterAdvanceItem {
 
         public void setReassignedOn(Date reassignedOn) {
             this.reassignedOn = reassignedOn;
+        }
+
+        public Integer getOrderNumber() {
+            return orderNumber;
+        }
+
+        public void setOrderNumber(Integer orderNumber) {
+            this.orderNumber = orderNumber;
         }
     }
 

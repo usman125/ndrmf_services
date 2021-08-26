@@ -56,7 +56,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.and()
 			.csrf().disable()
 			.authorizeRequests()
-				.antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+				.antMatchers(
+						SecurityConstants.SIGN_UP_URL,
+						SecurityConstants.COMPLAINT_ADD,
+						SecurityConstants.COMPLAINT_FIND_BY_USER,
+						SecurityConstants.COMPLAINT_FIND_USER,
+						SecurityConstants.COMPLAINT_FIND,
+						SecurityConstants.COMPLAINT_APPEAL).permitAll()
 				.anyRequest().authenticated()
 				.and().addFilter(authenticationFilter()).addFilter(new JWTAuthorizationFilter(authManager, userDetailsService))
 				.exceptionHandling()

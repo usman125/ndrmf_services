@@ -203,6 +203,16 @@ public class InitialAdvanceItem {
         private String comments;
         private String status;
         private String subStatus;
+        private int Amount;
+
+        public int getAmount() {
+            return Amount;
+        }
+
+        public void setAmount(int amount) {
+            Amount = amount;
+        }
+
         public UUID getId() {
             return id;
         }
@@ -266,6 +276,8 @@ public class InitialAdvanceItem {
 
         private List<GrantDisbursmentAdvanceLiquidationSoesItem> ndrmfSoes;
         private List<GrantDisbursmentAdvanceLiquidationSoesItem> fipSoes;
+
+        private Integer orderNumber;
 
         public String getReassignmentComments() {
             return reassignmentComments;
@@ -413,6 +425,14 @@ public class InitialAdvanceItem {
 
         public void setReassignedOn(Date reassignedOn) {
             this.reassignedOn = reassignedOn;
+        }
+
+        public Integer getOrderNumber() {
+            return orderNumber;
+        }
+
+        public void setOrderNumber(Integer orderNumber) {
+            this.orderNumber = orderNumber;
         }
     }
 }

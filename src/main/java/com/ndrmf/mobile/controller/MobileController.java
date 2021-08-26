@@ -6,6 +6,9 @@ import com.ndrmf.engine.dto.CommenceTpv;
 import com.ndrmf.engine.dto.TpvTaskSubmitRequest;
 import com.ndrmf.engine.dto.TpvTasksListItem;
 import com.ndrmf.engine.service.TpvService;
+import com.ndrmf.mobile.dto.ActivityVerificationItem;
+import com.ndrmf.mobile.dto.ActivityVerificationRequest;
+import com.ndrmf.mobile.service.ActivityVerificationService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,43 +28,43 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/mobile")
 public class MobileController {
-//	@Autowired private TpvService tpvService;
-//
-//	@GetMapping("/{proposalId}")
-//	public ResponseEntity<List<TpvTasksListItem>> getTpvs(@AuthenticationPrincipal AuthPrincipal principal,
-//			@PathVariable(name = "proposalId", required = false) UUID proposalId) throws IOException{
-//		return new ResponseEntity<>(tpvService.getTpvRequestsByProposalId(principal, proposalId), HttpStatus.OK);
-//	}
-//
-//	@PostMapping("/commence")
-//	public ResponseEntity<?> commenceTpvRequest(
-//			@AuthenticationPrincipal AuthPrincipal principal,
-//			@RequestBody @Valid CommenceTpv body){
-//		tpvService.commenceTpv(principal, body);
-//		return new ResponseEntity<>(new ApiResponse(true, "TPV initiated successfully."), HttpStatus.CREATED);
-//	}
-//
-//	@PostMapping("/{taskId}/submit")
-//	public ResponseEntity<ApiResponse> submitTpvTask(
-//			@AuthenticationPrincipal AuthPrincipal principal,
-//			@PathVariable(name = "taskId", required = true) UUID taskId,
-//			@RequestBody @Valid TpvTaskSubmitRequest body) throws IOException {
-//		tpvService.submitTpvTask(principal.getUserId(), taskId, body);
-//		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Task submitted successfully."), HttpStatus.CREATED);
-//	}
-//
-//	@PostMapping("/{taskId}/upload-file")
-//	public ResponseEntity<?> uploadFileForTpvTask(
-//			@AuthenticationPrincipal AuthPrincipal principal,
-//			@RequestParam(name = "file", required = true) MultipartFile file,
-//			@PathVariable(name = "taskId", required = true) UUID taskId) throws IOException {
-//		String path = tpvService.uploadFileForTpvTask(
-//				principal,
-//				taskId,
-//				file
-//		);
-//		Map<String, String> dto = new HashMap<>();
-//		dto.put("filePath", path);
-//		return new ResponseEntity<>(dto, HttpStatus.CREATED);
-//	}
+
+    @Autowired
+    private ActivityVerificationService avService;
+
+    @PostMapping("/commence")
+    public ResponseEntity<?> commenceTpvRequest(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestBody @Valid ActivityVerificationRequest body) throws IOException {
+//        UUID avId = avService.commenceActivityVerification(principal, body);
+//        Map<String, UUID> dto = new HashMap<>();
+//        dto.put("avId", avId);
+//        return new ResponseEntity<>(avId, HttpStatus.CREATED);
+        Map<String, UUID> dto = new HashMap<>();
+        dto.put("id", avService.commenceActivityVerification(principal, body));
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{avId}/upload-file")
+    public ResponseEntity<?> uploadFileForActivityVerification(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @RequestParam(name = "file", required = true) MultipartFile file,
+            @PathVariable(name = "avId", required = true) UUID avId) throws IOException {
+        String path = avService.uploadFileForActivityVerification(
+                principal,
+                avId,
+                file
+        );
+        Map<String, String> dto = new HashMap<>();
+        dto.put("filePath", path);
+
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+	@GetMapping("/{activityId}/{quarter}")
+	public ResponseEntity<ActivityVerificationItem> getAvItem(@AuthenticationPrincipal AuthPrincipal principal,
+                                                            @PathVariable(name = "activityId", required = true) String activityId,
+                                                            @PathVariable(name = "quarter", required = true) int quarter) throws IOException{
+		return new ResponseEntity<>(avService.getRequestsByActivityAndQuarter(principal, activityId, quarter), HttpStatus.OK);
+	}
 }

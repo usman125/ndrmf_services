@@ -10,9 +10,11 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.transaction.Transactional;
 
+import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.*;
 import com.ndrmf.engine.model.*;
 import com.ndrmf.engine.repository.*;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.setting.dto.ThematicAreaItem;
 import com.ndrmf.setting.repository.DesignationRepository;
 import com.ndrmf.user.dto.SmeLookupItem;
@@ -53,16 +55,17 @@ public class AccreditationService {
 	@Autowired private AccreditationQuestionairreRepository questionairreRepo;
 	@Autowired private FIPThematicAreaRepository fipThematicAreaRepo;
 	@Autowired private DesignationRepository designationRepository;
+	@Autowired private NotificationService notificationService;
 	
 	@PersistenceContext private EntityManager em;
 	
-	public void addEligibility(UUID initiatedByUserId, EligibilityRequest body) {
+	public void addEligibility(AuthPrincipal initiatedByUser, EligibilityRequest body) {
 		Set<String> constraintStatuses = new HashSet<>(); 
 		constraintStatuses.add(ProcessStatus.DRAFT.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.APPROVED.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
 		
-		int existingRequests = eligbiligyRepo.checkCountForUserWithStatuses(initiatedByUserId, constraintStatuses);
+		int existingRequests = eligbiligyRepo.checkCountForUserWithStatuses(initiatedByUser.getUserId(), constraintStatuses);
 		
 		if(existingRequests > 0) {
 			throw new ValidationException("A request for this username already exists which is either APPROVED, UNDER REVIEW or in DRAFT Status");
@@ -70,7 +73,7 @@ public class AccreditationService {
 		
 		Eligibility elig = new Eligibility();
 		
-		elig.setInitiatedBy(userRepo.getOne(initiatedByUserId));
+		elig.setInitiatedBy(userRepo.getOne(initiatedByUser.getUserId()));
 		com.ndrmf.setting.model.ProcessType processMeta = processTypeRepo.findById(ProcessType.ELIGIBILITY.name()).get();
 		
 		elig.setProcessOwner(processMeta.getOwner());
@@ -78,7 +81,24 @@ public class AccreditationService {
 		elig.setTemplate(body.getTemplate());
 		elig.setData(body.getData());
 		
-		eligbiligyRepo.save(elig);
+		Eligibility eligiRequest = eligbiligyRepo.save(elig);
+
+		try {
+			notificationService.sendPlainTextEmail(
+					processMeta.getOwner().getEmail(),
+					processMeta.getOwner().getFullName(),
+					"New Eligibility Request Submitted",
+					processMeta.getOwner().getFullName() +
+							" " +
+							initiatedByUser.getFullName() +
+							", has submitted a new eligibility request at NDRMF please visit " +
+							"http://ndrmfdev.herokuapp.com/eligibility-requests/"+eligiRequest.getId()
+							+ " to view the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	public void updateEligibility(UUID initiatedByUserId, UUID eligId, EligibilityRequest body) {
@@ -447,10 +467,23 @@ public class AccreditationService {
 //		}
 		
 		elig.setStatus(ProcessStatus.APPROVED.getPersistenceValue());
-		
 		elig = eligbiligyRepo.save(elig);
-		
 		eventPublisher.publishEvent(new EligibilityApprovedEvent(this, elig));
+
+		try {
+			notificationService.sendPlainTextEmail(
+					elig.getInitiatedBy().getEmail(),
+					elig.getInitiatedBy().getFullName(),
+					"Eligibility Request at NDRMF has been " + ProcessStatus.APPROVED.getPersistenceValue(),
+					elig.getInitiatedBy().getFullName() +
+					", your eligibility request at NDRMF has been " + ProcessStatus.APPROVED.getPersistenceValue() +
+					"please visit http://ndrmfdev.herokuapp.com/eligibility-requests/"+elig.getId()
+					+ " to view the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		
 	}
 	
@@ -472,6 +505,21 @@ public class AccreditationService {
 		elig = eligbiligyRepo.save(elig);
 		
 		eventPublisher.publishEvent(new EligibilityApprovedEvent(this, elig));
+
+		try {
+			notificationService.sendPlainTextEmail(
+					elig.getInitiatedBy().getEmail(),
+					elig.getInitiatedBy().getFullName(),
+					"Eligibility Request at NDRMF has been " + ProcessStatus.REJECTED.getPersistenceValue(),
+					elig.getInitiatedBy().getFullName() +
+					", your eligibility request at NDRMF has been " + ProcessStatus.REJECTED.getPersistenceValue() +
+					"please visit http://ndrmfdev.herokuapp.com/eligibility-requests/"+elig.getId()
+					+ " to view the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		
 	}
 	

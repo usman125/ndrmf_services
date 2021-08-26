@@ -105,17 +105,24 @@ public class GrantDisbursementController {
 	}
 
 	@PostMapping("/{disbursmentId}/initial-advance/commence/liquidation/")
-	public ResponseEntity<ApiResponse> commenceInitialAdvanceLiquidation(
+	public ResponseEntity<?> commenceInitialAdvanceLiquidation(
 			@PathVariable(name = "disbursmentId", required = true) UUID disbursmentId){
-		grantDisbursmentService.commenceInitialAdvanceLiquidation(disbursmentId);
-		return new ResponseEntity<>(new ApiResponse(true, "Liquidation Generated Successfully."), HttpStatus.CREATED);
+		UUID path = grantDisbursmentService.commenceInitialAdvanceLiquidation(disbursmentId);
+		Map<String, UUID> dto = new HashMap<>();
+		dto.put("id", path);
+		return new ResponseEntity<>(dto, HttpStatus.CREATED);
+//		return new ResponseEntity<>(new ApiResponse(true, "Liquidation Generated Successfully."), HttpStatus.CREATED);
 	}
 
 	@PostMapping("/{advanceId}/quarter-advance/commence/liquidation/")
-	public ResponseEntity<ApiResponse> commenceQuarterAdvanceLiquidation(
+	public ResponseEntity<?> commenceQuarterAdvanceLiquidation(
 			@PathVariable(name = "advanceId", required = true) UUID advanceId){
-		grantDisbursmentService.commenceQuarterAdvanceLiquidation(advanceId);
-		return new ResponseEntity<>(new ApiResponse(true, "Liquidation Generated Successfully."), HttpStatus.CREATED);
+
+		UUID path = grantDisbursmentService.commenceQuarterAdvanceLiquidation(advanceId);
+		Map<String, UUID> dto = new HashMap<>();
+		dto.put("id", path);
+		return new ResponseEntity<>(dto, HttpStatus.CREATED);
+//		return new ResponseEntity<>(new ApiResponse(true, "Liquidation Generated Successfully."), HttpStatus.CREATED);
 	}
 
 	@PutMapping("/{disbursmentId}/initial-advance/approve")

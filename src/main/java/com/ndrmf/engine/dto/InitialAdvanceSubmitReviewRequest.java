@@ -7,6 +7,15 @@ public class InitialAdvanceSubmitReviewRequest {
     private String subStatus;
     private UUID qaId;
     private String type;
+    private int amount;
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
 
     public UUID getQaId() {
         return qaId;

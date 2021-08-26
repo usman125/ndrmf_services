@@ -138,11 +138,7 @@ public class UserController {
     @RolesAllowed(SystemRoles.SIGNUP_APPROVER)
     @GetMapping("/signup/requests/{id}/approve")
     public ResponseEntity<ApiResponse> approveSignupRequest(@PathVariable(name = "id", required = true) UUID id){
-    	
-    	logger.debug("Approving Signup Request with ID: "+id.toString());
-    	
     	userService.approveSignupRequest(id, "approving request");
-    	
     	return new ResponseEntity<ApiResponse>(new ApiResponse(true, "signup request approved"), HttpStatus.OK);
     }
     

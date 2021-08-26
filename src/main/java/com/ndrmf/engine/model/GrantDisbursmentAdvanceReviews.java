@@ -31,6 +31,9 @@ public class GrantDisbursmentAdvanceReviews extends Auditable<String> {
     private String status;
     private String subStatus;
 
+//    @Column(nullable = false)
+    private int amount;
+
 
     @ManyToOne
     @JoinColumn(name = "initial_advance_id", nullable = false)
@@ -98,5 +101,13 @@ public class GrantDisbursmentAdvanceReviews extends Auditable<String> {
 
     public User getAssignee() {
         return assignee;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 }

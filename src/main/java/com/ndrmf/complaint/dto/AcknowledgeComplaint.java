@@ -14,7 +14,10 @@ public class AcknowledgeComplaint {
 	public AcknowledgeComplaint() {
 	}
 
-	public AcknowledgeComplaint(String status, Long seqNo, String priority, String internalStatus,
+	public AcknowledgeComplaint(
+			String status,
+			Long seqNo,
+			String priority, String internalStatus,
 			List<Assignee> assignee) {
 		super();
 		this.status = status;

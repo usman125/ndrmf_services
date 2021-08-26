@@ -35,6 +35,12 @@ public enum ProcessStatus {
 	QPR("QPR"),
 	QUALIFICATION("Qualification"),
 	QPR_TO_DONOR("Qpr To Donor"),
+	VERIFIED("Verified"),
+	NOT_VERIFIED("Not Verified"),
+	ELIGIBLE("Eligible"),
+	INELIGIBLE("Ineligible"),
+	CARRY_FORWARD("Carry Forward"),
+	ADJUSTED("Adjusted"),
 	SUB_PROJECT_DOCUMENT("Sub Project Doncument");
 
 	private final String persistenceValue;

@@ -33,7 +33,7 @@ public class GrantDisbursmentAdvanceLiquidation extends Auditable<String> {
     private String specialPaymentInstruction;
     private List<GrantDisbursmentAdvanceLiquidationSoes> liquidationSoes;
     private String reassignmentComments;
-
+    private Integer orderNumber;
     private Date reassignedOn;
 
     @Id
@@ -199,4 +199,11 @@ public class GrantDisbursmentAdvanceLiquidation extends Auditable<String> {
         this.reassignedOn = reassignedOn;
     }
 
+    public Integer getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(Integer orderNumber) {
+        this.orderNumber = orderNumber;
+    }
 }

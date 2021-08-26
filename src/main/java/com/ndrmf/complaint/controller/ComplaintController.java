@@ -106,12 +106,15 @@ public class ComplaintController {
 	@PostMapping("/{complaintId}/assign/concerned-person")
 	public ResponseEntity<ApiResponse> assignToConcernedPerson(@AuthenticationPrincipal AuthPrincipal principal,
 			@PathVariable(name = "complaintId", required = true) UUID complaintId,
-			@RequestBody @Valid List<AddComplaintAssignee> assigneeList, @RequestParam String notificationTitle,
-			String notificationBody) {
+			@RequestBody @Valid List<AddComplaintAssignee> assigneeList) {
 
-		complaintService.addComplaintAssignee(assigneeList, complaintId,
-				ComplaintStatus.MARKED_TO_CONCERNED_PERSON.getPersistenceValue(), "Complaint Received",
-				"You got a new complaint. Please submit your remarks/point of view within 3 working days.");
+		complaintService.addComplaintAssignee(
+				assigneeList,
+				complaintId,
+				ComplaintStatus.MARKED_TO_CONCERNED_PERSON.getPersistenceValue(),
+				"Complaint Received",
+				"You got a new complaint. Please submit your remarks/point of view within 3 working days."
+		);
 		return new ResponseEntity<>(new ApiResponse(true, "Complaint has been assigned."), HttpStatus.OK);
 	}
 
@@ -188,11 +191,14 @@ public class ComplaintController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(true, "Appeal has been submitted."));
 	}
 	@GetMapping("appeal/findall")
-	public ResponseEntity<List<ComplaintAppealDto>> getComplaintAppeal(@RequestParam ComplaintStatus status){
+	public ResponseEntity<List<ComplaintAppealDto>> getComplaintAppeal(
+			@RequestParam ComplaintStatus status
+	){
 		return ResponseEntity.ok().body(complaintService.getComplaintAppeals(status.getPersistenceValue()));		
 	}
 	@GetMapping("user/findByRole")
-	public ResponseEntity<List<UserLookupItem>> getUserListByRole(@RequestParam String role){
+	public ResponseEntity<List<UserLookupItem>> getUserListByRole(
+			@RequestParam String role){
 		return ResponseEntity.ok().body(complaintService.getActiveUsersForLookupByRole(role));		
 	}	
 

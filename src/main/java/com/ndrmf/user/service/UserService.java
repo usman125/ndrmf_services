@@ -2,6 +2,7 @@ package com.ndrmf.user.service;
 
 import com.ndrmf.engine.dto.FipThematicAreasListItem;
 import com.ndrmf.engine.model.ProjectProposalGeneralCommentModel;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.setting.dto.ThematicAreaItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -68,6 +69,7 @@ public class UserService {
 	@Autowired private FIPThematicAreaRepository fipThematicAreaRepo;
 	@Autowired private ThematicAreaRepository thematicAreaRepo;
 	@Autowired private TempTestRepository tempTestRepo;
+	@Autowired private NotificationService notificationService;
 	
 	@Transactional
     public String createUser(CreateUserRequest body) {
@@ -297,6 +299,34 @@ public class UserService {
 		signup.setApprovalStatus(SignupRequestStatus.PENDING.toString());
 		
 		signupRepo.save(signup);
+
+		try {
+			notificationService.sendPlainTextEmail(
+					body.getEmail(),
+					body.getFirstName(),
+					"Signup at NDRMF",
+					"Your sign up request has been initiated. We will review your application and once its approved " +
+							"or Rejected we will inform you. Thanks!"
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
+		try {
+			notificationService.sendPlainTextEmail(
+					userRepo.findActiveUsersForRole(SystemRoles.SIGNUP_APPROVER).get(0).getEmail(),
+					userRepo.findActiveUsersForRole(SystemRoles.SIGNUP_APPROVER).get(0).getFullName(),
+					"New Sign up request at NDRMF",
+					body.getFirstName() + " has submitted a new signup request. Please review and respond the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
+
+
 	}
 	
 	public List<SignupRequestItem> getPendingSignupRequests() {
@@ -544,6 +574,20 @@ public class UserService {
 		u.addRole(roleRepository.findByName(SystemRoles.FIP_DATAENTRY));
 		
 		userRepo.save(u);
+
+		try {
+			notificationService.sendPlainTextEmail(
+					s.getEmail(),
+					s.getFirstName(),
+					"Account at NDRMF has been approved;",
+					s.getFirstName() + " your account has been approved at NDRMF. Kindly login to the portal at " +
+							"http://ndrmfdev.herokuapp.com/"
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
 	}
 	
 	public List<UserLookupItem> getActiveUsersForLookupByRole(String roleName) {

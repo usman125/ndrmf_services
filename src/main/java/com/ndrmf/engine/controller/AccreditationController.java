@@ -60,7 +60,7 @@ public class AccreditationController {
 	@RolesAllowed(SystemRoles.ORG_FIP)
 	@PostMapping("/eligibility/add")
 	public ResponseEntity<ApiResponse> addEligibility(@AuthenticationPrincipal AuthPrincipal principal, @RequestBody @Valid EligibilityRequest body){
-		accreditationService.addEligibility(principal.getUserId(), body);
+		accreditationService.addEligibility(principal, body);
 		
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Eligibility request added successfully."), HttpStatus.CREATED);
 	}

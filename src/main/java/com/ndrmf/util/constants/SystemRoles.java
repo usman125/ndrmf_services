@@ -26,4 +26,7 @@ public class SystemRoles {
 	public static final String CEO = "CEO";
 	
 	public static final String SIGNUP_APPROVER = "SIGNUP_APPROVER";
+	public static final String FP = "FOCAL PERSON";
+	public static final String CP = "CONCERNED PERSON";
+	public static final String GRC = "GRC MEMBERS";
 }

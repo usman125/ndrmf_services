@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -116,7 +117,8 @@ public class ComplaintService {
 		body.getAssignee().forEach(x -> {
 			ComplaintAssignee assignee = new ComplaintAssignee();
 			assignee.setAssignedDateTime(LocalDateTime.now());
-			assignee.setAssignedPerson(userRepo.findById(x.getUserId()).get());
+			if (x.getUserId() != null)
+				assignee.setAssignedPerson(userRepo.findById(x.getUserId()).get());
 			assignee.setComplaintRef(complaint);
 			assigneeRepo.save(assignee);
 
@@ -384,16 +386,21 @@ public class ComplaintService {
 //		return modelMapper.map(dto, ComplaintAppeal.class);
 		return null;
 	}
+
 	public void addComplaintAppeal(ComplaintAppealDto body) {
-		ComplaintAppeal complaintAppeal= convertComplaintAppealDtoToEntity(body);
-		complaintAppeal.setComplaintRef(complaintRepo.findById(body.getComplaintId()).get());
+		Complaint c = complaintRepo.findById(body.getComplaintId())
+				.orElseThrow(() -> new ValidationException("COMPLAINT ID INVALID."));
+		ComplaintAppeal complaintAppeal = new ComplaintAppeal();
+		complaintAppeal.setComplaintRef(c);
 		complaintAppeal.setAppealTo(userRepo.findById(body.getAppealTo()).get());
 		complaintAppeal.setStatus(ComplaintStatus.INITIATED.getPersistenceValue());
+		complaintAppeal.setAppealDateTime(body.getAppealDateTime());
 		appealRepo.save(complaintAppeal);
 	}
 	
 	public List<ComplaintAppealDto> getComplaintAppeals(String status){
 		List<ComplaintAppeal> appealList= appealRepo.findByStatusOrderByAppealDateTimeDesc(status);
+		System.out.println(appealList.size());
 		List<ComplaintAppealDto> dtos = new ArrayList<>();
 		appealList.stream().forEach(appeal->{
 			ComplaintAppealDto dto = new ComplaintAppealDto();

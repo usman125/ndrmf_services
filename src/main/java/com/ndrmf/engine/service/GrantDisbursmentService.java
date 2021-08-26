@@ -178,6 +178,8 @@ public class GrantDisbursmentService {
             review.setId(r.getId());
             review.setStatus(r.getStatus());
             review.setSubStatus(r.getSubStatus());
+//            if (r.getAmount() != 0)
+                review.setAmount(r.getAmount());
             iai.addInitialAdvanceReviewItem(review);
         });
         if (gdi.getInitAdvance().getGrantDisbursmentAdvanceLiquidations() != null ||
@@ -194,7 +196,7 @@ public class GrantDisbursmentService {
                 iali.setAmount(gdalObj.getAmount());
                 iali.setStatus(gdalObj.getStatus());
                 iali.setSubStatus(gdalObj.getSubStatus());
-
+                iali.setOrderNumber(gdalObj.getOrderNumber());
                 if (gdalObj.getLiquidationSoes() != null) {
                     gdalObj.getLiquidationSoes().stream()
                             .filter(item -> item.getSoeType().equals("ndrmf") && item.isEnabled())
@@ -289,6 +291,8 @@ public class GrantDisbursmentService {
                     review.setId(r.getId());
                     review.setStatus(r.getStatus());
                     review.setSubStatus(r.getSubStatus());
+//                    if (r.getAmount() != 0)
+                        review.setAmount(r.getAmount());
                     qai.addQuarterAdvanceReviewsList(review);
                 });
 
@@ -308,6 +312,7 @@ public class GrantDisbursmentService {
                         qagdli.setSubStatus(qagdlObj.getSubStatus());
                         qagdli.setReassignmentComments(qagdlObj.getReassignmentComments());
                         qagdli.setReassignedOn(qagdlObj.getReassignedOn());
+                        qagdli.setOrderNumber(qagdlObj.getOrderNumber());
 //					System.out.println(qagdl.getLiquidationSoes().size());
                         if (qagdlObj.getLiquidationSoes() != null) {
                             qagdlObj.getLiquidationSoes().stream()
@@ -476,6 +481,7 @@ public class GrantDisbursmentService {
         review.setComments(body.getComments());
         review.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
         review.setSubStatus(body.getSubStatus());
+        review.setAmount(body.getAmount());
 
         List<GrantDisbursmentAdvanceReviews> gdiar = gd.getInitAdvance().getReviewsList();
         if (gdiar.stream()
@@ -602,7 +608,7 @@ public class GrantDisbursmentService {
     }
 
     @Transactional
-    public void commenceInitialAdvanceLiquidation(
+    public UUID commenceInitialAdvanceLiquidation(
             UUID disbursmentId
     ) {
         GrantDisbursment gd = grantDisbursmentRepo.findById(disbursmentId)
@@ -610,20 +616,27 @@ public class GrantDisbursmentService {
         InitialAdvance ia = gd.getInitAdvance();
         GrantDisbursmentAdvanceLiquidation gdal = new GrantDisbursmentAdvanceLiquidation();
         gdal.setStatus(ProcessStatus.NOT_INITIATED.getPersistenceValue());
-        ia.addGrantDisbursmentAdvanceLiquidation(gdal);
+        gdal.setInitialAdvanceRef(ia);
+        gdal.setOrderNumber(ia.getGrantDisbursmentAdvanceLiquidations().size() + 1);
+        GrantDisbursmentAdvanceLiquidation dto = grantDisbursmentAdvanceLiquidationRepository.save(gdal);
+        return dto.getId();
+//        ia.addGrantDisbursmentAdvanceLiquidation(gdal);
     }
 
     @Transactional
-    public void commenceQuarterAdvanceLiquidation(
+    public UUID commenceQuarterAdvanceLiquidation(
             UUID advanceId
     ) {
         QuarterAdvance qa = quarterAdvanceRepository.findById(advanceId)
                 .orElseThrow(() -> new ValidationException("Advance Id is not valid."));
         GrantDisbursmentAdvanceLiquidation gdal = new GrantDisbursmentAdvanceLiquidation();
         gdal.setStatus(ProcessStatus.NOT_INITIATED.getPersistenceValue());
-        qa.addGrantDisbursmentAdvanceLiquidation(gdal);
+        gdal.setQuarterAdvanceRef(qa);
+        gdal.setOrderNumber(qa.getGrantDisbursmentAdvanceLiquidations().size() + 1);
+        GrantDisbursmentAdvanceLiquidation qaid = grantDisbursmentAdvanceLiquidationRepository.save(gdal);
+//        UUID qlId = qa.addGrantDisbursmentAdvanceLiquidation(gdal);
+        return qaid.getId();
 
-        System.out.println("COMMENCED QUARTER ADVANCE");
     }
 
     @Transactional
@@ -676,6 +689,8 @@ public class GrantDisbursmentService {
             c.setEnabled(false);
         });
 
+        if (body.getFipSoes() != null){
+
         body.getFipSoes().forEach(item -> {
             GrantDisbursmentAdvanceLiquidationSoes gdalsoe = new GrantDisbursmentAdvanceLiquidationSoes();
             gdalsoe.setActivityId(item.getActivityId());
@@ -690,6 +705,9 @@ public class GrantDisbursmentService {
 
             gdal.addLiquidationSoe(gdalsoe);
         });
+        }
+
+        if (body.getNdrmfSoes() != null){
 
         body.getNdrmfSoes().forEach(item -> {
             GrantDisbursmentAdvanceLiquidationSoes gdalsoe = new GrantDisbursmentAdvanceLiquidationSoes();
@@ -705,6 +723,7 @@ public class GrantDisbursmentService {
 
             gdal.addLiquidationSoe(gdalsoe);
         });
+        }
 
     }
 
