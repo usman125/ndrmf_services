@@ -318,7 +318,9 @@ public class ProjectProposalService {
 				item.setStatus(s.getStatus());
 				item.setTemplate(s.getTemplate());
 				item.setTemplateType(s.getTemplateType());
-				item.setOrderNum(s.getSectionRef().getOrderNum());
+				if (s.getSectionRef().getOrderNum() != null){
+					item.setOrderNum(s.getSectionRef().getOrderNum());
+				}
 				eaItem.addSection(item);
 			});
 
@@ -502,7 +504,7 @@ public class ProjectProposalService {
 	}
 	
 
-	public void submitProposalSection(UUID userId, UUID proposalId, ProjectProposalSectionRequest body,
+	public void submitProposalSection(AuthPrincipal user, UUID proposalId, ProjectProposalSectionRequest body,
 			FormAction action) {
 		ProjectProposal p = projProposalRepo.findById(proposalId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
@@ -535,6 +537,33 @@ public class ProjectProposalService {
 		if (action == FormAction.SUBMIT) {
 			// TODO raise event
 			// eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));
+			try {
+				notificationService.sendPlainTextEmail(
+						p.getInitiatedBy().getEmail(),
+						p.getInitiatedBy().getFullName(),
+						"Project " + p.getName() + " Proposal Request is Under Review at NDRMF",
+						"Your project proposal request for project " + p.getName() + " is in Under Review stage " +
+								"please visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+								+ " to review your request."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			try {
+				notificationService.sendPlainTextEmail(
+						p.getProcessOwner().getEmail(),
+						p.getProcessOwner().getFullName(),
+						"New Project Proposal request submitted at NDRMF",
+						p.getInitiatedBy().getFullName() +
+								", has submiited a new project proposal request  with the name " + p.getName() +
+								"\nplease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+								+ " to review and process the application."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -567,6 +596,24 @@ public class ProjectProposalService {
 
 		proposal.setPreAppraisal(appraisal);
 		proposal.setStatus(ProcessStatus.PRELIMINARY_APPRAISAL.getPersistenceValue());
+
+		try {
+			notificationService.sendPlainTextEmail(
+					dmPAM.getEmail(),
+					dmPAM.getFullName(),
+					"Assigned Pre-appraisal on Project Proposal" + proposal.getName() + " at NDRMF",
+					proposal.getProcessOwner().getFullName() +
+							", has assigned you the primary apprasisal on project proposal " + proposal.getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/fill-primary-appraisal/"+proposal.getId()
+							+ " to review and process the request." +
+							"\nStart Date: " + body.getStartDate() +
+							"\nEnd Date: " + body.getEndDate() +
+							"\nComments from NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Transactional
@@ -589,6 +636,21 @@ public class ProjectProposalService {
 		appraisal.setCompletedOn(new Date());
 
 		proposal.setPreAppraisal(appraisal);
+
+		try {
+			notificationService.sendPlainTextEmail(
+					proposal.getProcessOwner().getEmail(),
+					proposal.getProcessOwner().getFullName(),
+					"Pre-appraisal submitted by DM-PAM on Project Proposal " + proposal.getName() + " at NDRMF",
+					dmPAM.getFullName() +
+							", has submitted the pre-appraisal on project proposal " + proposal.getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/view-primary-appraisal/"+proposal.getId()
+							+ " to review and process the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	public List<PreliminaryAppraisalListItem> getAllPreliminaryAppraisals(UUID userId, ProcessStatus status) {
@@ -663,6 +725,24 @@ public class ProjectProposalService {
 			s.setSectionRef(t.getSection());
 
 			e.addSection(s);
+
+			try {
+				notificationService.sendPlainTextEmail(
+						t.getSection().getSme().getEmail(),
+						t.getSection().getSme().getFullName(),
+						"Extended appraisal assigned on Project Proposal " + proposal.getName() + " at NDRMF",
+						proposal.getProcessOwner().getFullName() +
+								", has assigned you the extended apprasisal on project proposal " + proposal.getName() +
+								".\nPlease visit http://ndrmfdev.herokuapp.com/add-extended-appraisal-form/"+proposal.getId()
+								+ " to review and process the request." +
+								"\nStart Date: " + body.getStartDate() +
+								"\nEnd Date: " + body.getEndDate() +
+								"\nComments from NDRMF: " + body.getComments()
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 
 		proposal.setExtendedAppraisal(e);
@@ -674,6 +754,24 @@ public class ProjectProposalService {
 			e = proposal.getExtendedAppraisal();
 		} catch (Exception ex) {
 			throw new RuntimeException("An error occurred while commencing Extended Appraisal", ex);
+		}
+
+		try {
+			notificationService.sendPlainTextEmail(
+					dmPAM.getEmail(),
+					dmPAM.getFullName(),
+					"Extended appraisal assigned on Project Proposal " + proposal.getName() + " at NDRMF",
+					proposal.getProcessOwner().getFullName() +
+							", has assigned you the extended apprasisal on project proposal " + proposal.getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/add-extended-appraisal-form/"+proposal.getId()
+							+ " to review and process the request." +
+							"\nStart Date: " + body.getStartDate() +
+							"\nEnd Date: " + body.getEndDate() +
+							"\nComments from NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
 		}
 
 		ExtendedAppraisalItem dto = new ExtendedAppraisalItem();
@@ -725,6 +823,24 @@ public class ProjectProposalService {
 			a.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
 			a.setCompletedOn(new Date());
 			// TODO Also update Proposal Status
+
+			User dmPAM = userService.getDMPAM()
+					.orElseThrow(() -> new ValidationException("No DM PAM is defined in the system"));
+
+			try {
+				notificationService.sendPlainTextEmail(
+						dmPAM.getEmail(),
+						dmPAM.getFullName(),
+						"Extended appraisal completed on Project Proposal " + a.getProposalRef().getName() + " at NDRMF",
+						a.getProposalRef().getProcessOwner().getFullName() +
+								", all sections has been submitted on extended apprasisal for project proposal " + a.getProposalRef().getName() +
+								".\nPlease visit http://ndrmfdev.herokuapp.com/add-extended-appraisal-form/"+a.getProposalRef().getId()
+								+ " to review and process the request."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -736,13 +852,42 @@ public class ProjectProposalService {
 		ExtendedAppraisalSection section = a.getSections().stream().filter(s -> s.getId().equals(body.getId()))
 				.findAny().orElseThrow(() -> new ValidationException("Invalid ID"));
 		section.setStatus(ProcessStatus.PENDING.getPersistenceValue());
+
+		try {
+			notificationService.sendPlainTextEmail(
+					section.getSme().getEmail(),
+					section.getSme().getFullName(),
+					"Extended appraisal section re-assigned on Project Proposal " + section.getExtendedAppraisalRef().getProposalRef().getName() + " at NDRMF",
+					section.getSectionRef().getName() +
+							", has been re-assigned to you on the extended apprasisal on project proposal " + section.getExtendedAppraisalRef().getProposalRef().getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/add-extended-appraisal-form/"+section.getExtendedAppraisalRef().getProposalRef().getId()
+							+ " to review and process the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Transactional
-	public void extendedAppraisalDecisionByDm(UUID userId, UUID extAppraisalId) {
+	public void extendedAppraisalDecisionByDm(AuthPrincipal user, UUID extAppraisalId) {
 		ExtendedAppraisal a = extAppRepo.findById(extAppraisalId)
 				.orElseThrow(() -> new ValidationException("Invalid Extended Appraisal ID"));
 		a.setDecisionByDm(ProcessStatus.APPROVED.getPersistenceValue());
+		try {
+			notificationService.sendPlainTextEmail(
+					a.getProposalRef().getProcessOwner().getEmail(),
+					a.getProposalRef().getProcessOwner().getFullName(),
+					"Extended appraisal approved on Project Proposal " + a.getProposalRef().getName() + " at NDRMF",
+					user.getFullName() +
+							", has approved the extended apprasisal on project proposal " + a.getProposalRef().getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/add-extended-appraisal-form/"+a.getProposalRef().getId()
+							+ " to review and process the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Transactional
@@ -790,13 +935,44 @@ public class ProjectProposalService {
 				review.setEndDate(body.getEndDate());
 				review.setProposalRef(proposal);
 				gia.addReview(review);
+				try {
+					notificationService.sendPlainTextEmail(
+							userRepo.getOne(rv).getEmail(),
+							userRepo.getOne(rv).getFullName(),
+							"GIA remarks pending on Project Proposal " + proposal.getName() + " at NDRMF",
+							giaProcessType.getOwner().getFullName() +
+							", has assigned you to give your remarks on GIA for project proposal " + proposal.getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/gia-appraisal/"+proposal.getId()
+							+ " to review the request and submit your remarks."
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			});
 
 			gia.setSubStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
+
+
 		}
 		gia.setStatus(ProcessStatus.PENDING.getPersistenceValue());
 		proposal.setGia(gia);
 		proposal.setStatus(ProcessStatus.GIA.getPersistenceValue());
+
+		try {
+			notificationService.sendPlainTextEmail(
+					proposal.getProcessOwner().getEmail(),
+					proposal.getProcessOwner().getFullName(),
+					"GIA created on Project Proposal " + proposal.getName() + " at NDRMF",
+					giaProcessType.getOwner().getFullName() +
+					", has created the GIA on project proposal " + proposal.getName() +
+					".\nPlease visit http://ndrmfdev.herokuapp.com/gia-appraisal/"+proposal.getId()
+					+ " to review and process the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Transactional
@@ -823,6 +999,24 @@ public class ProjectProposalService {
 		if (proposal.getGia().getReviews().stream()
 				.allMatch(r -> r.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue()))) {
 			proposal.getGia().setSubStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
+
+			com.ndrmf.setting.model.ProcessType giaProcessType = processTypeRepo
+					.findById(ProcessStatus.GIA.getPersistenceValue())
+					.orElseThrow(() -> new ValidationException("GIA Process is not defined."));
+
+			try {
+				notificationService.sendPlainTextEmail(
+					giaProcessType.getOwner().getEmail(),
+					giaProcessType.getOwner().getFullName(),
+					"GIA reviews completed on Project Proposal " + proposal.getName() + " at NDRMF",
+					"GIA on project proposal " + proposal.getName() + " has been reviewed completely." +
+					".\nPlease visit http://ndrmfdev.herokuapp.com/gia-appraisal/"+proposal.getId()
+					+ " to review and process the request."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -851,6 +1045,20 @@ public class ProjectProposalService {
 
 			proposal.setGiaChecklist(checklist);
 			proposal.setStatus(ProcessStatus.GIA_CHECKLIST.getPersistenceValue());
+
+			try {
+				notificationService.sendPlainTextEmail(
+						proposal.getInitiatedBy().getEmail(),
+						proposal.getInitiatedBy().getFullName(),
+						"Submit GIA Checklist on Project Proposal " + proposal.getName() + " at NDRMF",
+						"GIA has been approved for project proposal " + proposal.getName() +
+						".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+proposal.getId()
+						+ " to review and process the request."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -894,13 +1102,30 @@ public class ProjectProposalService {
 
 		projPropTaskRepo.save(task);
 
+		try {
+			notificationService.sendPlainTextEmail(
+					section.getSme().getEmail(),
+					section.getSme().getFullName(),
+					"Submit your reviews on Project Proposal " + section.getProposalRef().getName() + " at NDRMF",
+					"Please submit your remarks on " + section.getName() +
+					".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+section.getProposalRef().getId()
+					+ " to review and submit your remarks." +
+					"\nStart Date: " + body.getStartDate() +
+					"\nEnd Date: " + body.getEndDate() +
+					"\nComments from NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
 		// TODO - trigger notification event
 	}
 
 	@Transactional
-	public void updateProposalStatus(UUID proposalId, UUID userId, ProcessStatus status, ProcessStatus subStatus, OfferLetterUpdateRequest body) {
+	public void updateProposalStatus(UUID proposalId, AuthPrincipal user, ProcessStatus status, ProcessStatus subStatus, OfferLetterUpdateRequest body) {
 		
-		User u = userRepo.findById(userId)
+		User u = userRepo.findById(user.getUserId())
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
 		Organisation userOrg = u.getOrg();
@@ -916,9 +1141,59 @@ public class ProjectProposalService {
 			if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
 				app.setIsMarkedTo(status.getPersistenceValue());
 				app.setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+
+				User assignedUser;
+
+				if (status.equals(ProcessStatus.MARKED_TO_GM)){
+					assignedUser = userRepo.findActiveUsersForRole(SystemRoles.GM).get(0);
+					try {
+						notificationService.sendPlainTextEmail(
+								assignedUser.getEmail(),
+								assignedUser.getFullName(),
+								"Pre-appraisal remarks on Project Proposal " + p.getName() + " at NDRMF",
+								"Please submit your remarks on " + p.getName() +
+										".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+										+ " to review and submit your remarks."
+						);
+					}
+					catch(Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
+				if (status.equals(ProcessStatus.MARKED_TO_CEO)){
+					assignedUser = userRepo.findActiveUsersForRole(SystemRoles.CEO).get(0);
+					try {
+						notificationService.sendPlainTextEmail(
+								assignedUser.getEmail(),
+								assignedUser.getFullName(),
+								"Pre-appraisal remarks on Project Proposal " + p.getName() + " at NDRMF",
+								"Please submit your remarks on " + p.getName() +
+										".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+										+ " to review and submit your remarks."
+						);
+					}
+					catch(Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+
 			}
 			else if (status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
 				app.setSubStatus(status.getPersistenceValue());
+				try {
+					notificationService.sendPlainTextEmail(
+							p.getProcessOwner().getEmail(),
+							p.getProcessOwner().getFullName(),
+							"Pre-appraisal " + status.getPersistenceValue() + " on project" + p.getName() + " at NDRMF",
+							"Review the board remarks on " + p.getName() +
+									".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+									+ " to review and submit your remarks."
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 			else {
 				p.setStatus(status.getPersistenceValue());
@@ -930,8 +1205,54 @@ public class ProjectProposalService {
 			if (status.equals(ProcessStatus.MARKED_TO_GM) || status.equals(ProcessStatus.MARKED_TO_CEO)) {
 				app.setIsMarkedTo(status.getPersistenceValue());
 				app.setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+				User assignedUser;
+				if (status.equals(ProcessStatus.MARKED_TO_GM)){
+					assignedUser = userRepo.findActiveUsersForRole(SystemRoles.GM).get(0);
+					try {
+						notificationService.sendPlainTextEmail(
+								assignedUser.getEmail(),
+								assignedUser.getFullName(),
+								"Pre-appraisal remarks on Project Proposal " + p.getName() + " at NDRMF",
+								"Please submit your remarks on " + p.getName() +
+										".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+										+ " to review and submit your remarks."
+						);
+					}
+					catch(Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+				if (status.equals(ProcessStatus.MARKED_TO_CEO)){
+					assignedUser = userRepo.findActiveUsersForRole(SystemRoles.CEO).get(0);
+					try {
+						notificationService.sendPlainTextEmail(
+								assignedUser.getEmail(),
+								assignedUser.getFullName(),
+								"Pre-appraisal remarks remarks on Project Proposal " + p.getName() + " at NDRMF",
+								"Please submit your remarks on " + p.getName() +
+										".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+										+ " to review and submit your remarks."
+						);
+					}
+					catch(Exception ex) {
+						ex.printStackTrace();
+					}
+				}
 			} else if (status.equals(ProcessStatus.APPROVED) || status.equals(ProcessStatus.REJECTED)) {
 				app.setSubStatus(status.getPersistenceValue());
+				try {
+					notificationService.sendPlainTextEmail(
+							p.getProcessOwner().getEmail(),
+							p.getProcessOwner().getFullName(),
+							"Extended-appraisal " + status.getPersistenceValue() + " on project" + p.getName() + " at NDRMF",
+							"Review the board remarks on " + p.getName() +
+									".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+									+ " to review and submit your remarks."
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 			else {
 				p.setStatus(status.getPersistenceValue());
@@ -950,6 +1271,53 @@ public class ProjectProposalService {
 				p.getOfferLetter().setFIP_response(body.getFipResponse());
 				p.getOfferLetter().setGM_response(body.getGmResponse());
 			}
+			if (body.getGmResponse() != null){
+				try {
+					notificationService.sendPlainTextEmail(
+						p.getProcessOwner().getEmail(),
+						p.getProcessOwner().getFullName(),
+						"Offer letter on project " + p.getName() + " has been " + body.getGmResponse(),
+						"Offer letter on project " + p.getName() + " is" + body.getGmResponse() +
+						".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+						+ " to review and proceed to next step."
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if (body.getFipStatus().equals(ProcessStatus.PENDING.getPersistenceValue())){
+				try {
+					notificationService.sendPlainTextEmail(
+						p.getInitiatedBy().getEmail(),
+						p.getInitiatedBy().getFullName(),
+						"Offer letter on project " + p.getName() + " has been generated.",
+						"Offer letter on project " + p.getName() + " is ready for signing" +
+						".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+						+ " to review and accept the offer letter.\n" +
+						"Expiry Date: " + body.getExpiryDate() +
+						"\nComments from NDRMF: " + body.getFipComments()
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			if (body.getFipResponse() != null){
+				try {
+					notificationService.sendPlainTextEmail(
+							p.getProcessOwner().getEmail(),
+							p.getProcessOwner().getFullName(),
+							"Offer letter on project " + p.getName() + " has been " + body.getFipResponse() + " by FIP.",
+							"Offer letter on project " + p.getName() + " is" + body.getFipResponse() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+							+ " to review and proceed to next step."
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
 		}
 		else if(status == ProcessStatus.OFFER_LETTER && !p.getStatus().equals(ProcessStatus.OFFER_LETTER.getPersistenceValue())) {
 			OfferLetter oL = new OfferLetter();
@@ -958,9 +1326,45 @@ public class ProjectProposalService {
 			p.setOfferLetter(oL);
 			p.setStatus(ProcessStatus.OFFER_LETTER.getPersistenceValue());
 			oL = offerLetterRepo.save(oL);
+
+			User assignedUser = userRepo.findActiveUsersForRole(SystemRoles.GM).get(0);
+
+			try {
+				notificationService.sendPlainTextEmail(
+						assignedUser.getEmail(),
+						assignedUser.getFullName(),
+						"Offer letter on project " + p.getName() + " is assigned at NDRMF",
+						p.getProcessOwner().getFullName() + " assigned you offer letter on " + p.getName() +
+						".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+						+ " to review and submit your remarks." +
+						"\nExpiry Date: " + body.getExpiryDate() +
+						"\nComments from NDRMF: " + body.getGmComments()
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 		else {
 			p.setStatus(status.getPersistenceValue());
+			if (status.getPersistenceValue().equals(ProcessStatus.GIA.getPersistenceValue())){
+				com.ndrmf.setting.model.ProcessType giaProcessType = processTypeRepo
+						.findById(ProcessStatus.GIA.getPersistenceValue())
+						.orElseThrow(() -> new ValidationException("GIA Process is not defined."));
+				try {
+					notificationService.sendPlainTextEmail(
+							giaProcessType.getOwner().getEmail(),
+							giaProcessType.getOwner().getFullName(),
+							"GIA is enabled on project " + p.getName() + " at NDRMF",
+							p.getProcessOwner().getFullName() + " assigned you to submit GIA on project " + p.getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+							+ " to review and prepare GIA."
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
 		}
 	}
 
@@ -1067,6 +1471,23 @@ public class ProjectProposalService {
 
 			section.setReassignmentStatus(ProcessStatus.PENDING.getPersistenceValue());
 			section.setReassignmentComments(comments);
+
+			try {
+				notificationService.sendPlainTextEmail(
+						p.getInitiatedBy().getEmail(),
+						p.getInitiatedBy().getFullName(),
+						"Project Proposal " + p.getName() + " section(s) reassigned at NDRMF",
+						p.getProcessOwner().getFullName() + " has reassigned you section " + section.getName() +
+							".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+p.getId()
+							+ " to review and submit the section again." +
+							"\nComments from NDRMF: " + comments
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
+
+
 		});
 	}
 

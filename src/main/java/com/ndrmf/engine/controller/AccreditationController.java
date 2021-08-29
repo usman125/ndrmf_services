@@ -118,7 +118,7 @@ public class AccreditationController {
 	@GetMapping("/qualification/commence")
 	public ResponseEntity<?> startQualificationRequest(@AuthenticationPrincipal AuthPrincipal principal){
 		Map<String, UUID> dto = new HashMap<>();
-		dto.put("id", accreditationService.commenceQualification(principal.getUserId()));
+		dto.put("id", accreditationService.commenceQualification(principal));
 		return new ResponseEntity<>(dto, HttpStatus.CREATED);
 	}
 	
@@ -128,7 +128,7 @@ public class AccreditationController {
 			@RequestParam(name = "action", required = true) FormAction action,
 			@PathVariable(name = "requestId", required = true) UUID requestId,
 			@RequestBody @Valid QualificationSectionRequest body){
-		accreditationService.addQualificationSection(principal.getUserId(), requestId, body, action);
+		accreditationService.addQualificationSection(principal, requestId, body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Qualification request added successfully."), HttpStatus.CREATED);
 	}

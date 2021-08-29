@@ -110,6 +110,20 @@ public class UserService {
         	q.setStatus(ProcessStatus.PENDING.getPersistenceValue());
         	
         	questionairreRepo.save(q);
+
+			try {
+				notificationService.sendPlainTextEmail(
+						process.getOwner().getEmail(),
+						process.getOwner().getFullName(),
+						"New Govt. User Created at NDRMF",
+						"New Govt. user created. Please review and respond the request.\n" +
+						"Please visit http://ndrmfdev.herokuapp.com/govt-accredit-requests\n" +
+						"to fill the questionnaire."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
         	
         	return "FIP_GOVT type user created successfully";
         }

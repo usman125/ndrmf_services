@@ -76,7 +76,7 @@ public class ProjectProposalController {
 			@RequestParam(name = "action", required = true) FormAction action,
 			@PathVariable(name = "proposalId", required = true) UUID proposalId,
 			@RequestBody @Valid ProjectProposalSectionRequest body){
-		projProposalService.submitProposalSection(principal.getUserId(), proposalId, body, action);
+		projProposalService.submitProposalSection(principal, proposalId, body, action);
 	
 		return new ResponseEntity<ApiResponse>(new ApiResponse(true, "Section saved successfully."), HttpStatus.CREATED);
 	}
@@ -139,7 +139,7 @@ public class ProjectProposalController {
 	@PutMapping("/ext-appraisal/{extendedAppraisalId}/decisionbydm")
 	public ResponseEntity<ApiResponse> extendedAppraisalDecisionByDm(@AuthenticationPrincipal AuthPrincipal principal,
 																	  @PathVariable(name = "extendedAppraisalId") UUID extendedAppraisalId){
-		projProposalService.extendedAppraisalDecisionByDm(principal.getUserId(), extendedAppraisalId);
+		projProposalService.extendedAppraisalDecisionByDm(principal, extendedAppraisalId);
 		return new ResponseEntity<>(new ApiResponse(true, "Appraisal approved successfully."), HttpStatus.OK);
 	}
 	
@@ -179,7 +179,7 @@ public class ProjectProposalController {
 			@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestBody(required = false) @Valid OfferLetterUpdateRequest body){
 		
-		projProposalService.updateProposalStatus(proposalId, principal.getUserId(), status, subStatus, body);
+		projProposalService.updateProposalStatus(proposalId, principal, status, subStatus, body);
 	
 		return new ResponseEntity<>(new ApiResponse(true, "Status updated successfully."), HttpStatus.OK);
 	}

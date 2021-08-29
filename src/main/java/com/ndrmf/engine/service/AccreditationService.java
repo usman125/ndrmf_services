@@ -377,14 +377,14 @@ public class AccreditationService {
 		return epqDto;
 	}
 	
-	public UUID commenceQualification(UUID initiatorUserId) {
+	public UUID commenceQualification(AuthPrincipal initiatorUser) {
 		Set<String> constraintStatuses = new HashSet<>();
 		constraintStatuses.add(ProcessStatus.DRAFT.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.APPROVED.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.UNDER_REVIEW.getPersistenceValue());
 		constraintStatuses.add(ProcessStatus.REASSIGNED.getPersistenceValue());
 		
-		int existingRequests = qualificationRepo.checkCountForUserWithStatuses(initiatorUserId, constraintStatuses);
+		int existingRequests = qualificationRepo.checkCountForUserWithStatuses(initiatorUser.getUserId(), constraintStatuses);
 		
 		if(existingRequests > 0) {
 			throw new ValidationException("A request for this username already exists which is either APPROVED, UNDER REVIEW or in DRAFT Status");
@@ -392,7 +392,7 @@ public class AccreditationService {
 		
 		Qualification q = new Qualification();
 		
-		q.setInitiatedBy(userRepo.getOne(initiatorUserId));
+		q.setInitiatedBy(userRepo.getOne(initiatorUser.getUserId()));
 		q.setProcessOwner(this.getProcessOwnerForProcess(ProcessType.QUALIFICATION));
 		q.setStatus(ProcessStatus.DRAFT.getPersistenceValue());
 		
@@ -412,11 +412,27 @@ public class AccreditationService {
 		}
 		
 		q = qualificationRepo.save(q);
+
+		try {
+			notificationService.sendPlainTextEmail(
+					initiatorUser.getEmail(),
+					initiatorUser.getFullName(),
+					"Qualification request initiated at NDRMF",
+					initiatorUser.getFullName() +
+					", your have initiated a qualification evaluation application at NDRMF. " +
+					"please visit http://ndrmfdev.herokuapp.com/fip-qualification/"+q.getId()
+					+ " and submit all the section one by one, after submitting all the sections" +
+					" submit the complete application to review board."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		
 		return q.getId();
 	}
 	
-	public void addQualificationSection(UUID initiatedByUseId, UUID requestId, QualificationSectionRequest body, FormAction action) {
+	public void addQualificationSection(AuthPrincipal initiatorUser, UUID requestId, QualificationSectionRequest body, FormAction action) {
 		Qualification q = qualificationRepo.findById(requestId)
 				.orElseThrow(() -> new ValidationException("Invalid request ID"));
 		
@@ -450,7 +466,36 @@ public class AccreditationService {
 		qualificationRepo.save(q);
 		
 		if(action == FormAction.SUBMIT) {
-			eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));	
+			com.ndrmf.setting.model.ProcessType processMeta = processTypeRepo.findById(ProcessType.QUALIFICATION.name()).get();
+			eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));
+			try {
+				notificationService.sendPlainTextEmail(
+						initiatorUser.getEmail(),
+						initiatorUser.getFullName(),
+						"Qualification request is Under Review at NDRMF",
+						initiatorUser.getFullName() +
+								", your qualification request is in Under Review stage " +
+								"please visit http://ndrmfdev.herokuapp.com/fip-qualification/"+q.getId()
+								+ " to review the application and decision made by NDRMF."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			try {
+				notificationService.sendPlainTextEmail(
+						processMeta.getOwner().getEmail(),
+						processMeta.getOwner().getFullName(),
+						"New Qualification request submitted at NDRMF",
+						initiatorUser.getFullName() +
+								", has submiited a new qualification request " +
+								"please visit http://ndrmfdev.herokuapp.com/all-qualification-requests/"+q.getId()
+								+ " to review and process the application."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 	
@@ -606,6 +651,24 @@ public class AccreditationService {
 		qtaskRepo.save(task);
 		
 		//TODO - trigger notification event
+
+		try {
+			notificationService.sendPlainTextEmail(
+					section.getSme().getEmail(),
+					section.getSme().getFullName(),
+					"Qualification task assigned at NDRMF",
+					section.getQualifcationRef().getProcessOwner().getFullName() +
+					", has assigned you a qualification request to review.\n" +
+					"Please visit http://ndrmfdev.herokuapp.com/all-qualification-requests/"+section.getQualifcationRef().getId()
+					+ " to fill the reviews. \n" +
+					"Start Date: " + body.getStartDate() + "\n" +
+					"End Date: " + body.getEndDate() + "\n" +
+					"Comments from NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	private User getProcessOwnerForProcess(ProcessType processType) {
@@ -629,7 +692,7 @@ public class AccreditationService {
 		{
 			q.setMarkedTo(ProcessStatus.MARKED_TO_CEO);
 		}else {
-			q.setStatus(ProcessStatus.valueOf( body.getStatus()).getPersistenceValue());
+			q.setStatus(ProcessStatus.valueOf(body.getStatus()).getPersistenceValue());
 		}
 		q.setMarkedTo(body.getMarkedTo());
 		q.setExpiryDate(body.getExpiryDate());
@@ -637,6 +700,23 @@ public class AccreditationService {
 		q.setSubStatus(body.getSubStatus());
 		
 		qualificationRepo.save(q);
+
+		try {
+			notificationService.sendPlainTextEmail(
+					q.getInitiatedBy().getEmail(),
+					q.getInitiatedBy().getFullName(),
+					"Qualification application at NDRMF " + body.getStatus(),
+					q.getProcessOwner().getFullName() +
+							", has changed your qualification status to " + body.getStatus()
+							+ "\nPlease visit http://ndrmfdev.herokuapp.com/all-qualification-requests/"+q.getId()
+							+ " to review your application."
+							+ "\nExpiry Date: " + body.getExpiryDate()
+							+ "\n" + "Comments from NDRMF: " + body.getComment()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		
 		//TODO - raise event, notify FIP, update accreditation status
 	}
@@ -683,10 +763,27 @@ public class AccreditationService {
 					.orElseThrow(() -> new ValidationException("Invalid section ID"));
 			
 			section.setReassignmentStatus(ReassignmentStatus.PENDING.getPersistenceValue());
+			try {
+				notificationService.sendPlainTextEmail(
+						q.getInitiatedBy().getEmail(),
+						q.getInitiatedBy().getFullName(),
+						"Qualification application section(s) at NDRMF has been reassigned",
+						q.getProcessOwner().getFullName() +
+								", has reassigned you " + section.getName() + "."
+								+ "\n"
+								+ "Please visit http://ndrmfdev.herokuapp.com/all-qualification-requests/"+section.getQualifcationRef().getId()
+								+ " to review the reassigned section(s). \n" +
+								"Comments from NDRMF: " + body.getComments()
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		});
-		
+
 		q.setStatus(ProcessStatus.REASSIGNED.getPersistenceValue());
-		
+
+
 		//TODO: Raise event, inform FIP about reassignment
 	}
 	
@@ -760,5 +857,22 @@ public class AccreditationService {
 		q.setTemplate(body.getTemplate());
 		q.setData(body.getData());
 		q.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+
+		try {
+			notificationService.sendPlainTextEmail(
+					q.getForUser().getEmail(),
+					q.getForUser().getFullName(),
+					"New login created at NDRMF",
+					"New Govt. user created. now you can submit your proposals.\n" +
+					"Please visit http://ndrmfdev.herokuapp.com\n" +
+					"to login and see your dashboard.\n" +
+					"Username: " + q.getForUser().getUsername() +
+					"\nPassword: " + q.getForUser().getPassword()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
 	}
 }

@@ -97,7 +97,7 @@ public class ExtendedAppraisal extends Auditable<String> {
 		this.comments = comments;
 	}
 
-	@OneToOne(mappedBy = "preAppraisal")
+	@OneToOne(mappedBy = "extendedAppraisal")
 	public ProjectProposal getProposalRef() {
 		return proposalRef;
 	}

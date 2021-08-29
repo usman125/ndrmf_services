@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 
 import com.ndrmf.engine.model.*;
 import com.ndrmf.engine.repository.*;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.util.enums.ProcessStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class CommentService {
 	@Autowired private ProjectProposalRepository projProposalRepo;
 	@Autowired private ObjectMapper objectMapper;
 	@Autowired private UserRepository userRepo;
+	@Autowired private NotificationService notificationService;
 	
 	@Transactional
 	public void addQualificationSectionReview(UUID byUserId, UUID sectionId, AddQualificationSectionReviewRequest body) {
@@ -63,6 +65,22 @@ public class CommentService {
 		tasks.forEach(t -> {
 			t.setStatus(TaskStatus.COMPLETED.getPersistenceValue());
 		});
+
+		try {
+			notificationService.sendPlainTextEmail(
+					section.getQualifcationRef().getProcessOwner().getEmail(),
+					section.getQualifcationRef().getProcessOwner().getFullName(),
+					"Review submitted on qualification request",
+					section.getSme().getFullName() +
+					", has submitted their remarks on qualification request.\n" +
+					"Please visit http://ndrmfdev.herokuapp.com/all-qualification-requests/"+section.getQualifcationRef().getId()
+					+ " to review the remarks. \n" +
+					"Comments from SME: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	@Transactional
