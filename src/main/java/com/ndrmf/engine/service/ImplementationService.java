@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ndrmf.common.AuthPrincipal;
 import com.ndrmf.engine.dto.*;
 import com.ndrmf.engine.model.*;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.util.KeyValue;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -48,8 +49,8 @@ public class ImplementationService {
 	@Autowired private SubProjectDocumentTasksRepository subProjectTasksRepo;
 	@Autowired private UserRepository userRepository;
 	@Autowired private SubProjectDocumentDmPamTasksRepository spdDmPamRepo;
-	@Autowired
-	private ObjectMapper objectMapper;
+	@Autowired private ObjectMapper objectMapper;
+	@Autowired private NotificationService notificationService;
 	/*
 	 * After signing GIA, FIP has to submit sub project documents (Template shared by PAM)
 	 * within 120 days. The system provides triggers at 90, 100 and then 120 days about the
@@ -95,6 +96,22 @@ public class ImplementationService {
 		}
 		
 		subProjectRepo.save(doc);
+
+		try {
+			notificationService.sendPlainTextEmail(
+				processType.getOwner().getEmail(),
+				processType.getOwner().getFullName(),
+				"Sub Project Document Scheme initiated on Project Proposal " + p.getName() + " at NDRMF",
+				p.getInitiatedBy().getFullName() +  " has initiated Sub project Document Scheme for project proposal " + p.getName() +
+				"\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"
+				+ " to review and process the request(s).\n" +
+				"Sub Project Document Number: " + body.getDocNumber() +
+				"\nSub Project Document Name: " + body.getDocName()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	public List<SubProjectDocumentListItem> getPendingSubProjectDocuments(UUID userId) {
@@ -238,6 +255,30 @@ public class ImplementationService {
 		
 		section.setData(body.getData());
 		section.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+
+		boolean allSectionsCompleted = doc.getSections().stream()
+				.allMatch(s -> s.getData() != null);
+
+		if (allSectionsCompleted){
+			com.ndrmf.setting.model.ProcessType processType = processTypeRepo.findById(ProcessType.SUB_PROJECT_DOCUMENT.name())
+					.orElseThrow(() -> new RuntimeException("Process Owner not defined for SUB_PROJECT_DOCUMENT"));
+
+			try {
+				notificationService.sendPlainTextEmail(
+					processType.getOwner().getEmail(),
+					processType.getOwner().getFullName(),
+					"Sub Project Document Scheme completed on Project Proposal " + doc.getProposalRef().getName() + " at NDRMF",
+					doc.getProposalRef().getInitiatedBy().getFullName() +  " has submitted all the sections on Sub project Document Scheme for project proposal " + doc.getProposalRef().getName() +
+					"\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"
+					+ " to review and process the request(s).\n" +
+					"Sub Project Document Number: " + doc.getDocNumber() +
+					"\nSub Project Document Name: " + doc.getDocName()
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 	
 	
@@ -264,6 +305,23 @@ public class ImplementationService {
 			spddmt.setEndDate(body.getEndDate());
 			spddmt.setStatus(ProcessStatus.PENDING.getPersistenceValue());
 			spd.addTask(spddmt);
+
+			try {
+				notificationService.sendPlainTextEmail(
+					userRepository.findById(c).get().getEmail(),
+					userRepository.findById(c).get().getFullName(),
+					"Sub Project Document Scheme task assigned on Project Proposal " + spd.getProposalRef().getName() + " at NDRMF",
+					spd.getProposalRef().getInitiatedBy().getFullName() +  " has submitted all the sections on Sub project Document Scheme for project proposal " + spd.getProposalRef().getName() +
+					"\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"
+					+ " to review and process the request(s).\n" +
+					"Sub Project Document Number: " + spd.getDocNumber() +
+					"\nSub Project Document Name: " + spd.getDocName() +
+					"\nComments from NDRMF: " + body.getComments()
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		});
 	}
 
@@ -282,6 +340,27 @@ public class ImplementationService {
 			spdt.setEndDate(body.getEndDate());
 			spdt.setComments(body.getComments());
 			spddmpt.addTask(spdt);
+
+			try {
+				notificationService.sendPlainTextEmail(
+					userRepository.findById(c).get().getEmail(),
+					userRepository.findById(c).get().getFullName(),
+					"Sub Project Document Scheme task assigned on Project Proposal " + spddmpt.getSubProjectRef().getProposalRef().getName() + " at NDRMF",
+					spddmpt.getSubProjectRef().getProcessOwner().getFullName()
+					+  " has marked you to submit your remarks on Sub Project Document Scheme for Project Proposal "
+					+ spddmpt.getSubProjectRef().getProposalRef().getName()
+					+ "\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"+spddmpt.getSubProjectRef().getId()
+					+ " to review and process the request(s).\n"
+					+ "Sub Project Document Number: " + spddmpt.getSubProjectRef().getDocNumber()
+					+ "\nSub Project Document Name: " + spddmpt.getSubProjectRef().getDocName()
+					+ "\nStart Date: " + body.getStartDate()
+					+ "\nEnd Date: " + body.getEndDate()
+					+ "\nComments from NDRMF: : " + body.getComments()
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		});
 		spddmpt.setStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
 	}
@@ -343,21 +422,15 @@ public class ImplementationService {
 				.orElseThrow(() -> new ValidationException("Invalid Section ID"));
 
 		section.setComments(body.getComments());
-
 		section.setReviewStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
 		section.setReviewCompletedOn(new Date());
 
-		boolean allSectionsCompleted = section.getSubProjectDocumentRef().getSections().stream()
-				.allMatch(s -> s.getReviewStatus().equals(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue()));
-
-//		System.out.println(section.getSubProjectDocumentRef().getSections().size());
-//		System.out.println(allSectionsCompleted);
-
-		if (allSectionsCompleted) {
+		if (section.getSubProjectDocumentRef().getSections().stream()
+				.allMatch(s -> s.getReviewStatus().equals(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue()))) {
 			section.getSubProjectDocumentRef().setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
 			// TODO Also update Proposal Status
+//			section.getSubProjectDocumentRef().getDmpamTasks().stream().anyMatch(s -> s.)
 		}
-
 		//TODO: update status of doc
 	}
 
@@ -375,6 +448,22 @@ public class ImplementationService {
 
 			section.setReassignmentStatus(ProcessStatus.PENDING.getPersistenceValue());
 			section.setReassignmentComments(comments);
+
+
+			try {
+				notificationService.sendPlainTextEmail(
+					section.getSubProjectDocumentRef().getProposalRef().getInitiatedBy().getEmail(),
+					section.getSubProjectDocumentRef().getProposalRef().getInitiatedBy().getFullName(),
+					"Sub Project Document Scheme status changes on Project Proposal " + section.getSubProjectDocumentRef().getProposalRef().getName() + " at NDRMF",
+					"You have been reassigned the Sub Project Document Schmeme Section please submit the section(s) again name of the section is " + section.getSectionRef().getName() + " for Project Proposal "
+					+ section.getSubProjectDocumentRef().getProposalRef().getName()
+					+ "\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"+p.getId()
+					+ " to review and process the request(s).\n"
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		});
 	}
 
@@ -387,6 +476,22 @@ public class ImplementationService {
 		SubProjectDocument spd = subProjectRepo.findById(requestId)
 				.orElseThrow(() -> new ValidationException("Invalid SUB PROCESS DOC ID"));
 		spd.setStatus(status.getPersistenceValue());
+
+		try {
+			notificationService.sendPlainTextEmail(
+				spd.getProposalRef().getInitiatedBy().getEmail(),
+				spd.getProposalRef().getInitiatedBy().getFullName(),
+				"Sub Project Document Scheme status changes on Project Proposal " + spd.getProposalRef().getName() + " at NDRMF",
+				spd.getProposalRef().getProcessOwner().getFullName()
+				+  " has changed the Sub Project Document Scheme status to " + status.getPersistenceValue() + " for Project Proposal "
+				+ spd.getProposalRef().getName()
+				+ "\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"
+				+ " to review and process the request(s).\n"
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Transactional
@@ -400,5 +505,23 @@ public class ImplementationService {
 				.orElseThrow(() -> new ValidationException("Invalid DM PAM TASK ID"));
 		spddmpt.setStatus(status.getPersistenceValue());
 		spddmpt.setDmComments(body.getComment());
+
+		try {
+			notificationService.sendPlainTextEmail(
+					spddmpt.getSubProjectRef().getProcessOwner().getEmail(),
+					spddmpt.getSubProjectRef().getProcessOwner().getFullName(),
+					"Sub Project Document Scheme DMPAM task completed on Project Proposal " + spddmpt.getSubProjectRef().getProposalRef().getName() + " at NDRMF",
+					spddmpt.getAssignee().getFullName()
+					+  " has chnaged the status for Sub Project Document Scheme for Project Proposal "
+					+ spddmpt.getSubProjectRef().getProposalRef().getName()
+					+ "\nPlease visit http://ndrmfdev.herokuapp.com/sub-project-document/"
+					+ " to review and process the request(s).\n"
+					+ "Sub Project Document Number: " + spddmpt.getSubProjectRef().getDocNumber()
+					+ "\nSub Project Document Name: " + spddmpt.getSubProjectRef().getDocName()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 }

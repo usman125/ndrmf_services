@@ -224,5 +224,24 @@ public class CommentService {
 		if (p.getTasks().stream().allMatch(r -> r.getStatus().equals(ProcessStatus.COMPLETED.getPersistenceValue()))){
 			p.setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
 		}
+
+		try {
+			notificationService.sendPlainTextEmail(
+				p.getAssignee().getEmail(),
+				p.getAssignee().getFullName(),
+				"Sub Project Document Scheme task assigned on Project Proposal " + p.getSubProjectRef().getProposalRef().getName() + " at NDRMF",
+				spdt.getAssignee().getFullName()
+				+  " has submitted their remarks on Sub Project Document Scheme for Project Proposal "
+				+ p.getSubProjectRef().getProposalRef().getName()
+				+ "\nPlease visit http://ndrmfdev.herokuapp.com/view-sub-project-document/"+p.getSubProjectRef().getId()
+				+ " to review and process the request(s).\n"
+				+ "Sub Project Document Number: " + p.getSubProjectRef().getDocNumber()
+				+ "\nSub Project Document Name: " + p.getSubProjectRef().getDocName()
+				+ "\nComments from others: : " + body.getComment()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 }

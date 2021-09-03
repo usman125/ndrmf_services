@@ -27,7 +27,6 @@ import com.ndrmf.setting.model.ThematicArea;
 import com.ndrmf.user.model.User;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import org.springframework.data.annotation.CreatedDate;
 
 @TypeDefs({@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 @Entity
@@ -279,9 +278,10 @@ public class ProjectProposal extends Auditable<String> {
 	public GrantDisbursment getGrantDisbursment() {
 		return grantDisbursment;
 	}
-	public void setGrantDisbursment(GrantDisbursment grantDisbursment) {
+	public GrantDisbursment setGrantDisbursment(GrantDisbursment grantDisbursment) {
 		this.grantDisbursment = grantDisbursment;
-	}
+        return grantDisbursment;
+    }
 
 	public String getType() {
 		return type;

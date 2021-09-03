@@ -6,6 +6,7 @@ import java.util.*;
 import com.ndrmf.engine.dto.*;
 import com.ndrmf.engine.model.*;
 import com.ndrmf.engine.repository.*;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.user.dto.QprUserLookUpItem;
 import com.ndrmf.user.model.Role;
 import com.ndrmf.user.repository.UserRepository;
@@ -38,6 +39,7 @@ public class QPRService {
 	@Autowired private QuarterlyProgressReportSectionRepository quarterlyProgressReportSectionRepository;
 	@Autowired private QuarterlyProgressReportTaskRepository quarterlyProgressReportTaskRepository;
 	@Autowired private QuarterlyProgressReportTaskReviewRepository qprTaskReviewRepo;
+	@Autowired private NotificationService notificationService;
 	
 	public UUID commenceQPR(UUID proposalId, DateAndCommentBody body) {
 		com.ndrmf.setting.model.ProcessType  processType = processTypeRepo.findById(ProcessType.QPR.toString())
@@ -89,8 +91,26 @@ public class QPRService {
 			
 			qpr.addSection(ps);
 		}
+
+		QuarterlyProgressReport testQpr = qprRepo.save(qpr);
+
+		try {
+			notificationService.sendPlainTextEmail(
+				p.getInitiatedBy().getEmail(),
+				p.getInitiatedBy().getFullName(),
+				"Quarterly Progress Report generated on Project Proposal " + p.getName() + " at NDRMF",
+				processType.getOwner().getFullName() + " has inititalized a quarterly progress report on Project Proposal " + p.getName()
+				+ "\nPlease visit http://ndrmfdev.herokuapp.com/fill-qpr/"+testQpr.getId()
+				+ " to review and process the request(s).\n"
+				+ "Due Date: " + body.getDueDate()
+				+ "\nComment from NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 		
-		return qprRepo.save(qpr).getId();
+		return testQpr.getId();
 	}
 	
 	public List<QuarterlyProgressReportListItem> getQPRRequests(AuthPrincipal principal){
@@ -284,7 +304,21 @@ public class QPRService {
 
 		if (action == FormAction.SUBMIT) {
 			// TODO raise event
-			// eventPublisher.publishEvent(new QualificationCreatedEvent(this, q));
+			com.ndrmf.setting.model.ProcessType  processType = processTypeRepo.findById(ProcessType.QPR.toString())
+					.orElseThrow(() -> new RuntimeException("QPR Process Type is undefined in the system."));
+			try {
+				notificationService.sendPlainTextEmail(
+					processType.getOwner().getEmail(),
+					processType.getOwner().getFullName(),
+					"Quarterly Progress Report submitted on Project Proposal " + qpr.getProposalRef().getName() + " at NDRMF",
+					qpr.getProposalRef().getInitiatedBy().getFullName() + " has submitted the quarterly progress report "
+					+ "\nPlease visit http://ndrmfdev.herokuapp.com/view-qpr/"+qpr.getId()
+					+ " to review and process the request(s).\n"
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -309,6 +343,26 @@ public class QPRService {
 		section.getQprRef().setStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
 		quarterlyProgressReportTaskRepository.save(task);
 
+//		com.ndrmf.setting.model.ProcessType  processType = processTypeRepo.findById(ProcessType.QPR.toString())
+//				.orElseThrow(() -> new RuntimeException("QPR Process Type is undefined in the system."));
+
+		try {
+			notificationService.sendPlainTextEmail(
+				section.getSme().getEmail(),
+				section.getSme().getFullName(),
+				"Reviews Pending on Quarterly Progress Report for Project Proposal " + section.getQprRef().getProposalRef().getName() + " at NDRMF",
+				"Process owner for the quarterly progress report assigned you the section of Quarterly Progress Report"
+				+ "\nPlease visit http://ndrmfdev.herokuapp.com/fill-qpr/"+section.getQprRef().getId()
+				+ " to review and process the request(s)." +
+				"\nStart Date: " + body.getStartDate() +
+				"\nEnd Date: " + body.getEndDate() +
+				"\nComments form NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
 	}
 
 	@Transactional
@@ -320,15 +374,31 @@ public class QPRService {
 			throw new ValidationException("Only Process Owner for this process can add tasks. Authorized user is: "+ qpr.getProcessOwner().getFullName());
 		}
 		body.getUsersId().forEach(userId -> {
-			System.out.println("THIS FNNCTION CALLED1" + qprId);
+//			System.out.println("THIS FNNCTION CALLED1" + qprId);
 			Optional<QuarterlyProgressReportTask> oqprt = quarterlyProgressReportTaskRepository.findTasksForUserWithNoSection(userId, qprId);
 
 			if (oqprt.isPresent()){
-				System.out.println("THIS FNNCTION CALLED2" + qprId);
+//				System.out.println("THIS FNNCTION CALLED2" + qprId);
 				oqprt.get().setStatus(ProcessStatus.PENDING.getPersistenceValue());
 				oqprt.get().setStartDate(body.getStartDate());
 				oqprt.get().setEndDate(body.getEndDate());
 				oqprt.get().setComments(body.getComments());
+				try {
+					notificationService.sendPlainTextEmail(
+						oqprt.get().getAssignee().getEmail(),
+						oqprt.get().getAssignee().getFullName(),
+						"Reviews Pending on Quarterly Progress Report for Project Proposal " + qpr.getProposalRef().getName() + " at NDRMF",
+						"Process owner for the quarterly progress report assigned you the section of Quarterly Progress Report"
+						+ "\nPlease visit http://ndrmfdev.herokuapp.com/view-qpr/"+qpr.getId()
+						+ " to review and process the request(s)." +
+						"\nStart Date: " + body.getStartDate() +
+						"\nEnd Date: " + body.getEndDate() +
+						"\nComments form NDRMF: " + body.getComments()
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			}else{
 				QuarterlyProgressReportTask task = new QuarterlyProgressReportTask();
 				task.setStartDate(body.getStartDate());
@@ -338,7 +408,23 @@ public class QPRService {
 				task.setStatus(TaskStatus.PENDING.getPersistenceValue());
 				task.setQpr(qpr);
 				quarterlyProgressReportTaskRepository.save(task);
-				System.out.println("THIS FNNCTION CALLED3" + qprId);
+//				System.out.println("THIS FNNCTION CALLED3" + qprId);
+				try {
+					notificationService.sendPlainTextEmail(
+						task.getAssignee().getEmail(),
+						task.getAssignee().getFullName(),
+						"Reviews Pending on Quarterly Progress Report for Project Proposal " + qpr.getProposalRef().getName() + " at NDRMF",
+						"Process owner for the quarterly progress report assigned you the section of Quarterly Progress Report"
+						+ "\nPlease visit http://ndrmfdev.herokuapp.com/view-qpr/"+qpr.getId()
+						+ " to review and process the request(s)." +
+						"\nStart Date: " + body.getStartDate() +
+						"\nEnd Date: " + body.getEndDate() +
+						"\nComments form NDRMF: " + body.getComments()
+					);
+				}
+				catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 		});
 
@@ -371,13 +457,28 @@ public class QPRService {
 
 		List<QuarterlyProgressReportTask> peningTasks = quarterlyProgressReportTaskRepository.findTasksForQpr(section.getQprRef().getId());
 
-		System.out.println(peningTasks);
-		System.out.println(peningTasks.size());
+//		System.out.println(peningTasks);
+//		System.out.println(peningTasks.size());
 
 		if (peningTasks.stream().anyMatch(r -> r.getStatus() == ProcessStatus.PENDING.getPersistenceValue())){
 			section.getQprRef().setStatus(ProcessStatus.REVIEW_PENDING.getPersistenceValue());
 		}else{
+			com.ndrmf.setting.model.ProcessType  processType = processTypeRepo.findById(ProcessType.QPR.toString())
+				.orElseThrow(() -> new RuntimeException("QPR Process Type is undefined in the system."));
 			section.getQprRef().setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
+			try {
+				notificationService.sendPlainTextEmail(
+					processType.getOwner().getEmail(),
+					processType.getOwner().getFullName(),
+					"Reviews Completed on Quarterly Progress Report for Project Proposal " + section.getQprRef().getProposalRef().getName() + " at NDRMF",
+					"All the reviews are completed on quarterly progress report."
+					+ "\nPlease visit http://ndrmfdev.herokuapp.com/view-qpr/"+section.getQprRef().getId()
+					+ " to review and process the request(s)."
+				);
+			}
+			catch(Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
@@ -392,6 +493,7 @@ public class QPRService {
 			oqprtr.get().setDecision(body.getDecision());
 			oqprtr.get().setComments(body.getComments());
 			oqprtr.get().setReviewCompletedOn(new Date());
+			
 		}else{
 			QuarterlyProgressReportTaskReview qprtr = new QuarterlyProgressReportTaskReview();
 			qprtr.setDecision(body.getDecision());
@@ -412,8 +514,20 @@ public class QPRService {
 
 		qpr.setDueDate(body.getDueDate());
 		qpr.setAssignedComments(body.getComments());
-//		System.out.println(qpr.getDueDate());
-//		System.out.println(body.getDueDate());
-//		System.out.println(qpr.getAssignedComments() + body.getComments());
+		try {
+			notificationService.sendPlainTextEmail(
+				qpr.getProposalRef().getInitiatedBy().getEmail(),
+				qpr.getProposalRef().getInitiatedBy().getFullName(),
+				"Quarterly Progress Report timeline extended on Project Proposal " + qpr.getProposalRef().getName() + " at NDRMF",
+				"Timeline has been extended for the quarterly progress report "
+				+ "\nPlease visit http://ndrmfdev.herokuapp.com/fill-qpr/"+qpr.getId()
+				+ " to review and process the request(s).\n" +
+				"Due Date: " + body.getDueDate() +
+				"\nComments form NDRMF: " + body.getComments()
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 }

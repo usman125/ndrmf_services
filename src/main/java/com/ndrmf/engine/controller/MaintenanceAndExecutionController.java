@@ -37,7 +37,8 @@ public class MaintenanceAndExecutionController {
 	@Autowired private QPRService qprService;
 	
 	@PostMapping("/qpr/commence")
-	public ResponseEntity<?> commenceQPR(@AuthenticationPrincipal AuthPrincipal principal,
+	public ResponseEntity<?> commenceQPR(
+			@AuthenticationPrincipal AuthPrincipal principal,
 			@RequestBody @Valid DateAndCommentBody body,
 			@RequestParam(name = "proposalId", required = true) UUID proposalId){
 		Map<String, UUID> dto = new HashMap<>();

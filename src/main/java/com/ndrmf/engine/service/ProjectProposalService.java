@@ -1048,12 +1048,13 @@ public class ProjectProposalService {
 
 			try {
 				notificationService.sendPlainTextEmail(
-						proposal.getInitiatedBy().getEmail(),
-						proposal.getInitiatedBy().getFullName(),
-						"Submit GIA Checklist on Project Proposal " + proposal.getName() + " at NDRMF",
-						"GIA has been approved for project proposal " + proposal.getName() +
-						".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+proposal.getId()
-						+ " to review and process the request."
+					proposal.getInitiatedBy().getEmail(),
+					proposal.getInitiatedBy().getFullName(),
+					"Submit GIA Checklist on Project Proposal " + proposal.getName() + " at NDRMF",
+					"GIA has been approved for project proposal " + proposal.getName() +
+					".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+proposal.getId()
+					+ " to review and process the request.\n" +
+					"Due Date: " + checklistDeadline + "\n"
 				);
 			}
 			catch(Exception ex) {
@@ -1074,6 +1075,35 @@ public class ProjectProposalService {
 		proposal.getGiaChecklist().setData(body.getData());
 		proposal.getGiaChecklist().setTemplate(body.getTemplate());
 		proposal.getGiaChecklist().setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
+
+		try {
+			notificationService.sendPlainTextEmail(
+					proposal.getProcessOwner().getEmail(),
+					proposal.getProcessOwner().getFullName(),
+					"GIA Checklist submitted on Project Proposal " + proposal.getName() + " at NDRMF",
+					proposal.getInitiatedBy().getFullName() +  " has submitted GIA Checklist for project proposal " + proposal.getName() +
+					".\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+proposal.getId()
+					+ " to review and process the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
+
+		try {
+			notificationService.sendPlainTextEmail(
+					proposal.getInitiatedBy().getEmail(),
+					proposal.getInitiatedBy().getFullName(),
+					"GIA Checklist submitted on Project Proposal " + proposal.getName() + " at NDRMF",
+					"You have submitted GIA Checklist for project proposal " + proposal.getName() +
+							".\nYou can now submit the sub project document schemes." +
+							"\nPlease visit http://ndrmfdev.herokuapp.com/project-details/"+proposal.getId()
+							+ " to review and process the request."
+			);
+		}
+		catch(Exception ex) {
+			ex.printStackTrace();
+		}
 	}
 
 	@Transactional

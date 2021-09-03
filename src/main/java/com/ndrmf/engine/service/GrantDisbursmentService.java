@@ -23,6 +23,7 @@ import com.ndrmf.engine.model.GrantDisbursmentAdvanceLiquidationSoes;
 import com.ndrmf.engine.repository.*;
 
 import com.ndrmf.exception.ValidationException;
+import com.ndrmf.notification.service.NotificationService;
 import com.ndrmf.setting.repository.ProcessTypeRepository;
 import com.ndrmf.user.dto.GrantDisbursmentUserLookUpItem;
 import com.ndrmf.user.dto.UserLookupItem;
@@ -64,6 +65,8 @@ public class GrantDisbursmentService {
     private FileStoreService fileStoreService;
     @Autowired
     private GrantDisbursmentWithdrawalFilesRepository gdwfrepo;
+    @Autowired
+    private NotificationService notificationService;
 
     public List<ProjectProposalListItem> getProjectProposalsInGrantDisbursmentWithInitAdvanceStatus(
             AuthPrincipal currentUser,
@@ -111,12 +114,41 @@ public class GrantDisbursmentService {
             GrantDisbursment gb = new GrantDisbursment();
             gb.setInitAdvance(ia);
             gb.setOwner(userRepo.getOne(disbursmentProcessType.getOwner().getId()));
-            p.setGrantDisbursment(gb);
+            GrantDisbursment tempGdr = p.setGrantDisbursment(gb);
+
+
+            try {
+                notificationService.sendPlainTextEmail(
+                    p.getInitiatedBy().getEmail(),
+                    p.getInitiatedBy().getFullName(),
+                    "Grant Disbursement initiated on Project Proposal " + p.getName() + " at NDRMF",
+                    p.getProcessOwner().getFullName() +  " has initiated grand disbursement for project proposal " + p.getName() +
+                    "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+tempGdr.getId()
+                    + " to submit initial advance and proceed to next step.\n"
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
+
         } else {
             QuarterAdvance qa = new QuarterAdvance();
             qa.setQuarter(p.getGrantDisbursment().getQuarterAdvances().size() + 2);
             p.getGrantDisbursment().addQuarterAdvance(qa);
 //			quarterAdvanceRepository.save(qa);
+            try {
+                notificationService.sendPlainTextEmail(
+                    p.getInitiatedBy().getEmail(),
+                    p.getInitiatedBy().getFullName(),
+                    "Grant Disbursement Quarter Advance initiated on Project Proposal " + p.getName() + " at NDRMF",
+                    p.getProcessOwner().getFullName() +  " has initiated grand disbursement for project proposal " + p.getName() +
+                    "\nPlease visit Grant Disbursement on this project to proceed thr request."
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
+
         }
 
     }
@@ -437,6 +469,24 @@ public class GrantDisbursmentService {
         gd.setInitAdvance(ia);
         grantDisbursmentRepo.save(gd);
 
+//        com.ndrmf.setting.model.ProcessType processType = processTypeRepo.findById(ProcessType.GIA.name())
+//            .orElseThrow(() -> new RuntimeException("GIA NOT DEFINED."));
+//
+        try {
+            notificationService.sendPlainTextEmail(
+                disbursmentProcessType.getOwner().getEmail(),
+                disbursmentProcessType.getOwner().getFullName(),
+                "Grant Disbursement Initial Advance submitted on Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                gd.getProposalRef().getInitiatedBy().getFullName() +  " has submitted Initial Advance on grant disbursement for project proposal " + gd.getProposalRef().getName() +
+                "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
+
+
     }
 
     @Transactional
@@ -456,6 +506,20 @@ public class GrantDisbursmentService {
                 gdar.setStatus(ProcessStatus.PENDING.getPersistenceValue());
                 gdar.setAssignee(userRepo.getOne(r));
                 ia.addReviewList(gdar);
+
+                try {
+                    notificationService.sendPlainTextEmail(
+                        userRepo.getOne(r).getEmail(),
+                        userRepo.getOne(r).getFullName(),
+                        "Grant Disbursement Reviews assigned for Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                        "You have been assigned to submit reviews on Grant Disbursement initial advance for project proposal " + gd.getProposalRef().getName() +
+                        "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                        + " to review and process the request(s).\n"
+                    );
+                }
+                catch(Exception ex) {
+                    ex.printStackTrace();
+                }
             });
         }
 
@@ -499,6 +563,24 @@ public class GrantDisbursmentService {
             if (review.getQuarterAdvanceRef() != null)
                 review.getQuarterAdvanceRef().setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
             gd.setStatus(ProcessStatus.REVIEW_COMPLETED.getPersistenceValue());
+
+            com.ndrmf.setting.model.ProcessType disbursmentProcessType = processTypeRepo
+                    .findById(ProcessType.DISBURSEMENT.name())
+                    .orElseThrow(() -> new ValidationException("Disbursment Process is not defined."));
+
+            try {
+                notificationService.sendPlainTextEmail(
+                    disbursmentProcessType.getOwner().getEmail(),
+                    disbursmentProcessType.getOwner().getFullName(),
+                    "Grant Disbursement Reviews submitted on advance for Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                    "Assigned comments have been completed on Grant Disbursement advances & liquidations for project proposal " + gd.getProposalRef().getName() +
+                    "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                    + " to review and process the request(s).\n"
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -530,6 +612,24 @@ public class GrantDisbursmentService {
 
         qa.setStatus(ProcessStatus.COMPLETED.getPersistenceValue());
         qa.setSubStatus(ProcessStatus.MARKED_TO_PO.getPersistenceValue());
+
+        com.ndrmf.setting.model.ProcessType disbursmentProcessType = processTypeRepo
+                .findById(ProcessType.DISBURSEMENT.name())
+                .orElseThrow(() -> new ValidationException("Disbursment Process is not defined."));
+
+        try {
+            notificationService.sendPlainTextEmail(
+                    disbursmentProcessType.getOwner().getEmail(),
+                    disbursmentProcessType.getOwner().getFullName(),
+                    "Grant Disbursement Quarter Advance submitted on Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                    gd.getProposalRef().getInitiatedBy().getFullName() +  " has submitted Quarter Advance on grant disbursement for project proposal " + gd.getProposalRef().getName() +
+                            "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                            + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
 
     }
 
@@ -581,10 +681,36 @@ public class GrantDisbursmentService {
             ia.setStatus(status);
             ia.setInitAdvanceStatus(status);
             gd.setInitAdvanceRequestStatus(ProcessStatus.APPROVED);
+            try {
+                notificationService.sendPlainTextEmail(
+                    gd.getProposalRef().getInitiatedBy().getEmail(),
+                    gd.getProposalRef().getInitiatedBy().getFullName(),
+                    "Grant Disbursement Initial Advance Approved on Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                    "NDRMF has Approved Initial Advance on grant disbursement for project proposal " + gd.getProposalRef().getName() +
+                    "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                    + " to review and process the request(s).\n"
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
         } else if (ProcessStatus.REJECTED.getPersistenceValue().equals(status.getPersistenceValue())) {
             ia.setStatus(status);
             ia.setInitAdvanceStatus(status);
             gd.setInitAdvanceRequestStatus(ProcessStatus.REJECTED);
+            try {
+                notificationService.sendPlainTextEmail(
+                    gd.getProposalRef().getInitiatedBy().getEmail(),
+                    gd.getProposalRef().getInitiatedBy().getFullName(),
+                    "Grant Disbursement Initial Advance Rejected on Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                    "NDRMF has Rejected Initial Advance on grant disbursement for project proposal " + gd.getProposalRef().getName() +
+                    "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                    + " to review and process the request(s).\n"
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
         }
 
     }
@@ -605,6 +731,20 @@ public class GrantDisbursmentService {
         ia.setStatus(ProcessStatus.REASSIGNED);
         ia.setInitAdvanceStatus(ProcessStatus.PENDING);
 //		ia.setS
+
+        try {
+            notificationService.sendPlainTextEmail(
+                gd.getProposalRef().getInitiatedBy().getEmail(),
+                gd.getProposalRef().getInitiatedBy().getFullName(),
+                "Grant Disbursement Initial Advance re-assigned on Project Proposal " + gd.getProposalRef().getName() + " at NDRMF",
+                "NDRMF has re-assigned Initial Advance on grant disbursement for project proposal " + gd.getProposalRef().getName() +
+                "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gd.getId()
+                + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Transactional
@@ -619,6 +759,8 @@ public class GrantDisbursmentService {
         gdal.setInitialAdvanceRef(ia);
         gdal.setOrderNumber(ia.getGrantDisbursmentAdvanceLiquidations().size() + 1);
         GrantDisbursmentAdvanceLiquidation dto = grantDisbursmentAdvanceLiquidationRepository.save(gdal);
+
+
         return dto.getId();
 //        ia.addGrantDisbursmentAdvanceLiquidation(gdal);
     }
@@ -660,9 +802,37 @@ public class GrantDisbursmentService {
             }
             qa.setStatus(status.getPersistenceValue());
             qa.setSubStatus(status.getPersistenceValue());
+
+            try {
+                notificationService.sendPlainTextEmail(
+                    qa.getGrantDisbursmentRef().getProposalRef().getInitiatedBy().getEmail(),
+                    qa.getGrantDisbursmentRef().getProposalRef().getInitiatedBy().getFullName(),
+                    "Grant Disbursement Quarter Advance Liquidation Approved on Project Proposal " + qa.getGrantDisbursmentRef().getProposalRef().getName() + " at NDRMF",
+                    "NDRMF has Approved Quarter Advance liquidation on grant disbursement for project proposal " + qa.getGrantDisbursmentRef().getProposalRef().getName() +
+                    "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+qa.getGrantDisbursmentRef().getId()
+                    + " to review and process the request(s).\n"
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
         } else if (ProcessStatus.REJECTED.getPersistenceValue().equals(status.getPersistenceValue())) {
             qa.setStatus(status.getPersistenceValue());
             qa.setSubStatus(status.getPersistenceValue());
+
+            try {
+                notificationService.sendPlainTextEmail(
+                    qa.getGrantDisbursmentRef().getProposalRef().getInitiatedBy().getEmail(),
+                    qa.getGrantDisbursmentRef().getProposalRef().getInitiatedBy().getFullName(),
+                    "Grant Disbursement Quarter Advance Liquidation Rejected on Project Proposal " + qa.getGrantDisbursmentRef().getProposalRef().getName() + " at NDRMF",
+                    "NDRMF has Rejected Quarter Advance liquidation on grant disbursement for project proposal " + qa.getGrantDisbursmentRef().getProposalRef().getName() +
+                    "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+qa.getGrantDisbursmentRef().getId()
+                    + " to review and process the request(s).\n"
+                );
+            }
+            catch(Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -691,38 +861,56 @@ public class GrantDisbursmentService {
 
         if (body.getFipSoes() != null){
 
-        body.getFipSoes().forEach(item -> {
-            GrantDisbursmentAdvanceLiquidationSoes gdalsoe = new GrantDisbursmentAdvanceLiquidationSoes();
-            gdalsoe.setActivityId(item.getActivityId());
-            gdalsoe.setVendorName(item.getVendorName());
-            gdalsoe.setInvoiceAmount(item.getInvoiceAmount());
-            gdalsoe.setDateOfPayment(item.getDateOfPayment());
-            gdalsoe.setPaidAmount(item.getPaidAmount());
-            gdalsoe.setChequeNumber(item.getChequeNumber());
-            gdalsoe.setRemarks(item.getRemarks());
-            gdalsoe.setSoeType(item.getSoeType());
-            gdalsoe.setEnabled(true);
+            body.getFipSoes().forEach(item -> {
+                GrantDisbursmentAdvanceLiquidationSoes gdalsoe = new GrantDisbursmentAdvanceLiquidationSoes();
+                gdalsoe.setActivityId(item.getActivityId());
+                gdalsoe.setVendorName(item.getVendorName());
+                gdalsoe.setInvoiceAmount(item.getInvoiceAmount());
+                gdalsoe.setDateOfPayment(item.getDateOfPayment());
+                gdalsoe.setPaidAmount(item.getPaidAmount());
+                gdalsoe.setChequeNumber(item.getChequeNumber());
+                gdalsoe.setRemarks(item.getRemarks());
+                gdalsoe.setSoeType(item.getSoeType());
+                gdalsoe.setEnabled(true);
 
-            gdal.addLiquidationSoe(gdalsoe);
-        });
+                gdal.addLiquidationSoe(gdalsoe);
+            });
         }
 
         if (body.getNdrmfSoes() != null){
 
-        body.getNdrmfSoes().forEach(item -> {
-            GrantDisbursmentAdvanceLiquidationSoes gdalsoe = new GrantDisbursmentAdvanceLiquidationSoes();
-            gdalsoe.setActivityId(item.getActivityId());
-            gdalsoe.setVendorName(item.getVendorName());
-            gdalsoe.setInvoiceAmount(item.getInvoiceAmount());
-            gdalsoe.setDateOfPayment(item.getDateOfPayment());
-            gdalsoe.setPaidAmount(item.getPaidAmount());
-            gdalsoe.setChequeNumber(item.getChequeNumber());
-            gdalsoe.setRemarks(item.getRemarks());
-            gdalsoe.setSoeType(item.getSoeType());
-            gdalsoe.setEnabled(true);
+            body.getNdrmfSoes().forEach(item -> {
+                GrantDisbursmentAdvanceLiquidationSoes gdalsoe = new GrantDisbursmentAdvanceLiquidationSoes();
+                gdalsoe.setActivityId(item.getActivityId());
+                gdalsoe.setVendorName(item.getVendorName());
+                gdalsoe.setInvoiceAmount(item.getInvoiceAmount());
+                gdalsoe.setDateOfPayment(item.getDateOfPayment());
+                gdalsoe.setPaidAmount(item.getPaidAmount());
+                gdalsoe.setChequeNumber(item.getChequeNumber());
+                gdalsoe.setRemarks(item.getRemarks());
+                gdalsoe.setSoeType(item.getSoeType());
+                gdalsoe.setEnabled(true);
 
-            gdal.addLiquidationSoe(gdalsoe);
-        });
+                gdal.addLiquidationSoe(gdalsoe);
+            });
+        }
+
+        com.ndrmf.setting.model.ProcessType disbursmentProcessType = processTypeRepo
+                .findById(ProcessType.DISBURSEMENT.name())
+                .orElseThrow(() -> new ValidationException("Disbursment Process is not defined."));
+
+        try {
+            notificationService.sendPlainTextEmail(
+                disbursmentProcessType.getOwner().getEmail(),
+                disbursmentProcessType.getOwner().getFullName(),
+                "Grant Disbursement Initial Advance Liquidation submitted on Project Proposal " + gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getName() + " at NDRMF",
+                user.getFullName() +  " has submitted Initial Advance liquidation on grant disbursement for project proposal " + gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getName() +
+                "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gdal.getInitialAdvanceRef().getDisbursmentRef().getId()
+                + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
         }
 
     }
@@ -735,6 +923,24 @@ public class GrantDisbursmentService {
 
         gdal.setSubStatus(ProcessStatus.APPROVED.getPersistenceValue());
         gdal.setStatus(ProcessStatus.APPROVED.getPersistenceValue());
+
+//        com.ndrmf.setting.model.ProcessType disbursmentProcessType = processTypeRepo
+//                .findById(ProcessType.DISBURSEMENT.name())
+//                .orElseThrow(() -> new ValidationException("Disbursment Process is not defined."));
+
+        try {
+            notificationService.sendPlainTextEmail(
+                gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getInitiatedBy().getEmail(),
+                gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getInitiatedBy().getFullName(),
+                "Grant Disbursement Initial Advance Liquidation Approved on Project Proposal " + gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getName() + " at NDRMF",
+                "NDRMF has approved Initial Advance liquidation on grant disbursement for project proposal " + gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getName() +
+                "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gdal.getInitialAdvanceRef().getDisbursmentRef().getId()
+                + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Transactional
@@ -746,6 +952,20 @@ public class GrantDisbursmentService {
         gdal.setReassignedOn(new Date());
         gdal.setStatus(ProcessStatus.REASSIGNED.getPersistenceValue());
         gdal.setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+
+        try {
+            notificationService.sendPlainTextEmail(
+                gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getInitiatedBy().getEmail(),
+                gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getInitiatedBy().getFullName(),
+                "Grant Disbursement Initial Advance Liquidation re-assigned on Project Proposal " + gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getName() + " at NDRMF",
+                "NDRMF has re-assigned Initial Advance liquidation on grant disbursement for project proposal " + gdal.getInitialAdvanceRef().getDisbursmentRef().getProposalRef().getName() +
+                "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+gdal.getInitialAdvanceRef().getDisbursmentRef().getId()
+                + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Transactional
@@ -757,6 +977,20 @@ public class GrantDisbursmentService {
         qa.setReassignedOn(new Date());
         qa.setStatus(ProcessStatus.REASSIGNED.getPersistenceValue());
         qa.setSubStatus(ProcessStatus.PENDING.getPersistenceValue());
+
+        try {
+            notificationService.sendPlainTextEmail(
+                qa.getGrantDisbursmentRef().getProposalRef().getInitiatedBy().getEmail(),
+                qa.getGrantDisbursmentRef().getProposalRef().getInitiatedBy().getFullName(),
+                "Grant Disbursement Quarter Advance Liquidation re-assigned on Project Proposal " + qa.getGrantDisbursmentRef().getProposalRef().getName() + " at NDRMF",
+                "NDRMF has re-assigned Quarter Advance liquidation on grant disbursement for project proposal " + qa.getGrantDisbursmentRef().getProposalRef().getName() +
+                "\nPlease visit http://ndrmfdev.herokuapp.com/view-grant-disbursment/"+qa.getGrantDisbursmentRef().getId()
+                + " to review and process the request(s).\n"
+            );
+        }
+        catch(Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Transactional
