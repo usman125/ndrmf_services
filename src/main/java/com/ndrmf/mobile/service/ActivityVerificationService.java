@@ -93,26 +93,58 @@ public class ActivityVerificationService {
     }
 
     @Transactional
-    public ActivityVerificationItem getRequestsByActivityAndQuarter(AuthPrincipal currentUser, String activityId, int quarter) throws IOException {
-        ActivityVerification av = avRepo.findRequestsForActivtyAndQuarter(activityId, quarter)
-                .orElseThrow(() -> new ValidationException("ACTIVITY ID NOT VALID"));
-        ActivityVerificationItem dto = new ActivityVerificationItem();
+    public List<ActivityVerificationItem> getRequestsByActivityAndQuarter(AuthPrincipal currentUser, String activityId, int quarter) throws IOException {
+        List<ActivityVerification> av = avRepo.findRequestsForActivtyAndQuarter(activityId, quarter);
+//                .orElseThrow(() -> new ValidationException("ACTIVITY ID NOT VALID"));
+        List<ActivityVerificationItem> dto = new ArrayList<ActivityVerificationItem>();
+        av.forEach(item -> {
+            ActivityVerificationItem avi = new ActivityVerificationItem();
+            avi.setId(item.getId());
+            avi.setStatus(item.getStatus());
+            avi.setInitiatedBy(new UserLookupItem(item.getInitiatedBy().getId(), item.getInitiatedBy().getFullName()));
+            avi.setGeneralComments(item.getGeneralComments());
+            avi.setCreated_at(item.getCreated_at());
+            avi.setQuarter(item.getQuarter());
+//            avi.setActivityId(item.getActivityId());
+            avi.setRating(item.getRating());
 
-        dto.setId(av.getId());
-        dto.setStatus(av.getStatus());
-        dto.setInitiatedBy(new UserLookupItem(av.getInitiatedBy().getId(), av.getInitiatedBy().getFullName()));
-        dto.setGeneralComments(av.getGeneralComments());
-        dto.setCreated_at(av.getCreated_at());
-        dto.setQuarter(av.getQuarter());
-        dto.setActivityId(av.getActivityId());
-        dto.setRating(av.getRating());
-        
-        av.getFiles().stream().forEach(c -> {
-            ActivityVerificationFilesListItem avfli = new ActivityVerificationFilesListItem();
-            avfli.setName(c.getFileRef().getFileName());
-            avfli.setPath(c.getFileRef().getPath());
-            avfli.setCreated_by(c.getCreatedBy());
-            dto.addFile(avfli);
+            item.getFiles().stream().forEach(c -> {
+                ActivityVerificationFilesListItem avfli = new ActivityVerificationFilesListItem();
+                avfli.setName(c.getFileRef().getFileName());
+                avfli.setPath(c.getFileRef().getPath());
+                avfli.setCreated_by(c.getCreatedBy());
+                avi.addFile(avfli);
+            });
+
+            dto.add(avi);
+        });
+
+        return dto;
+    }
+
+    @Transactional
+    public List<ActivityVerificationItem> getRequestsByProposalId(AuthPrincipal user, UUID proposalId){
+        List<ActivityVerification> av = avRepo.findRequestsForProposal(proposalId);
+        List<ActivityVerificationItem> dto = new ArrayList<>();
+        av.forEach(item -> {
+            ActivityVerificationItem avi = new ActivityVerificationItem();
+            avi.setActivity(item.getActivityId());
+            avi.setGeneralComments(item.getGeneralComments());
+            avi.setRating(item.getRating());
+            avi.setQuarter(item.getQuarter());
+            avi.setCreated_at(item.getCreated_at());
+            avi.setInitiatedBy(new UserLookupItem(item.getInitiatedBy().getId(), item.getInitiatedBy().getFullName()));
+            avi.setId(item.getId());
+            avi.setStatus(item.getStatus());
+            item.getFiles().stream().forEach(c -> {
+                ActivityVerificationFilesListItem avfli = new ActivityVerificationFilesListItem();
+                avfli.setName(c.getFileRef().getFileName());
+                avfli.setPath(c.getFileRef().getPath());
+                avfli.setCreated_by(c.getCreatedBy());
+                avi.addFile(avfli);
+            });
+            dto.add(avi);
+
         });
 
         return dto;

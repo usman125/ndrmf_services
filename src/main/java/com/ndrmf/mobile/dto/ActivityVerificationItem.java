@@ -18,7 +18,7 @@ public class ActivityVerificationItem {
     private String generalComments;
     private Date created_at;
     private int quarter;
-    private String activityId;
+    private String activity;
     private int rating;
     private List<ActivityVerificationFilesListItem> files;
 
@@ -46,13 +46,12 @@ public class ActivityVerificationItem {
         this.initiatedBy = initiatedBy;
     }
 
-
-    public String getActivityId(String activityId) {
-        return this.activityId;
+    public String getActivity() {
+        return activity;
     }
 
-    public void setActivityId(String activityId) {
-        this.activityId = activityId;
+    public void setActivity(String activity) {
+        this.activity = activity;
     }
 
     public String getStatus() {

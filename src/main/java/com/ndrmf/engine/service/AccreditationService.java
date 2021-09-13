@@ -208,20 +208,27 @@ public class AccreditationService {
 		EligPlusQual epqDto = new EligPlusQual();
 		
 		List<Eligibility> elig = eligbiligyRepo.findAllRequestsForInitiator(q.getInitiatedBy().getId());
-		List<EligibilityItem> edto = new ArrayList<EligibilityItem>();
+//		EligibilityItem edto = new EligibilityItem();
+		Eligibility testEligibility = elig.get(elig.size() -1);
+
+		System.out.println(elig.size());
+		System.out.println(elig.get(0).getStatus());
+		System.out.println(elig.get(0).getId());
+		System.out.println(elig.get(elig.size() -1).getStatus());
+		System.out.println(elig.get(elig.size() -1).getId());
 		
-		for (int i = 0; i < elig.size(); i++) {
+//		for (int i = 0; i < elig.size(); i++) {
 			EligibilityItem singleEdto = new EligibilityItem();
 			
-			singleEdto.setData(elig.get(i).getData());
-			singleEdto.setInitiatedBy(new UserLookupItem(elig.get(i).getInitiatedBy().getId(), elig.get(i).getInitiatedBy().getFullName()));
-			singleEdto.setProcessOwner(new UserLookupItem(elig.get(i).getProcessOwner().getId(), elig.get(i).getProcessOwner().getFullName()));
-			singleEdto.setStatus(elig.get(i).getStatus());
-			singleEdto.setTemplate(elig.get(i).getTemplate());
-			singleEdto.setSubmittedAt(elig.get(i).getCreatedDate());
-			singleEdto.setComment(elig.get(i).getComment());
-			edto.add(singleEdto);
-		}
+			singleEdto.setData(testEligibility.getData());
+			singleEdto.setInitiatedBy(new UserLookupItem(testEligibility.getInitiatedBy().getId(), testEligibility.getInitiatedBy().getFullName()));
+			singleEdto.setProcessOwner(new UserLookupItem(testEligibility.getProcessOwner().getId(), testEligibility.getProcessOwner().getFullName()));
+			singleEdto.setStatus(testEligibility.getStatus());
+			singleEdto.setTemplate(testEligibility.getTemplate());
+			singleEdto.setSubmittedAt(testEligibility.getCreatedDate());
+			singleEdto.setComment(testEligibility.getComment());
+//			edto.add(singleEdto);
+//		}
 		
 		
 		
@@ -370,7 +377,7 @@ public class AccreditationService {
 		uidto.setOtherAccreditation(userIfo.getOtherAccreditation());
 		
 		epqDto.setQualItem(qdto);
-		epqDto.setEligItem(edto);
+		epqDto.setEligItem(singleEdto);
 		epqDto.setThematicAreasListItems(tadto);
 		epqDto.setUserInfo(uidto);
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class EligPlusQual {
 	private QualificationItem qualItem;
-	private List<EligibilityItem> eligItem;
+	private EligibilityItem eligItem;
 	private List<FipThematicAreasListItem> thematicAreasListItems;
 	private UserItem userInfo;
 	
@@ -15,10 +15,19 @@ public class EligPlusQual {
 	public void setQualItem(QualificationItem qualItem) {
 		this.qualItem = qualItem;
 	}
-	public List<EligibilityItem> getEligItem() {
+//	public List<EligibilityItem> getEligItem() {
+//		return eligItem;
+//	}
+//	public void setEligItem(List<EligibilityItem> eligItem) {
+//		this.eligItem = eligItem;
+//	}
+
+
+	public EligibilityItem getEligItem() {
 		return eligItem;
 	}
-	public void setEligItem(List<EligibilityItem> eligItem) {
+
+	public void setEligItem(EligibilityItem eligItem) {
 		this.eligItem = eligItem;
 	}
 

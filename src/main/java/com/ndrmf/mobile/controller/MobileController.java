@@ -62,9 +62,15 @@ public class MobileController {
     }
 
 	@GetMapping("/{activityId}/{quarter}")
-	public ResponseEntity<ActivityVerificationItem> getAvItem(@AuthenticationPrincipal AuthPrincipal principal,
+	public ResponseEntity<List<ActivityVerificationItem>> getAvItem(@AuthenticationPrincipal AuthPrincipal principal,
                                                             @PathVariable(name = "activityId", required = true) String activityId,
                                                             @PathVariable(name = "quarter", required = true) int quarter) throws IOException{
 		return new ResponseEntity<>(avService.getRequestsByActivityAndQuarter(principal, activityId, quarter), HttpStatus.OK);
 	}
+
+    @GetMapping("/{proposalId}/proposal/activities")
+    public ResponseEntity<List<ActivityVerificationItem>> getAvItem(@AuthenticationPrincipal AuthPrincipal principal,
+                                                                    @PathVariable(name = "proposalId", required = true) UUID proposalId) throws IOException{
+        return new ResponseEntity<>(avService.getRequestsByProposalId(principal, proposalId), HttpStatus.OK);
+    }
 }
