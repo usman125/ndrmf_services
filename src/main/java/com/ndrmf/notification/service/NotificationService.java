@@ -76,5 +76,6 @@ public class NotificationService {
                 .encoding("UTF-8").build();
 
         emailService.send(email);
+//		System.out.println("SYSTEM EMAIL SEND");
 	}
 }
